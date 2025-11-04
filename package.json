@@ -2,6 +2,12 @@
   "name": "phuong-long-vo-dao",
   "version": "1.0.0",
   "description": "Plateforme web vitrine + back-office pour 5 clubs Phuong Long Vo Dao",
+  "author": "DevWeb31 <contact@devweb31.fr>",
+  "license": "UNLICENSED",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/DevWeb31/phuong-long.git"
+  },
   "private": true,
   "scripts": {
     "dev": "next dev",

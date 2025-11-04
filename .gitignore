@@ -59,3 +59,25 @@ next-env.d.ts
 /tmp
 *.tmp
 
+# ============================================
+# FICHIERS SENSIBLES - NE PAS VERSIONNER
+# ============================================
+
+# Documentation stratégique (propriété intellectuelle)
+/docs/
+/DESIGN_*.md
+/STATUS.md
+/IMPORTANT_FIX.md
+
+# Cursor AI (stratégie IA privée)
+/.cursor/
+.cursorrules
+
+# Database (migrations peuvent contenir données sensibles)
+/supabase/
+
+# Notes internes
+*.internal.md
+*.private.md
+/notes/
+

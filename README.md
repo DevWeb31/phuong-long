@@ -2,6 +2,10 @@
 
 Plateforme web vitrine + back-office pour 5 clubs de Phuong Long Vo Dao avec e-commerce intégré.
 
+**Développé par** : [DevWeb31](https://github.com/DevWeb31)  
+**Développeur** : [@Damiodev](https://github.com/Damiodev)  
+**Licence** : Propriétaire - Tous droits réservés
+
 ## 🚀 Tech Stack
 
 - **Frontend**: Next.js 15 (App Router), React 19, TypeScript, Tailwind CSS
@@ -169,23 +173,7 @@ phuong-long-vo-dao/
 
 ## 📚 Documentation
 
-La documentation complète du projet se trouve dans `docs/`:
-
-### Memory Bank (Architecture)
-- **`docs/memory-bank/project/PROJECT_BRIEF.md`**: Vision, features, roadmap
-- **`docs/memory-bank/frontend/ARCHITECTURE.md`**: Architecture frontend Next.js/React
-- **`docs/memory-bank/backend/ARCHITECTURE.md`**: API, database, RLS policies
-- **`docs/memory-bank/project/DATABASE.mmd`**: Schema database (Mermaid)
-- **`docs/memory-bank/project/RGPD_COMPLIANCE.md`**: Conformité RGPD
-
-### Rules (Standards)
-- **`docs/rules/CODE_CONVENTIONS.md`**: Conventions de code, naming, patterns
-- **`docs/rules/API_STANDARDS.md`**: Standards API REST
-- **`docs/rules/NAMING_PATTERNS.md`**: Conventions de nommage strictes
-
-### Prompts (AI Engineering)
-- **`docs/prompts/templates/`**: Templates pour Cursor AI (implement, review, bug analysis)
-- **`docs/prompts/sub-agents/`**: Experts spécialisés (frontend, backend, SEO, security)
+Documentation disponible dans le repository privé (non versionné pour raisons commerciales).
 
 ## 🔐 Security
 
@@ -285,15 +273,19 @@ npm run type-check
 
 ## 📞 Support
 
-- **Documentation**: `docs/`
 - **Issues**: GitHub Issues
-- **Email**: dev@phuong-long-vo-dao.fr
+- **Email**: contact@devweb31.fr
+- **Website**: [DevWeb31](https://devweb31.fr)
 
 ## 📄 License
 
-Propriétaire - Phuong Long Vo Dao © 2025
+**Propriétaire - Tous droits réservés**
+
+© 2025 DevWeb31 - Phuong Long Vo Dao  
+Ce code est la propriété de DevWeb31. Toute utilisation, reproduction ou distribution non autorisée est strictement interdite.
 
 ---
 
-**Développé avec ❤️ et Cursor AI** par l'équipe Phuong Long Vo Dao
+**Développé par** [DevWeb31](https://github.com/DevWeb31) - [@Damiodev](https://github.com/Damiodev)  
+**Powered by** : Next.js 15, React 19, Supabase, Stripe
 
