@@ -1,0 +1,77 @@
+# Coding Standards - Phuong Long Vo Dao
+
+Voir documentation complète dans `@docs/rules/CODE_CONVENTIONS.md`.
+
+## Quick Reference
+
+### TypeScript
+- **Strict mode activé** : Jamais `any`, utiliser `unknown` si vraiment inconnu
+- **Interfaces** pour objets, **Types** pour unions/intersections
+- **Zod** pour validation runtime (API, forms)
+
+### React / Next.js
+- **Server Components par défaut** : `"use client"` uniquement si nécessaire
+- **Export named** : `export function Component()` (pas default)
+- **Props destructuring** avec defaults
+- **Composants max 400 lignes** : Refactor si plus grand
+
+### Naming
+- **Variables/fonctions**: `camelCase` (ex: `getUserData()`)
+- **Composants/Types**: `PascalCase` (ex: `UserProfile`)
+- **Constantes**: `SCREAMING_SNAKE_CASE` (ex: `MAX_FILE_SIZE`)
+- **Fichiers**: 
+  - Composants: `PascalCase.tsx`
+  - Utils: `kebab-case.ts`
+  - Hooks: `use-hook-name.ts`
+
+### API Routes
+- **Validation Zod** sur tous inputs
+- **Error handling** : try/catch + responses standardisées
+- **Auth check** dès le début si endpoint protégé
+- **RLS policies** en plus des checks API (defense in depth)
+
+### Styling
+- **Tailwind CSS** : Utility-first, mobile-first (`md:`, `lg:`)
+- **`cn()` helper** pour classes conditionnelles
+- **CSS Modules** uniquement pour animations complexes
+
+### Git
+```bash
+# Format commit
+<type>(<scope>): <subject>
+
+# Types: feat, fix, docs, style, refactor, perf, test, chore
+# Exemple:
+feat(blog): add comment moderation system
+fix(auth): prevent race condition on logout
+```
+
+### Testing
+- **Unit tests** : Vitest + React Testing Library
+- **E2E tests** : Playwright pour flows critiques
+- **Coverage** : Min 80% sur features majeures
+
+## Error Handling
+```typescript
+// API Response Standard
+{
+  "success": true|false,
+  "data"?: {...},
+  "error"?: {
+    "code": "ERROR_CODE",
+    "message": "Human-readable message"
+  }
+}
+```
+
+## Performance
+- Images via `next/image`
+- Fonts via `next/font`
+- Lazy load composants lourds : `dynamic import`
+- Memoization : `useMemo`/`useCallback` si nécessaire
+
+## Security
+- Secrets dans `.env` (jamais hardcodé)
+- Input validation (Zod) frontend + backend
+- RLS policies sur toutes tables sensibles
+- Rate limiting sur endpoints publics

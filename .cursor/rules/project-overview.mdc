@@ -1,0 +1,53 @@
+# Project Overview - Phuong Long Vo Dao
+
+## Description
+Plateforme web vitrine + back-office pour 5 clubs de Phuong Long Vo Dao avec e-commerce intégré.
+
+## Tech Stack
+- **Frontend**: Next.js 15 (App Router), React 19, TypeScript, Tailwind CSS
+- **Backend**: Next.js API Routes + Supabase
+- **Database**: PostgreSQL (Supabase)
+- **Auth**: Supabase Auth (JWT + RLS)
+- **Payment**: Stripe
+- **Hosting**: Vercel
+- **Analytics**: Vercel Analytics
+
+## Project Goals
+1. Attirer nouveaux élèves via site professionnel optimisé SEO
+2. Fidéliser membres avec espace personnel et contenu exclusif
+3. Générer revenus via boutique e-commerce (équipements)
+4. Simplifier gestion administrative via back-office complet
+
+## Key Features
+- Site vitrine responsive avec animations martial arts
+- Blog multi-auteurs avec modération
+- Calendrier événements (compétitions, stages)
+- Fil d'actualité Facebook intégré
+- Boutique Stripe
+- Back-office CRUD (clubs, blog, événements, utilisateurs)
+- Système de rôles et permissions (Admin, Moderator, Coach, User)
+- Conformité RGPD totale
+
+## Documentation
+Toute la documentation se trouve dans `docs/`:
+- `docs/memory-bank/` : Architecture, patterns, décisions
+- `docs/rules/` : Standards de code, conventions
+- `docs/prompts/` : Templates prompts et sub-agents IA
+
+## Commands
+```bash
+npm run dev          # Development server
+npm run build        # Production build
+npm run start        # Production server
+npm run lint         # ESLint check
+npm run test         # Run tests
+npm run test:e2e     # E2E tests (Playwright)
+```
+
+## Important Principles
+- **Mobile-first**: Design responsive dès le départ
+- **TypeScript strict**: Pas de `any`, types explicites
+- **SEO-first**: Server Components par défaut, metadata optimisé
+- **Security**: RLS PostgreSQL + validation Zod systématique
+- **Performance**: Core Web Vitals > 90
+- **Accessibility**: WCAG 2.1 AA minimum

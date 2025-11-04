@@ -1,0 +1,308 @@
+/**
+ * Supabase Database Types
+ * 
+ * Types pour typage fort du client Supabase
+ * Généré manuellement depuis le schema (à automatiser avec Supabase CLI)
+ * 
+ * @version 1.0
+ * @date 2025-11-04 20:35
+ */
+
+export type Json =
+  | string
+  | number
+  | boolean
+  | null
+  | { [key: string]: Json | undefined }
+  | Json[];
+
+export interface Database {
+  public: {
+    Tables: {
+      clubs: {
+        Row: {
+          id: string;
+          name: string;
+          slug: string;
+          city: string;
+          address: string | null;
+          postal_code: string | null;
+          phone: string | null;
+          email: string | null;
+          description: string | null;
+          cover_image_url: string | null;
+          schedule: Json | null;
+          pricing: Json | null;
+          latitude: number | null;
+          longitude: number | null;
+          active: boolean;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          name: string;
+          slug: string;
+          city: string;
+          address?: string | null;
+          postal_code?: string | null;
+          phone?: string | null;
+          email?: string | null;
+          description?: string | null;
+          cover_image_url?: string | null;
+          schedule?: Json | null;
+          pricing?: Json | null;
+          latitude?: number | null;
+          longitude?: number | null;
+          active?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          name?: string;
+          slug?: string;
+          city?: string;
+          address?: string | null;
+          postal_code?: string | null;
+          phone?: string | null;
+          email?: string | null;
+          description?: string | null;
+          cover_image_url?: string | null;
+          schedule?: Json | null;
+          pricing?: Json | null;
+          latitude?: number | null;
+          longitude?: number | null;
+          active?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
+      coaches: {
+        Row: {
+          id: string;
+          club_id: string | null;
+          name: string;
+          bio: string | null;
+          photo_url: string | null;
+          specialties: Json | null;
+          years_experience: number;
+          active: boolean;
+          display_order: number;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          club_id?: string | null;
+          name: string;
+          bio?: string | null;
+          photo_url?: string | null;
+          specialties?: Json | null;
+          years_experience?: number;
+          active?: boolean;
+          display_order?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          club_id?: string | null;
+          name?: string;
+          bio?: string | null;
+          photo_url?: string | null;
+          specialties?: Json | null;
+          years_experience?: number;
+          active?: boolean;
+          display_order?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
+      blog_posts: {
+        Row: {
+          id: string;
+          title: string;
+          slug: string;
+          excerpt: string | null;
+          content: string;
+          cover_image_url: string | null;
+          author_id: string | null;
+          club_id: string | null;
+          status: 'draft' | 'published' | 'archived';
+          published_at: string | null;
+          views_count: number;
+          reading_time_minutes: number | null;
+          seo_title: string | null;
+          seo_description: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          title: string;
+          slug: string;
+          excerpt?: string | null;
+          content: string;
+          cover_image_url?: string | null;
+          author_id?: string | null;
+          club_id?: string | null;
+          status?: 'draft' | 'published' | 'archived';
+          published_at?: string | null;
+          views_count?: number;
+          reading_time_minutes?: number | null;
+          seo_title?: string | null;
+          seo_description?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          title?: string;
+          slug?: string;
+          excerpt?: string | null;
+          content?: string;
+          cover_image_url?: string | null;
+          author_id?: string | null;
+          club_id?: string | null;
+          status?: 'draft' | 'published' | 'archived';
+          published_at?: string | null;
+          views_count?: number;
+          reading_time_minutes?: number | null;
+          seo_title?: string | null;
+          seo_description?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
+      events: {
+        Row: {
+          id: string;
+          title: string;
+          slug: string;
+          description: string | null;
+          event_type: 'competition' | 'stage' | 'demonstration' | 'seminar' | 'other';
+          club_id: string | null;
+          start_date: string;
+          end_date: string | null;
+          location: string | null;
+          max_attendees: number | null;
+          registration_deadline: string | null;
+          cover_image_url: string | null;
+          price_cents: number;
+          active: boolean;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          title: string;
+          slug: string;
+          description?: string | null;
+          event_type: 'competition' | 'stage' | 'demonstration' | 'seminar' | 'other';
+          club_id?: string | null;
+          start_date: string;
+          end_date?: string | null;
+          location?: string | null;
+          max_attendees?: number | null;
+          registration_deadline?: string | null;
+          cover_image_url?: string | null;
+          price_cents?: number;
+          active?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          title?: string;
+          slug?: string;
+          description?: string | null;
+          event_type?: 'competition' | 'stage' | 'demonstration' | 'seminar' | 'other';
+          club_id?: string | null;
+          start_date?: string;
+          end_date?: string | null;
+          location?: string | null;
+          max_attendees?: number | null;
+          registration_deadline?: string | null;
+          cover_image_url?: string | null;
+          price_cents?: number;
+          active?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
+      products: {
+        Row: {
+          id: string;
+          name: string;
+          slug: string;
+          description: string | null;
+          price_cents: number;
+          stock_quantity: number;
+          images: Json | null;
+          category: string | null;
+          sizes: Json | null;
+          attributes: Json | null;
+          active: boolean;
+          stripe_product_id: string | null;
+          stripe_price_id: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          name: string;
+          slug: string;
+          description?: string | null;
+          price_cents: number;
+          stock_quantity?: number;
+          images?: Json | null;
+          category?: string | null;
+          sizes?: Json | null;
+          attributes?: Json | null;
+          active?: boolean;
+          stripe_product_id?: string | null;
+          stripe_price_id?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          name?: string;
+          slug?: string;
+          description?: string | null;
+          price_cents?: number;
+          stock_quantity?: number;
+          images?: Json | null;
+          category?: string | null;
+          sizes?: Json | null;
+          attributes?: Json | null;
+          active?: boolean;
+          stripe_product_id?: string | null;
+          stripe_price_id?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
+    };
+    Views: {
+      [_ in never]: never;
+    };
+    Functions: {
+      is_admin: {
+        Args: Record<PropertyKey, never>;
+        Returns: boolean;
+      };
+      has_role: {
+        Args: {
+          role_name: string;
+        };
+        Returns: boolean;
+      };
+    };
+    Enums: {
+      [_ in never]: never;
+    };
+  };
+}
+

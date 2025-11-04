@@ -1,0 +1,273 @@
+erDiagram
+    USERS ||--o{ USER_ROLES : "has"
+    USERS ||--o{ BLOG_POSTS : "creates"
+    USERS ||--o{ BLOG_COMMENTS : "creates"
+    USERS ||--o{ ORDERS : "creates"
+    USERS ||--o{ AUDIT_LOGS : "triggers"
+    USERS ||--o{ EVENT_REGISTRATIONS : "registers"
+    USERS ||--o{ USER_BOOKMARKS : "has"
+    
+    CLUBS ||--o{ EVENTS : "hosts"
+    CLUBS ||--o{ USER_ROLES : "manages"
+    CLUBS ||--o{ BLOG_POSTS : "contains"
+    CLUBS ||--o{ COACHES : "employs"
+    
+    BLOG_POSTS ||--o{ BLOG_COMMENTS : "has"
+    BLOG_POSTS ||--o{ BLOG_TAGS : "tagged_with"
+    BLOG_POSTS ||--o{ USER_BOOKMARKS : "bookmarked_in"
+    
+    TAGS ||--o{ BLOG_TAGS : "used_in"
+    
+    EVENTS ||--o{ EVENT_REGISTRATIONS : "has"
+    EVENTS ||--o{ PRODUCTS : "features"
+    
+    PRODUCTS ||--o{ ORDER_ITEMS : "included_in"
+    
+    ORDERS ||--o{ ORDER_ITEMS : "contains"
+    ORDERS ||--o{ AUDIT_LOGS : "creates"
+    
+    ROLES ||--o{ USER_ROLES : "assigned_via"
+    ROLES ||--o{ ROLE_PERMISSIONS : "has"
+    
+    PERMISSIONS ||--o{ ROLE_PERMISSIONS : "granted_by"
+    
+    USERS {
+        uuid id PK
+        string email UK
+        string encrypted_password
+        timestamptz created_at
+        timestamptz updated_at
+        timestamptz last_sign_in_at
+    }
+    
+    USER_PROFILES {
+        uuid id PK,FK
+        string username UK
+        string full_name
+        text avatar_url
+        text bio
+        uuid favorite_club_id FK
+        jsonb preferences
+        timestamptz created_at
+        timestamptz updated_at
+    }
+    
+    CLUBS {
+        uuid id PK
+        string name
+        string slug UK
+        string city
+        text address
+        string postal_code
+        string phone
+        string email
+        text description
+        text cover_image_url
+        jsonb schedule
+        jsonb pricing
+        boolean active
+        timestamptz created_at
+        timestamptz updated_at
+    }
+    
+    COACHES {
+        uuid id PK
+        uuid club_id FK
+        string name
+        text bio
+        text photo_url
+        jsonb specialties
+        int years_experience
+        boolean active
+        timestamptz created_at
+        timestamptz updated_at
+    }
+    
+    BLOG_POSTS {
+        uuid id PK
+        string title
+        string slug UK
+        text excerpt
+        text content
+        text cover_image_url
+        uuid author_id FK
+        uuid club_id FK
+        string status
+        timestamptz published_at
+        int views_count
+        int reading_time_minutes
+        text seo_title
+        text seo_description
+        timestamptz created_at
+        timestamptz updated_at
+    }
+    
+    BLOG_COMMENTS {
+        uuid id PK
+        uuid post_id FK
+        uuid user_id FK
+        text content
+        uuid parent_id FK
+        boolean approved
+        timestamptz created_at
+        timestamptz updated_at
+    }
+    
+    TAGS {
+        uuid id PK
+        string name UK
+        string slug UK
+        int usage_count
+        timestamptz created_at
+    }
+    
+    BLOG_TAGS {
+        uuid id PK
+        uuid post_id FK
+        uuid tag_id FK
+        timestamptz created_at
+    }
+    
+    EVENTS {
+        uuid id PK
+        string title
+        string slug UK
+        text description
+        string event_type
+        uuid club_id FK
+        timestamptz start_date
+        timestamptz end_date
+        text location
+        int max_attendees
+        timestamptz registration_deadline
+        text cover_image_url
+        int price_cents
+        boolean active
+        timestamptz created_at
+        timestamptz updated_at
+    }
+    
+    EVENT_REGISTRATIONS {
+        uuid id PK
+        uuid event_id FK
+        uuid user_id FK
+        string status
+        jsonb metadata
+        timestamptz created_at
+        timestamptz updated_at
+    }
+    
+    PRODUCTS {
+        uuid id PK
+        string name
+        string slug UK
+        text description
+        int price_cents
+        int stock_quantity
+        jsonb images
+        string category
+        jsonb sizes
+        jsonb attributes
+        boolean active
+        string stripe_product_id
+        string stripe_price_id
+        timestamptz created_at
+        timestamptz updated_at
+    }
+    
+    ORDERS {
+        uuid id PK
+        uuid user_id FK
+        string status
+        int total_cents
+        int shipping_cents
+        int tax_cents
+        string stripe_session_id UK
+        string stripe_payment_intent_id
+        jsonb shipping_address
+        jsonb billing_address
+        text notes
+        timestamptz created_at
+        timestamptz updated_at
+    }
+    
+    ORDER_ITEMS {
+        uuid id PK
+        uuid order_id FK
+        uuid product_id FK
+        int quantity
+        int unit_price_cents
+        jsonb product_snapshot
+        timestamptz created_at
+    }
+    
+    ROLES {
+        uuid id PK
+        string name UK
+        string description
+        int level
+        timestamptz created_at
+        timestamptz updated_at
+    }
+    
+    PERMISSIONS {
+        uuid id PK
+        string name UK
+        string resource
+        string action
+        text description
+        timestamptz created_at
+    }
+    
+    USER_ROLES {
+        uuid id PK
+        uuid user_id FK
+        uuid role_id FK
+        uuid club_id FK
+        uuid granted_by FK
+        timestamptz granted_at
+        timestamptz expires_at
+        timestamptz created_at
+    }
+    
+    ROLE_PERMISSIONS {
+        uuid id PK
+        uuid role_id FK
+        uuid permission_id FK
+        timestamptz created_at
+    }
+    
+    USER_BOOKMARKS {
+        uuid id PK
+        uuid user_id FK
+        string bookmarkable_type
+        uuid bookmarkable_id
+        timestamptz created_at
+    }
+    
+    AUDIT_LOGS {
+        uuid id PK
+        uuid user_id FK
+        string action
+        string table_name
+        uuid record_id
+        jsonb old_data
+        jsonb new_data
+        inet ip_address
+        text user_agent
+        timestamptz created_at
+    }
+    
+    FACEBOOK_CACHE {
+        uuid id PK
+        uuid club_id FK
+        string post_id UK
+        text content
+        jsonb media
+        timestamptz fb_created_time
+        int likes_count
+        int comments_count
+        timestamptz cached_at
+        timestamptz created_at
+    }
+

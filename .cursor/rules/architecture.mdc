@@ -1,0 +1,159 @@
+# Architecture Patterns - Phuong Long Vo Dao
+
+Voir documentation complète dans `@docs/memory-bank/frontend/ARCHITECTURE.md` et `@docs/memory-bank/backend/ARCHITECTURE.md`.
+
+## Frontend Architecture
+
+### App Router Structure
+```
+src/app/
+├── (marketing)/   # Pages publiques SEO (Server Components)
+├── (auth)/        # Pages authentification
+├── (dashboard)/   # Espace utilisateur connecté
+├── (admin)/       # Back-office admin
+└── api/           # API Routes
+```
+
+### Component Patterns
+- **Server Components** : Par défaut (data fetching, SEO)
+- **Client Components** : Uniquement pour interactivité (`"use client"`)
+- **Composition** : Petits composants réutilisables
+- **Colocation** : Fichiers liés proches (component + test)
+
+### State Management
+- **Server State** : React Query (cache + revalidation)
+- **Global State** : Zustand (minimal, seulement si vraiment global)
+- **Props drilling** : Préférer props si < 3 niveaux
+
+### Data Fetching
+```typescript
+// Server Component (preferred for SEO)
+export default async function Page() {
+  const data = await fetch('...');
+  return <div>{data}</div>;
+}
+
+// Client Component (interactivity needed)
+'use client';
+export function Component() {
+  const { data } = useQuery({ ... });
+  return <div>{data}</div>;
+}
+```
+
+## Backend Architecture
+
+### API Design
+- **RESTful** : Resources avec HTTP methods appropriés
+- **Validation** : Zod schemas systématiques
+- **RLS-first** : Security au niveau database
+- **Consistent responses** : Format uniforme success/error
+
+### Authentication Flow
+```typescript
+// 1. Check session
+const { data: { session } } = await supabase.auth.getSession();
+
+// 2. Verify auth
+if (!session) return 401;
+
+// 3. Check permissions (RBAC)
+const hasPermission = await checkRole(session.user.id, 'admin');
+if (!hasPermission) return 403;
+
+// 4. Proceed with operation
+```
+
+### RLS Patterns
+```sql
+-- Pattern: Owner or Admin can update
+CREATE POLICY "Owners and admins can update"
+  ON resources FOR UPDATE
+  USING (
+    auth.uid() = owner_id
+    OR EXISTS (
+      SELECT 1 FROM user_roles
+      WHERE user_id = auth.uid() AND role = 'admin'
+    )
+  );
+```
+
+## Database Schema
+
+### Naming
+- **Tables**: `snake_case` pluriel (ex: `blog_posts`)
+- **Columns**: `snake_case` (ex: `created_at`)
+- **Indexes**: `idx_table_column` (ex: `idx_users_email`)
+
+### Key Tables
+- `auth.users` (Supabase) + `user_profiles` (custom)
+- `clubs`, `blog_posts`, `events`, `products`, `orders`
+- `user_roles` (RBAC), `audit_logs` (RGPD)
+
+## Security Layers
+
+### Defense in Depth
+1. **Client Validation** : Zod + React Hook Form
+2. **API Validation** : Zod schemas
+3. **RLS Policies** : Database-level security
+4. **Audit Logs** : Traçabilité actions sensibles
+
+### Authentication
+- **JWT** : Supabase Auth (auto-refresh)
+- **Sessions** : Cookie-based avec httpOnly
+- **Service Role** : JAMAIS exposé frontend
+
+## Testing Strategy
+
+### Test Pyramid
+1. **Unit Tests** (80%) : Fonctions, utils, composants isolés
+2. **Integration Tests** (15%) : API endpoints, database
+3. **E2E Tests** (5%) : User flows critiques
+
+### What to Test
+- Business logic (calculs, transformations)
+- API endpoints (success + error cases)
+- User interactions (forms, buttons)
+- Edge cases (null, empty, invalid)
+
+## Performance Targets
+
+### Core Web Vitals
+- **LCP** : < 2.5s (Largest Contentful Paint)
+- **FID** : < 100ms (First Input Delay)
+- **CLS** : < 0.1 (Cumulative Layout Shift)
+
+### Optimization Strategies
+- Server Components pour contenu statique
+- Code splitting (dynamic imports)
+- Image optimization (next/image)
+- Database indexes sur requêtes fréquentes
+- Caching (React Query + HTTP headers)
+
+## Deployment
+
+### Environments
+- **Development** : `localhost:3000`
+- **Staging** : Vercel preview deployments
+- **Production** : `phuong-long-vo-dao.fr`
+
+### CI/CD
+1. Push → GitHub
+2. Vercel auto-deploy preview
+3. Tests automatiques (CI)
+4. Review + approve
+5. Merge → Deploy production
+
+## Documentation
+
+### When to Document
+- **Toujours** : Fonctions publiques (JSDoc)
+- **Souvent** : Choix architecturaux (DECISIONS.md)
+- **Parfois** : Code complexe (comments POURQUOI)
+- **Jamais** : Code self-explanatory (éviter comments QUOI)
+
+### Where to Document
+- `docs/memory-bank/` : Architecture, patterns
+- `docs/rules/` : Standards, conventions
+- `README.md` : Setup, getting started
+- Inline comments : Business logic complexe

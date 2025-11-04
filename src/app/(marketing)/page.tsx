@@ -1,0 +1,318 @@
+/**
+ * Homepage - Landing Page
+ * 
+ * Page d'accueil avec Hero section et présentation
+ * 
+ * @version 1.0
+ * @date 2025-11-04 20:50
+ */
+
+import type { Metadata } from 'next';
+import Link from 'next/link';
+import { Container, Button, Card, CardHeader, CardTitle, CardDescription, CardContent, Badge } from '@/components/common';
+import { createServerClient } from '@/lib/supabase/server';
+import type { Club, Event } from '@/lib/types';
+import { BoltIcon, TrophyIcon, UserGroupIcon, ShieldCheckIcon, UsersIcon, MapPinIcon } from '@heroicons/react/24/outline';
+
+export const metadata: Metadata = {
+  title: 'Accueil - Art Martial Vietnamien',
+  description: 'Découvrez le Phuong Long Vo Dao, art martial vietnamien traditionnel. 5 clubs en France. Cours pour tous niveaux, enfants et adultes.',
+};
+
+export default async function HomePage() {
+  const supabase = await createServerClient();
+  
+  // Récupérer les clubs actifs
+  const { data: clubs } = await supabase
+    .from('clubs')
+    .select('id, name, slug, city, description')
+    .eq('active', true)
+    .order('city');
+  
+  const typedClubs = (clubs || []) as unknown as Pick<Club, 'id' | 'name' | 'slug' | 'city' | 'description'>[];
+  
+  // Récupérer les prochains événements
+  const { data: events } = await supabase
+    .from('events')
+    .select('id, title, slug, start_date, event_type, location')
+    .eq('active', true)
+    .gte('start_date', new Date().toISOString())
+    .order('start_date')
+    .limit(3);
+  
+  const typedEvents = (events || []) as unknown as Pick<Event, 'id' | 'title' | 'slug' | 'start_date' | 'event_type' | 'location'>[];
+
+  return (
+    <>
+      {/* Hero Section - Arts Martiaux */}
+      <section className="relative bg-gradient-to-br from-primary via-primary-dark to-[#B91C1C] py-20 lg:py-32 overflow-hidden">
+        {/* Background Pattern - Motif Asiatique */}
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute inset-0" style={{
+            backgroundImage: `url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M50 50c0-5.523 4.477-10 10-10s10 4.477 10 10-4.477 10-10 10c0-5.523-4.477-10-10-10zm-20 0c0-5.523-4.477-10-10-10S10 44.477 10 50s4.477 10 10 10c0-5.523 4.477-10 10-10zM50 30c0-5.523 4.477-10 10-10s10 4.477 10 10-4.477 10-10 10c0-5.523-4.477-10-10-10zm-20 0c0-5.523-4.477-10-10-10S10 24.477 10 30s4.477 10 10 10c0-5.523 4.477-10 10-10z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+          }} />
+        </div>
+
+        {/* Gradient Overlay pour profondeur */}
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/20" />
+
+        <Container className="relative z-10">
+          <div className="max-w-4xl mx-auto text-center">
+            {/* Badge avec Or */}
+            <div className="inline-flex items-center px-4 py-2 mb-6 bg-secondary/20 text-white border border-secondary/40 rounded-full backdrop-blur-sm">
+              <span className="text-secondary mr-2">⭐</span>
+              <span className="font-medium">5 clubs en France</span>
+            </div>
+            
+            <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-6 animate-fade-in tracking-tight">
+              Phuong Long<span className="block text-secondary mt-2">Vo Dao</span>
+            </h1>
+            
+            <p className="text-2xl md:text-3xl text-white/95 mb-8 animate-slide-up font-medium">
+              L'art martial vietnamien traditionnel
+            </p>
+            
+            <p className="text-lg md:text-xl text-white/85 mb-10 max-w-3xl mx-auto leading-relaxed">
+              Découvrez une discipline complète alliant <span className="text-secondary font-semibold">techniques de combat</span>, 
+              <span className="text-secondary font-semibold"> développement personnel</span> et 
+              <span className="text-secondary font-semibold"> valeurs traditionnelles</span>. 
+              Rejoignez l'un de nos 5 clubs et bénéficiez d'un cours d'essai gratuit.
+            </p>
+            
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+              <Link href="/clubs">
+                <Button size="lg" className="bg-white text-primary hover:bg-gray-50 hover:shadow-lg hover:shadow-primary/20 transition-all min-w-[220px] font-semibold">
+                  🥋 Trouver un Club
+                </Button>
+              </Link>
+              <Link href="/contact">
+                <Button size="lg" className="bg-secondary text-gray-900 hover:bg-secondary-light hover:shadow-lg hover:shadow-secondary/30 transition-all min-w-[220px] font-semibold">
+                  ✨ Essai Gratuit
+                </Button>
+              </Link>
+            </div>
+
+            {/* Stats */}
+            <div className="mt-16 grid grid-cols-3 gap-8 max-w-2xl mx-auto">
+              <div className="text-center">
+                <div className="text-4xl font-bold text-white mb-2">40+</div>
+                <div className="text-sm text-white/70 uppercase tracking-wide">Ans d'expérience</div>
+              </div>
+              <div className="text-center">
+                <div className="text-4xl font-bold text-white mb-2">5</div>
+                <div className="text-sm text-white/70 uppercase tracking-wide">Clubs actifs</div>
+              </div>
+              <div className="text-center">
+                <div className="text-4xl font-bold text-white mb-2">500+</div>
+                <div className="text-sm text-white/70 uppercase tracking-wide">Pratiquants</div>
+              </div>
+            </div>
+          </div>
+        </Container>
+      </section>
+
+      {/* Features Section */}
+      <section className="py-16 lg:py-24 bg-white">
+        <Container>
+          <div className="text-center mb-12">
+            <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
+              Pourquoi choisir le Vo Dao ?
+            </h2>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              Une discipline complète qui développe le corps et l'esprit
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8">
+            {/* Technique & Combat */}
+            <Card variant="bordered" hoverable className="text-center border-2 hover:border-primary/50 hover:shadow-lg hover:shadow-primary/10 transition-all">
+              <CardContent className="pt-8 pb-8">
+                <div className="w-16 h-16 bg-gradient-to-br from-primary/10 to-primary/5 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                  <BoltIcon className="w-8 h-8 text-primary" />
+                </div>
+                <CardTitle className="mb-3 text-gray-900">Technique & Combat</CardTitle>
+                <CardDescription className="text-gray-600 text-base leading-relaxed">
+                  Maîtrisez les <span className="text-primary font-semibold">techniques de frappe</span>, blocage et combat. 
+                  Développez réflexes, coordination et self-défense efficace.
+                </CardDescription>
+              </CardContent>
+            </Card>
+
+            {/* Excellence & Tradition */}
+            <Card variant="bordered" hoverable className="text-center border-2 hover:border-secondary/50 hover:shadow-lg hover:shadow-secondary/10 transition-all">
+              <CardContent className="pt-8 pb-8">
+                <div className="w-16 h-16 bg-gradient-to-br from-secondary/10 to-secondary/5 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                  <TrophyIcon className="w-8 h-8 text-secondary" />
+                </div>
+                <CardTitle className="mb-3 text-gray-900">Excellence & Tradition</CardTitle>
+                <CardDescription className="text-gray-600 text-base leading-relaxed">
+                  Cultivez les valeurs martiales : <span className="text-secondary font-semibold">respect, humilité, persévérance</span>. 
+                  Un cadre structurant pour enfants et adultes.
+                </CardDescription>
+              </CardContent>
+            </Card>
+
+            {/* Communauté */}
+            <Card variant="bordered" hoverable className="text-center border-2 hover:border-accent/50 hover:shadow-lg hover:shadow-accent/10 transition-all">
+              <CardContent className="pt-8 pb-8">
+                <div className="w-16 h-16 bg-gradient-to-br from-accent/10 to-accent/5 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                  <UserGroupIcon className="w-8 h-8 text-accent" />
+                </div>
+                <CardTitle className="mb-3 text-gray-900">Communauté Passionnée</CardTitle>
+                <CardDescription className="text-gray-600 text-base leading-relaxed">
+                  Rejoignez une <span className="text-accent font-semibold">famille soudée</span>. 
+                  Participez à des stages, compétitions et événements dans toute la France.
+                </CardDescription>
+              </CardContent>
+            </Card>
+          </div>
+        </Container>
+      </section>
+
+      {/* Clubs Section */}
+      <section className="py-16 lg:py-24 bg-gray-50">
+        <Container>
+          <div className="text-center mb-12">
+            <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
+              Nos 5 Clubs
+            </h2>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              Trouvez le club le plus proche de chez vous
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {typedClubs?.map((club) => (
+              <Link key={club.id} href={`/clubs/${club.slug}`}>
+                <Card variant="bordered" hoverable>
+                  <CardHeader>
+                    <Badge variant="primary" size="sm" className="mb-2">
+                      {club.city}
+                    </Badge>
+                    <CardTitle>{club.name}</CardTitle>
+                    <CardDescription className="line-clamp-2">
+                      {club.description || `Club de ${club.city}`}
+                    </CardDescription>
+                  </CardHeader>
+                </Card>
+              </Link>
+            ))}
+          </div>
+
+          <div className="text-center mt-10">
+            <Link href="/clubs">
+              <Button size="lg" variant="primary">
+                Voir Tous les Clubs
+              </Button>
+            </Link>
+          </div>
+        </Container>
+      </section>
+
+      {/* Events Section */}
+      {typedEvents && typedEvents.length > 0 && (
+        <section className="py-16 lg:py-24 bg-white">
+          <Container>
+            <div className="text-center mb-12">
+              <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
+                Prochains Événements
+              </h2>
+              <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+                Stages, compétitions, démonstrations
+              </p>
+            </div>
+
+            <div className="grid md:grid-cols-3 gap-6">
+              {typedEvents.map((event) => (
+                <Link key={event.id} href={`/events/${event.slug}`}>
+                  <Card variant="bordered" hoverable>
+                    <CardHeader>
+                      <Badge variant="warning" size="sm" className="mb-2">
+                        {new Date(event.start_date).toLocaleDateString('fr-FR', {
+                          day: 'numeric',
+                          month: 'short',
+                          year: 'numeric'
+                        })}
+                      </Badge>
+                      <CardTitle className="line-clamp-2">{event.title}</CardTitle>
+                      <CardDescription>{event.location}</CardDescription>
+                    </CardHeader>
+                  </Card>
+                </Link>
+              ))}
+            </div>
+
+            <div className="text-center mt-10">
+              <Link href="/events">
+                <Button size="lg" variant="ghost">
+                  Tous les Événements
+                </Button>
+              </Link>
+            </div>
+          </Container>
+        </section>
+      )}
+
+      {/* CTA Section - Dégradé Rouge/Or */}
+      <section className="relative py-20 lg:py-28 overflow-hidden">
+        {/* Background dégradé */}
+        <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary-dark to-secondary" />
+        
+        {/* Pattern overlay */}
+        <div className="absolute inset-0 opacity-5">
+          <div className="absolute inset-0" style={{
+            backgroundImage: `url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M50 0L60 40L100 50L60 60L50 100L40 60L0 50L40 40Z' fill='%23ffffff' fill-opacity='0.4'/%3E%3C/svg%3E")`,
+            backgroundSize: '100px 100px',
+          }} />
+        </div>
+
+        <Container className="relative z-10">
+          <div className="max-w-3xl mx-auto text-center">
+            <div className="inline-block mb-6 px-4 py-2 bg-secondary/20 border border-secondary/40 rounded-full backdrop-blur-sm">
+              <span className="text-secondary font-semibold">⭐ Cours d'essai offert ⭐</span>
+            </div>
+            
+            <h2 className="text-4xl lg:text-5xl font-bold mb-6 text-white">
+              Prêt à Rejoindre le Dojo ?
+            </h2>
+            
+            <p className="text-xl md:text-2xl text-white/90 mb-10 leading-relaxed">
+              Profitez d'un <span className="text-secondary font-bold">cours d'essai 100% gratuit</span> dans le club de votre choix. 
+              Venez découvrir le Vo Dao et notre communauté passionnée.
+            </p>
+            
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+              <Link href="/clubs">
+                <Button size="lg" className="bg-white text-primary hover:bg-gray-50 hover:shadow-xl hover:shadow-white/20 transition-all min-w-[220px] font-bold">
+                  🥋 Choisir un Club
+                </Button>
+              </Link>
+              <Link href="/contact">
+                <Button size="lg" className="bg-secondary text-gray-900 hover:bg-secondary-light border-2 border-secondary hover:shadow-xl hover:shadow-secondary/30 transition-all min-w-[220px] font-bold">
+                  ✉️ Nous Contacter
+                </Button>
+              </Link>
+            </div>
+
+            {/* Trust badges - Heroicons */}
+            <div className="mt-12 flex flex-wrap justify-center gap-6 text-white/80 text-sm font-medium">
+              <div className="flex items-center gap-2">
+                <ShieldCheckIcon className="w-5 h-5 text-secondary" />
+                <span>40 ans d'expérience</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <UsersIcon className="w-5 h-5 text-secondary" />
+                <span>500+ pratiquants</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <MapPinIcon className="w-5 h-5 text-secondary" />
+                <span>5 villes</span>
+              </div>
+            </div>
+          </div>
+        </Container>
+      </section>
+    </>
+  );
+}
+
