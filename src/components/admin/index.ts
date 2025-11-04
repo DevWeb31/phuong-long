@@ -8,4 +8,6 @@
  */
 
 export { StatsCard } from './StatsCard';
+export { DataTable } from './DataTable';
+export type { DataTableColumn, DataTableAction } from './DataTable';
 
