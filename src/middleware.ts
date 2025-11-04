@@ -85,17 +85,20 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(url);
     }
 
-    // Vérifier le rôle admin
+    // Vérifier le rôle admin (jointure avec table roles)
     try {
       const { data: userRole, error: roleError } = await supabase
         .from('user_roles')
-        .select('role')
+        .select('role_id, roles(name)')
         .eq('user_id', user.id)
-        .eq('role', 'admin')
         .maybeSingle();
 
+      // Vérifier si l'utilisateur a le rôle admin
+      const isAdmin = userRole && 
+        (userRole as any).roles?.name === 'admin';
+
       // Si pas de rôle admin, rediriger vers le dashboard user
-      if (roleError || !userRole) {
+      if (roleError || !isAdmin) {
         console.warn(`User ${user.id} attempted to access admin panel without admin role`);
         const url = request.nextUrl.clone();
         url.pathname = '/dashboard';

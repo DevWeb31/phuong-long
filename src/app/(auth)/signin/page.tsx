@@ -39,8 +39,9 @@ export default function SignInPage() {
         return;
       }
 
-      // Redirection vers dashboard
-      router.push('/dashboard');
+      // Redirection vers dashboard avec refresh
+      router.refresh();
+      window.location.href = '/dashboard';
     } catch (err) {
       setError('Une erreur est survenue');
       setLoading(false);

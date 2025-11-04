@@ -15,9 +15,8 @@ export async function checkAdminRole(userId: string): Promise<boolean> {
     
     const { data: userRole, error } = await supabase
       .from('user_roles')
-      .select('role')
+      .select('role_id, roles(name)')
       .eq('user_id', userId)
-      .eq('role', 'admin')
       .maybeSingle();
 
     if (error) {
@@ -25,7 +24,7 @@ export async function checkAdminRole(userId: string): Promise<boolean> {
       return false;
     }
 
-    return !!userRole;
+    return !!(userRole && (userRole as any).roles?.name === 'admin');
   } catch (error) {
     console.error('Exception checking admin role:', error);
     return false;
@@ -36,9 +35,9 @@ export async function getUserRoles(userId: string): Promise<string[]> {
   try {
     const supabase = await createServerClient();
     
-    const { data: roles, error } = await supabase
+    const { data: userRoles, error } = await supabase
       .from('user_roles')
-      .select('role')
+      .select('role_id, roles(name)')
       .eq('user_id', userId);
 
     if (error) {
@@ -46,32 +45,30 @@ export async function getUserRoles(userId: string): Promise<string[]> {
       return [];
     }
 
-    return (roles as unknown as { role: string }[])?.map(r => r.role) || [];
+    return (userRoles as any[])?.map(ur => ur.roles?.name).filter(Boolean) || [];
   } catch (error) {
     console.error('Exception fetching user roles:', error);
     return [];
   }
 }
 
-export async function hasRole(userId: string, role: string): Promise<boolean> {
+export async function hasRole(userId: string, roleName: string): Promise<boolean> {
   try {
     const supabase = await createServerClient();
     
-    const { data: userRole, error } = await supabase
+    const { data: userRoles, error } = await supabase
       .from('user_roles')
-      .select('role')
-      .eq('user_id', userId)
-      .eq('role', role)
-      .maybeSingle();
+      .select('role_id, roles(name)')
+      .eq('user_id', userId);
 
     if (error) {
-      console.error(`Error checking role ${role}:`, error);
+      console.error(`Error checking role ${roleName}:`, error);
       return false;
     }
 
-    return !!userRole;
+    return (userRoles as any[])?.some(ur => ur.roles?.name === roleName) || false;
   } catch (error) {
-    console.error(`Exception checking role ${role}:`, error);
+    console.error(`Exception checking role ${roleName}:`, error);
     return false;
   }
 }
