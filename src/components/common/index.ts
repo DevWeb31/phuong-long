@@ -19,4 +19,5 @@ export {
 } from './Card';
 export { Container, type ContainerProps } from './Container';
 export { Badge, type BadgeProps } from './Badge';
+export { Accordion, type AccordionItem, type AccordionProps } from './Accordion';
 
