@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { Inter, Poppins } from 'next/font/google';
+import { CartProvider } from '@/lib/contexts/CartContext';
 import './globals.css';
 
 const inter = Inter({
@@ -62,7 +63,9 @@ export default function RootLayout({
   return (
     <html lang="fr" className={`${inter.variable} ${heading.variable}`}>
       <body className="font-sans antialiased flex flex-col min-h-screen">
-        {children}
+        <CartProvider>
+          {children}
+        </CartProvider>
       </body>
     </html>
   );

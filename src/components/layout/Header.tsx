@@ -14,6 +14,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Container } from '@/components/common';
 import { UserMenu } from './UserMenu';
+import { CartButton } from './CartButton';
 import { cn } from '@/lib/utils/cn';
 
 const navigation = [
@@ -73,8 +74,9 @@ export function Header() {
             ))}
           </nav>
 
-          {/* Desktop CTA / User Menu */}
-          <div className="hidden md:flex items-center">
+          {/* Desktop CTA / Cart / User Menu */}
+          <div className="hidden md:flex items-center gap-2">
+            <CartButton />
             <UserMenu />
           </div>
 

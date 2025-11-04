@@ -11,4 +11,5 @@ export { Header } from './Header';
 export { Footer } from './Footer';
 export { LogoutButton } from './LogoutButton';
 export { UserMenu } from './UserMenu';
+export { CartButton } from './CartButton';
 
