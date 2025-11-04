@@ -13,6 +13,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Container } from '@/components/common';
+import { UserMenu } from './UserMenu';
 import { cn } from '@/lib/utils/cn';
 
 const navigation = [
@@ -72,21 +73,9 @@ export function Header() {
             ))}
           </nav>
 
-          {/* Desktop CTA */}
-          <div className="hidden md:flex items-center space-x-3">
-            <Link
-              href="/signin"
-              className="text-sm font-medium text-gray-700 hover:text-primary transition-colors"
-            >
-              Connexion
-            </Link>
-            <Link
-              href="/signup"
-              className="inline-flex items-center gap-1.5 px-4 py-2 bg-gradient-to-r from-primary to-primary-dark text-white rounded-lg text-sm font-semibold hover:shadow-md hover:shadow-primary/20 transition-all"
-            >
-              <span className="text-base">🥋</span>
-              <span>Essai Gratuit</span>
-            </Link>
+          {/* Desktop CTA / User Menu */}
+          <div className="hidden md:flex items-center">
+            <UserMenu />
           </div>
 
           {/* Mobile menu button */}
