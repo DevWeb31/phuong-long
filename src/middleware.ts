@@ -85,17 +85,32 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(url);
     }
 
-    // TODO: Vérifier le rôle admin
-    // const { data: roles } = await supabase
-    //   .from('user_roles')
-    //   .select('role')
-    //   .eq('user_id', user.id)
-    //   .eq('role', 'admin')
-    //   .single();
-    // 
-    // if (!roles) {
-    //   return NextResponse.redirect(new URL('/dashboard', request.url));
-    // }
+    // Vérifier le rôle admin
+    try {
+      const { data: userRole, error: roleError } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', user.id)
+        .eq('role', 'admin')
+        .maybeSingle();
+
+      // Si pas de rôle admin, rediriger vers le dashboard user
+      if (roleError || !userRole) {
+        console.warn(`User ${user.id} attempted to access admin panel without admin role`);
+        const url = request.nextUrl.clone();
+        url.pathname = '/dashboard';
+        url.searchParams.set('error', 'unauthorized');
+        return NextResponse.redirect(url);
+      }
+
+      console.log(`Admin access granted for user ${user.id}`);
+    } catch (error) {
+      console.error('Error checking admin role:', error);
+      // En cas d'erreur, on redirige par sécurité
+      const url = request.nextUrl.clone();
+      url.pathname = '/dashboard';
+      return NextResponse.redirect(url);
+    }
   }
 
   // Rediriger les utilisateurs connectés qui vont sur /signin ou /signup

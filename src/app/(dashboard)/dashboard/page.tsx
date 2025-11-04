@@ -3,14 +3,16 @@
  * 
  * Page principale du dashboard utilisateur
  * 
- * @version 1.0
- * @date 2025-11-05 00:10
+ * @version 1.1
+ * @date 2025-11-05 01:40
  */
 
 'use client';
 
+import { Suspense } from 'react';
 import { useAuth } from '@/lib/hooks/useAuth';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, Badge } from '@/components/common';
+import { UnauthorizedAlert } from '@/components/dashboard/UnauthorizedAlert';
 import Link from 'next/link';
 import { 
   UserIcon, 
@@ -19,7 +21,7 @@ import {
   BookOpenIcon 
 } from '@heroicons/react/24/outline';
 
-export default function DashboardPage() {
+function DashboardContent() {
   const { user, loading } = useAuth();
 
   if (loading) {
@@ -43,6 +45,11 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-8">
+      {/* Unauthorized Alert */}
+      <Suspense fallback={null}>
+        <UnauthorizedAlert />
+      </Suspense>
+
       {/* Welcome Section */}
       <div>
         <h1 className="text-3xl font-bold text-gray-900 mb-2">
@@ -147,3 +154,17 @@ export default function DashboardPage() {
   );
 }
 
+export default function DashboardPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex items-center justify-center py-20">
+        <div className="text-center">
+          <div className="text-4xl mb-4">⏳</div>
+          <p className="text-gray-600">Chargement...</p>
+        </div>
+      </div>
+    }>
+      <DashboardContent />
+    </Suspense>
+  );
+}
