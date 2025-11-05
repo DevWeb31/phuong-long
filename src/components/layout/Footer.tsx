@@ -50,9 +50,9 @@ export function Footer() {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="bg-gray-50 border-t border-gray-200">
+    <footer className="bg-gradient-to-b from-gray-50 to-gray-100 border-t border-gray-200/60">
       <Container>
-        <div className="py-12 lg:py-16">
+        <div className="py-16 lg:py-20">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 lg:gap-12">
             {/* Clubs */}
             <div>
@@ -132,13 +132,14 @@ export function Footer() {
           </div>
 
           {/* Newsletter */}
-          <div className="mt-12 border-t border-gray-200 pt-8">
-            <h3 className="text-sm font-semibold text-gray-900 uppercase tracking-wider">
-              Newsletter
-            </h3>
-            <p className="mt-4 text-base text-gray-600">
-              Recevez nos actualités, événements et promotions.
-            </p>
+          <div className="mt-16 border-t border-gray-200/60 pt-12">
+            <div className="max-w-md">
+              <h3 className="text-lg font-bold text-gray-900 mb-2">
+                📧 Newsletter
+              </h3>
+              <p className="mt-2 text-base text-gray-600 mb-6">
+                Recevez nos actualités, événements et promotions.
+              </p>
             <form className="mt-4 sm:flex sm:max-w-md">
               <label htmlFor="email-address" className="sr-only">
                 Email
