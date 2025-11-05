@@ -51,16 +51,15 @@ export default function AdminLayout({
       <header className="bg-white border-b border-gray-200 sticky top-0 z-40">
         <Container>
           <div className="flex items-center justify-between h-16">
-            <Link href="/admin" className="flex items-center space-x-2.5 group">
-              <div className="w-10 h-10 bg-gradient-to-br from-primary to-primary-dark rounded-lg flex items-center justify-center shadow-sm">
-                <span className="text-white font-bold text-lg">PL</span>
-              </div>
+            <Link href="/admin" className="flex items-center gap-3 group">
+              <img
+                src="/logo.png"
+                alt="Phuong Long Vo Dao"
+                className="h-10 w-auto object-contain group-hover:scale-105 transition-transform"
+              />
               <div>
-                <div className="text-base font-bold text-gray-900 leading-tight">
+                <div className="text-sm font-bold text-gray-900 leading-tight">
                   Admin Panel
-                </div>
-                <div className="text-xs font-semibold text-secondary uppercase tracking-wide leading-tight">
-                  Phuong Long
                 </div>
               </div>
             </Link>

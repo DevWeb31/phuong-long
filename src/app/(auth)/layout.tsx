@@ -28,18 +28,12 @@ export default function AuthLayout({
       {/* Simple Header */}
       <header className="bg-white border-b border-gray-200 py-4">
         <Container>
-          <Link href="/" className="flex items-center space-x-2.5 group w-fit">
-            <div className="w-10 h-10 bg-gradient-to-br from-primary to-primary-dark rounded-lg flex items-center justify-center shadow-sm group-hover:shadow-md group-hover:shadow-primary/20 transition-all">
-              <span className="text-white font-bold text-lg">PL</span>
-            </div>
-            <div>
-              <div className="text-base font-bold text-gray-900 group-hover:text-primary transition-colors leading-tight">
-                Phuong Long
-              </div>
-              <div className="text-xs font-semibold text-secondary uppercase tracking-wide leading-tight">
-                Vo Dao
-              </div>
-            </div>
+          <Link href="/" className="flex items-center group w-fit">
+            <img
+              src="/logo.png"
+              alt="Phuong Long Vo Dao"
+              className="h-12 w-auto object-contain group-hover:scale-105 transition-transform"
+            />
           </Link>
         </Container>
       </header>

@@ -8,6 +8,7 @@
  */
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { Container } from '@/components/common';
 import { Facebook, Instagram, Youtube } from 'lucide-react';
 

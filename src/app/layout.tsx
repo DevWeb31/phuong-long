@@ -43,6 +43,14 @@ export const metadata: Metadata = {
     title: 'Phuong Long Vo Dao - Arts Martiaux Vietnamiens',
     description: 'Découvrez le Phuong Long Vo Dao. 5 clubs en France. Cours pour tous niveaux.',
     siteName: 'Phuong Long Vo Dao',
+    images: [
+      {
+        url: '/logo.png',
+        width: 1200,
+        height: 630,
+        alt: 'Phuong Long Vo Dao',
+      },
+    ],
   },
   twitter: {
     card: 'summary_large_image',
