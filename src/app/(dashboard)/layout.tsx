@@ -42,11 +42,14 @@ export default function DashboardLayout({
         <Container>
           <div className="flex items-center justify-between h-16">
             <Link href="/" className="flex items-center group">
-              <img
-                src="/logo.png"
-                alt="Phuong Long Vo Dao"
-                className="h-12 w-auto object-contain group-hover:scale-105 transition-transform"
-              />
+              <picture>
+                <source srcSet="/logo.webp" type="image/webp" />
+                <img
+                  src="/logo.png"
+                  alt="Phuong Long Vo Dao"
+                  className="h-12 w-auto object-contain group-hover:scale-105 transition-transform"
+                />
+              </picture>
             </Link>
 
             <nav className="hidden md:flex items-center gap-6">

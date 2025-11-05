@@ -29,11 +29,14 @@ export default function AuthLayout({
       <header className="bg-white border-b border-gray-200 py-4">
         <Container>
           <Link href="/" className="flex items-center group w-fit">
-            <img
-              src="/logo.png"
-              alt="Phuong Long Vo Dao"
-              className="h-12 w-auto object-contain group-hover:scale-105 transition-transform"
-            />
+            <picture>
+              <source srcSet="/logo.webp" type="image/webp" />
+              <img
+                src="/logo.png"
+                alt="Phuong Long Vo Dao"
+                className="h-12 w-auto object-contain group-hover:scale-105 transition-transform"
+              />
+            </picture>
           </Link>
         </Container>
       </header>

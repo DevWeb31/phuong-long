@@ -52,11 +52,14 @@ export default function AdminLayout({
         <Container>
           <div className="flex items-center justify-between h-16">
             <Link href="/admin" className="flex items-center gap-3 group">
-              <img
-                src="/logo.png"
-                alt="Phuong Long Vo Dao"
-                className="h-10 w-auto object-contain group-hover:scale-105 transition-transform"
-              />
+              <picture>
+                <source srcSet="/logo.webp" type="image/webp" />
+                <img
+                  src="/logo.png"
+                  alt="Phuong Long Vo Dao"
+                  className="h-10 w-auto object-contain group-hover:scale-105 transition-transform"
+                />
+              </picture>
               <div>
                 <div className="text-sm font-bold text-gray-900 leading-tight">
                   Admin Panel

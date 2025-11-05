@@ -43,11 +43,14 @@ export function Header() {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-2.5 group">
-            <img
-              src="/logo.png"
-              alt="Phuong Long Vo Dao"
-              className="h-12 w-auto object-contain group-hover:scale-105 transition-transform"
-            />
+            <picture>
+              <source srcSet="/logo.webp" type="image/webp" />
+              <img
+                src="/logo.png"
+                alt="Phuong Long Vo Dao"
+                className="h-12 w-auto object-contain group-hover:scale-105 transition-transform"
+              />
+            </picture>
           </Link>
 
           {/* Desktop Navigation */}
