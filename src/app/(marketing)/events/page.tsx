@@ -54,8 +54,8 @@ export default async function EventsPage() {
 
   return (
     <>
-      {/* Hero - Full Screen Immersive with Parallax */}
-      <section className="relative bg-gradient-to-br from-primary via-primary-dark to-[#B91C1C] min-h-screen flex items-center overflow-hidden">
+      {/* Hero with Parallax */}
+      <section className="relative bg-gradient-to-br from-primary via-primary-dark to-[#B91C1C] py-20 lg:py-24 overflow-hidden">
         {/* Parallax Background */}
         <ParallaxBackground>
           <div className="absolute inset-0" style={{
