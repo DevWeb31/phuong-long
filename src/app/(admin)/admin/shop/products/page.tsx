@@ -9,9 +9,10 @@
 
 'use client';
 
-import { useState } from 'react';
-import { DataTable, DataTableColumn } from '@/components/admin';
-import { Badge } from '@/components/common';
+import { useState, useEffect } from 'react';
+import { DataTable, DataTableColumn, ConfirmModal } from '@/components/admin';
+import { ProductFormModal } from '@/components/admin/ProductFormModal';
+import { Badge, Button } from '@/components/common';
 
 interface Product {
   id: string;
@@ -21,65 +22,8 @@ interface Product {
   stock_quantity: number;
   active: boolean;
   created_at: string;
+  slug?: string;
 }
-
-// Données de démonstration
-const mockProducts: Product[] = [
-  {
-    id: '1',
-    name: 'Vo Phuc Traditionnel - Adulte',
-    category: 'vetements',
-    price_cents: 4500,
-    stock_quantity: 25,
-    active: true,
-    created_at: '2024-01-10',
-  },
-  {
-    id: '2',
-    name: 'Gants de Combat Renforcés',
-    category: 'protection',
-    price_cents: 2900,
-    stock_quantity: 15,
-    active: true,
-    created_at: '2024-02-15',
-  },
-  {
-    id: '3',
-    name: 'Ceinture Noire 1er Dan',
-    category: 'equipement',
-    price_cents: 1200,
-    stock_quantity: 8,
-    active: true,
-    created_at: '2024-01-20',
-  },
-  {
-    id: '4',
-    name: 'Protège-tibias Pro',
-    category: 'protection',
-    price_cents: 3500,
-    stock_quantity: 12,
-    active: true,
-    created_at: '2024-03-05',
-  },
-  {
-    id: '5',
-    name: 'Sac de Sport Brodé',
-    category: 'accessoires',
-    price_cents: 2800,
-    stock_quantity: 20,
-    active: true,
-    created_at: '2024-02-28',
-  },
-  {
-    id: '6',
-    name: 'Nunchaku Bois',
-    category: 'armes',
-    price_cents: 1800,
-    stock_quantity: 0,
-    active: false,
-    created_at: '2023-11-12',
-  },
-];
 
 const categoryLabels: Record<string, string> = {
   equipement: 'Équipement',
@@ -90,7 +34,31 @@ const categoryLabels: Record<string, string> = {
 };
 
 export default function AdminShopProductsPage() {
-  const [products] = useState<Product[]>(mockProducts);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    loadProducts();
+  }, []);
+
+  const loadProducts = async () => {
+    try {
+      setIsLoading(true);
+      const response = await fetch('/api/admin/products');
+      if (response.ok) {
+        const data = await response.json();
+        setProducts(data);
+      }
+    } catch (error) {
+      console.error('Error loading products:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const columns: DataTableColumn<Product>[] = [
     {
@@ -152,43 +120,128 @@ export default function AdminShopProductsPage() {
   ];
 
   const handleEdit = (product: Product) => {
-    console.log('Edit product:', product);
-    // TODO: Rediriger vers /admin/shop/products/[id]/edit
+    setSelectedProduct(product);
+    setIsFormOpen(true);
   };
 
   const handleDelete = (product: Product) => {
-    if (confirm(`Êtes-vous sûr de vouloir supprimer "${product.name}" ?`)) {
-      console.log('Delete product:', product);
-      // TODO: Implémenter la suppression
-    }
+    setSelectedProduct(product);
+    setIsDeleteOpen(true);
   };
 
   const handleView = (product: Product) => {
-    console.log('View product:', product);
-    // TODO: Rediriger vers /shop/[slug]
+    window.open(`/shop/${product.slug || product.id}`, '_blank');
+  };
+
+  const handleCreateNew = () => {
+    setSelectedProduct(null);
+    setIsFormOpen(true);
+  };
+
+  const handleSubmit = async (productData: any) => {
+    try {
+      setIsSubmitting(true);
+      
+      if (selectedProduct) {
+        const response = await fetch(`/api/admin/products/${selectedProduct.id}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(productData),
+        });
+        if (!response.ok) throw new Error('Erreur lors de la mise à jour');
+      } else {
+        const response = await fetch('/api/admin/products', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(productData),
+        });
+        if (!response.ok) throw new Error('Erreur lors de la création');
+      }
+
+      await loadProducts();
+      setIsFormOpen(false);
+      setSelectedProduct(null);
+    } catch (error) {
+      console.error('Error submitting product:', error);
+      alert('Une erreur est survenue');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!selectedProduct) return;
+    try {
+      setIsSubmitting(true);
+      const response = await fetch(`/api/admin/products/${selectedProduct.id}`, {
+        method: 'DELETE',
+      });
+      if (!response.ok) throw new Error('Erreur lors de la suppression');
+      await loadProducts();
+      setIsDeleteOpen(false);
+      setSelectedProduct(null);
+    } catch (error) {
+      console.error('Error deleting product:', error);
+      alert('Une erreur est survenue');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Gestion des Produits</h1>
-        <p className="text-gray-600">
-          Gérez le catalogue, les stocks et les prix de la boutique
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Gestion des Produits</h1>
+          <p className="text-gray-600">
+            Gérez le catalogue, les stocks et les prix de la boutique
+          </p>
+        </div>
+        <Button variant="primary" onClick={handleCreateNew}>
+          ➕ Nouveau Produit
+        </Button>
       </div>
 
-      {/* DataTable */}
-      <DataTable
-        data={products}
-        columns={columns}
-        onEdit={handleEdit}
-        onDelete={handleDelete}
-        onView={handleView}
-        searchPlaceholder="Rechercher un produit..."
-        newItemLabel="Nouveau Produit"
-        newItemHref="/admin/shop/products/new"
-        emptyMessage="Aucun produit trouvé"
+      {isLoading ? (
+        <div className="text-center py-12">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-gray-200 border-t-primary"></div>
+          <p className="mt-4 text-gray-600">Chargement...</p>
+        </div>
+      ) : (
+        <DataTable
+          data={products}
+          columns={columns}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+          onView={handleView}
+          searchPlaceholder="Rechercher un produit..."
+          emptyMessage="Aucun produit trouvé"
+        />
+      )}
+
+      <ProductFormModal
+        isOpen={isFormOpen}
+        onClose={() => {
+          setIsFormOpen(false);
+          setSelectedProduct(null);
+        }}
+        onSubmit={handleSubmit}
+        product={selectedProduct as any}
+        isLoading={isSubmitting}
+      />
+
+      <ConfirmModal
+        isOpen={isDeleteOpen}
+        onClose={() => {
+          setIsDeleteOpen(false);
+          setSelectedProduct(null);
+        }}
+        onConfirm={handleConfirmDelete}
+        title="Supprimer le produit"
+        message={`Êtes-vous sûr de vouloir supprimer "${selectedProduct?.name}" ? Cette action est irréversible.`}
+        confirmLabel="Supprimer"
+        variant="danger"
+        isLoading={isSubmitting}
       />
     </div>
   );

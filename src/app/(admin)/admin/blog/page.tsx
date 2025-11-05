@@ -9,99 +9,57 @@
 
 'use client';
 
-import { useState } from 'react';
-import { DataTable, DataTableColumn } from '@/components/admin';
-import { Badge } from '@/components/common';
+import { useState, useEffect } from 'react';
+import { DataTable, DataTableColumn, ConfirmModal } from '@/components/admin';
+import { BlogFormModal } from '@/components/admin/BlogFormModal';
+import { Badge, Button } from '@/components/common';
 
 interface BlogPost {
   id: string;
   title: string;
-  author: string;
-  status: 'draft' | 'published' | 'archived';
-  published_at: string | null;
-  views_count: number;
-  tags: string[];
+  status: 'draft' | 'published';
+  published_at?: string | null;
+  tags?: string[];
   created_at: string;
+  slug?: string;
 }
-
-// Données de démonstration
-const mockPosts: BlogPost[] = [
-  {
-    id: '1',
-    title: 'Les Fondamentaux du Vo Dao pour Débutants',
-    author: 'Maître Nguyen',
-    status: 'published',
-    published_at: '2025-10-15',
-    views_count: 1245,
-    tags: ['Débutant', 'Technique'],
-    created_at: '2025-10-10',
-  },
-  {
-    id: '2',
-    title: 'Histoire et Tradition des Arts Martiaux Vietnamiens',
-    author: 'Sarah Dubois',
-    status: 'published',
-    published_at: '2025-10-20',
-    views_count: 856,
-    tags: ['Histoire', 'Culture'],
-    created_at: '2025-10-18',
-  },
-  {
-    id: '3',
-    title: 'Préparation Physique pour les Compétitions',
-    author: 'Jean Martin',
-    status: 'draft',
-    published_at: null,
-    views_count: 0,
-    tags: ['Compétition', 'Entraînement'],
-    created_at: '2025-11-01',
-  },
-  {
-    id: '4',
-    title: 'Philosophie et Méditation dans le Vo Dao',
-    author: 'Maître Nguyen',
-    status: 'published',
-    published_at: '2025-10-25',
-    views_count: 672,
-    tags: ['Philosophie', 'Méditation'],
-    created_at: '2025-10-22',
-  },
-  {
-    id: '5',
-    title: 'Techniques de Self-Défense Essentielles',
-    author: 'Sarah Dubois',
-    status: 'published',
-    published_at: '2025-11-02',
-    views_count: 1890,
-    tags: ['Self-défense', 'Technique'],
-    created_at: '2025-10-30',
-  },
-  {
-    id: '6',
-    title: 'Guide Complet des Ceintures et Grades',
-    author: 'Jean Martin',
-    status: 'archived',
-    published_at: '2024-06-10',
-    views_count: 3421,
-    tags: ['Guide', 'Progression'],
-    created_at: '2024-06-05',
-  },
-];
 
 const statusLabels: Record<string, string> = {
   draft: 'Brouillon',
   published: 'Publié',
-  archived: 'Archivé',
 };
 
-const statusColors: Record<string, 'default' | 'success' | 'warning'> = {
+const statusColors: Record<string, 'default' | 'success'> = {
   draft: 'default',
   published: 'success',
-  archived: 'warning',
 };
 
 export default function AdminBlogPage() {
-  const [posts] = useState<BlogPost[]>(mockPosts);
+  const [posts, setPosts] = useState<BlogPost[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [selectedPost, setSelectedPost] = useState<BlogPost | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    loadPosts();
+  }, []);
+
+  const loadPosts = async () => {
+    try {
+      setIsLoading(true);
+      const response = await fetch('/api/admin/blog');
+      if (response.ok) {
+        const data = await response.json();
+        setPosts(data);
+      }
+    } catch (error) {
+      console.error('Error loading posts:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const columns: DataTableColumn<BlogPost>[] = [
     {
@@ -110,11 +68,6 @@ export default function AdminBlogPage() {
       sortable: true,
       render: (value) => <span className="font-medium text-gray-900">{value}</span>,
       width: 'min-w-[250px]',
-    },
-    {
-      key: 'author',
-      label: 'Auteur',
-      sortable: true,
     },
     {
       key: 'status',
@@ -167,43 +120,128 @@ export default function AdminBlogPage() {
   ];
 
   const handleEdit = (post: BlogPost) => {
-    console.log('Edit post:', post);
-    // TODO: Rediriger vers /admin/blog/[id]/edit
+    setSelectedPost(post);
+    setIsFormOpen(true);
   };
 
   const handleDelete = (post: BlogPost) => {
-    if (confirm(`Êtes-vous sûr de vouloir supprimer l'article "${post.title}" ?`)) {
-      console.log('Delete post:', post);
-      // TODO: Implémenter la suppression
-    }
+    setSelectedPost(post);
+    setIsDeleteOpen(true);
   };
 
   const handleView = (post: BlogPost) => {
-    console.log('View post:', post);
-    // TODO: Rediriger vers /blog/[slug]
+    window.open(`/blog/${post.slug || post.id}`, '_blank');
+  };
+
+  const handleCreateNew = () => {
+    setSelectedPost(null);
+    setIsFormOpen(true);
+  };
+
+  const handleSubmit = async (postData: any) => {
+    try {
+      setIsSubmitting(true);
+      
+      if (selectedPost) {
+        const response = await fetch(`/api/admin/blog/${selectedPost.id}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(postData),
+        });
+        if (!response.ok) throw new Error('Erreur lors de la mise à jour');
+      } else {
+        const response = await fetch('/api/admin/blog', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(postData),
+        });
+        if (!response.ok) throw new Error('Erreur lors de la création');
+      }
+
+      await loadPosts();
+      setIsFormOpen(false);
+      setSelectedPost(null);
+    } catch (error) {
+      console.error('Error submitting post:', error);
+      alert('Une erreur est survenue');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!selectedPost) return;
+    try {
+      setIsSubmitting(true);
+      const response = await fetch(`/api/admin/blog/${selectedPost.id}`, {
+        method: 'DELETE',
+      });
+      if (!response.ok) throw new Error('Erreur lors de la suppression');
+      await loadPosts();
+      setIsDeleteOpen(false);
+      setSelectedPost(null);
+    } catch (error) {
+      console.error('Error deleting post:', error);
+      alert('Une erreur est survenue');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Gestion du Blog</h1>
-        <p className="text-gray-600">
-          Gérez les articles, brouillons et publications du blog
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Gestion du Blog</h1>
+          <p className="text-gray-600">
+            Gérez les articles, brouillons et publications du blog
+          </p>
+        </div>
+        <Button variant="primary" onClick={handleCreateNew}>
+          ➕ Nouvel Article
+        </Button>
       </div>
 
-      {/* DataTable */}
-      <DataTable
-        data={posts}
-        columns={columns}
-        onEdit={handleEdit}
-        onDelete={handleDelete}
-        onView={handleView}
-        searchPlaceholder="Rechercher un article..."
-        newItemLabel="Nouvel Article"
-        newItemHref="/admin/blog/new"
-        emptyMessage="Aucun article trouvé"
+      {isLoading ? (
+        <div className="text-center py-12">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-gray-200 border-t-primary"></div>
+          <p className="mt-4 text-gray-600">Chargement...</p>
+        </div>
+      ) : (
+        <DataTable
+          data={posts}
+          columns={columns}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+          onView={handleView}
+          searchPlaceholder="Rechercher un article..."
+          emptyMessage="Aucun article trouvé"
+        />
+      )}
+
+      <BlogFormModal
+        isOpen={isFormOpen}
+        onClose={() => {
+          setIsFormOpen(false);
+          setSelectedPost(null);
+        }}
+        onSubmit={handleSubmit}
+        post={selectedPost as any}
+        isLoading={isSubmitting}
+      />
+
+      <ConfirmModal
+        isOpen={isDeleteOpen}
+        onClose={() => {
+          setIsDeleteOpen(false);
+          setSelectedPost(null);
+        }}
+        onConfirm={handleConfirmDelete}
+        title="Supprimer l'article"
+        message={`Êtes-vous sûr de vouloir supprimer l'article "${selectedPost?.title}" ? Cette action est irréversible.`}
+        confirmLabel="Supprimer"
+        variant="danger"
+        isLoading={isSubmitting}
       />
     </div>
   );

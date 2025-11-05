@@ -9,80 +9,22 @@
 
 'use client';
 
-import { useState } from 'react';
-import { DataTable, DataTableColumn } from '@/components/admin';
-import { Badge } from '@/components/common';
+import { useState, useEffect } from 'react';
+import { DataTable, DataTableColumn, ConfirmModal } from '@/components/admin';
+import { EventFormModal } from '@/components/admin/EventFormModal';
+import { Badge, Button } from '@/components/common';
 
 interface Event {
   id: string;
   title: string;
   event_type: 'competition' | 'stage' | 'demonstration' | 'seminar' | 'other';
-  club: string;
+  club?: { name: string; city: string };
   start_date: string;
-  location: string;
-  max_attendees: number | null;
-  registered: number;
+  location?: string;
+  max_attendees?: number | null;
   active: boolean;
+  slug?: string;
 }
-
-// Données de démonstration
-const mockEvents: Event[] = [
-  {
-    id: '1',
-    title: 'Stage National de Vo Dao',
-    event_type: 'stage',
-    club: 'Marseille Centre',
-    start_date: '2025-12-15',
-    location: 'Marseille',
-    max_attendees: 100,
-    registered: 45,
-    active: true,
-  },
-  {
-    id: '2',
-    title: 'Compétition Régionale PACA',
-    event_type: 'competition',
-    club: 'Nice Promenade',
-    start_date: '2025-11-20',
-    location: 'Nice',
-    max_attendees: 150,
-    registered: 89,
-    active: true,
-  },
-  {
-    id: '3',
-    title: 'Démonstration Fête de la Ville',
-    event_type: 'demonstration',
-    club: 'Paris Bastille',
-    start_date: '2025-11-10',
-    location: 'Paris 11ème',
-    max_attendees: null,
-    registered: 12,
-    active: true,
-  },
-  {
-    id: '4',
-    title: 'Séminaire Techniques Avancées',
-    event_type: 'seminar',
-    club: 'Strasbourg Centre',
-    start_date: '2026-01-25',
-    location: 'Strasbourg',
-    max_attendees: 40,
-    registered: 18,
-    active: true,
-  },
-  {
-    id: '5',
-    title: 'Stage d\'été Enfants',
-    event_type: 'stage',
-    club: 'Créteil Université',
-    start_date: '2025-07-10',
-    location: 'Créteil',
-    max_attendees: 60,
-    registered: 55,
-    active: false,
-  },
-];
 
 const eventTypeLabels: Record<string, string> = {
   competition: 'Compétition',
@@ -101,7 +43,45 @@ const eventTypeColors: Record<string, 'primary' | 'warning' | 'info' | 'success'
 };
 
 export default function AdminEventsPage() {
-  const [events] = useState<Event[]>(mockEvents);
+  const [events, setEvents] = useState<Event[]>([]);
+  const [clubs, setClubs] = useState<Array<{ id: string; name: string; city: string }>>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    loadEvents();
+    loadClubs();
+  }, []);
+
+  const loadEvents = async () => {
+    try {
+      setIsLoading(true);
+      const response = await fetch('/api/admin/events');
+      if (response.ok) {
+        const data = await response.json();
+        setEvents(data);
+      }
+    } catch (error) {
+      console.error('Error loading events:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const loadClubs = async () => {
+    try {
+      const response = await fetch('/api/admin/clubs');
+      if (response.ok) {
+        const data = await response.json();
+        setClubs(data);
+      }
+    } catch (error) {
+      console.error('Error loading clubs:', error);
+    }
+  };
 
   const columns: DataTableColumn<Event>[] = [
     {
@@ -124,7 +104,8 @@ export default function AdminEventsPage() {
     {
       key: 'club',
       label: 'Club',
-      sortable: true,
+      sortable: false,
+      render: (_, row) => row.club ? `${row.club.name} - ${row.club.city}` : '-',
     },
     {
       key: 'start_date',
@@ -142,19 +123,16 @@ export default function AdminEventsPage() {
       sortable: true,
     },
     {
-      key: 'registered',
-      label: 'Inscrits',
+      key: 'max_attendees',
+      label: 'Places max',
       sortable: true,
-      render: (value, row) => {
-        const percentage = row.max_attendees ? (value / row.max_attendees) * 100 : 0;
-        const variant = percentage >= 80 ? 'warning' : percentage >= 50 ? 'primary' : 'default';
-        
-        return (
-          <Badge variant={variant} size="sm">
-            {value}{row.max_attendees ? ` / ${row.max_attendees}` : ''}
-          </Badge>
-        );
-      },
+      render: (value) => value ? (
+        <Badge variant="primary" size="sm">
+          {value} places
+        </Badge>
+      ) : (
+        <span className="text-gray-400 text-sm">Illimité</span>
+      ),
     },
     {
       key: 'active',
@@ -169,43 +147,129 @@ export default function AdminEventsPage() {
   ];
 
   const handleEdit = (event: Event) => {
-    console.log('Edit event:', event);
-    // TODO: Rediriger vers /admin/events/[id]/edit
+    setSelectedEvent(event);
+    setIsFormOpen(true);
   };
 
   const handleDelete = (event: Event) => {
-    if (confirm(`Êtes-vous sûr de vouloir supprimer l'événement "${event.title}" ?`)) {
-      console.log('Delete event:', event);
-      // TODO: Implémenter la suppression
-    }
+    setSelectedEvent(event);
+    setIsDeleteOpen(true);
   };
 
   const handleView = (event: Event) => {
-    console.log('View event:', event);
-    // TODO: Rediriger vers /events/[slug]
+    window.open(`/events/${event.slug || event.id}`, '_blank');
+  };
+
+  const handleCreateNew = () => {
+    setSelectedEvent(null);
+    setIsFormOpen(true);
+  };
+
+  const handleSubmit = async (eventData: any) => {
+    try {
+      setIsSubmitting(true);
+      
+      if (selectedEvent) {
+        const response = await fetch(`/api/admin/events/${selectedEvent.id}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(eventData),
+        });
+        if (!response.ok) throw new Error('Erreur lors de la mise à jour');
+      } else {
+        const response = await fetch('/api/admin/events', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(eventData),
+        });
+        if (!response.ok) throw new Error('Erreur lors de la création');
+      }
+
+      await loadEvents();
+      setIsFormOpen(false);
+      setSelectedEvent(null);
+    } catch (error) {
+      console.error('Error submitting event:', error);
+      alert('Une erreur est survenue');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!selectedEvent) return;
+    try {
+      setIsSubmitting(true);
+      const response = await fetch(`/api/admin/events/${selectedEvent.id}`, {
+        method: 'DELETE',
+      });
+      if (!response.ok) throw new Error('Erreur lors de la suppression');
+      await loadEvents();
+      setIsDeleteOpen(false);
+      setSelectedEvent(null);
+    } catch (error) {
+      console.error('Error deleting event:', error);
+      alert('Une erreur est survenue');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Gestion des Événements</h1>
-        <p className="text-gray-600">
-          Gérez les événements, stages, compétitions et inscriptions
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Gestion des Événements</h1>
+          <p className="text-gray-600">
+            Gérez les événements, stages, compétitions et inscriptions
+          </p>
+        </div>
+        <Button variant="primary" onClick={handleCreateNew}>
+          ➕ Nouvel Événement
+        </Button>
       </div>
 
-      {/* DataTable */}
-      <DataTable
-        data={events}
-        columns={columns}
-        onEdit={handleEdit}
-        onDelete={handleDelete}
-        onView={handleView}
-        searchPlaceholder="Rechercher un événement..."
-        newItemLabel="Nouvel Événement"
-        newItemHref="/admin/events/new"
-        emptyMessage="Aucun événement trouvé"
+      {isLoading ? (
+        <div className="text-center py-12">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-gray-200 border-t-primary"></div>
+          <p className="mt-4 text-gray-600">Chargement...</p>
+        </div>
+      ) : (
+        <DataTable
+          data={events}
+          columns={columns}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+          onView={handleView}
+          searchPlaceholder="Rechercher un événement..."
+          emptyMessage="Aucun événement trouvé"
+        />
+      )}
+
+      <EventFormModal
+        isOpen={isFormOpen}
+        onClose={() => {
+          setIsFormOpen(false);
+          setSelectedEvent(null);
+        }}
+        onSubmit={handleSubmit}
+        event={selectedEvent as any}
+        clubs={clubs}
+        isLoading={isSubmitting}
+      />
+
+      <ConfirmModal
+        isOpen={isDeleteOpen}
+        onClose={() => {
+          setIsDeleteOpen(false);
+          setSelectedEvent(null);
+        }}
+        onConfirm={handleConfirmDelete}
+        title="Supprimer l'événement"
+        message={`Êtes-vous sûr de vouloir supprimer l'événement "${selectedEvent?.title}" ? Cette action est irréversible.`}
+        confirmLabel="Supprimer"
+        variant="danger"
+        isLoading={isSubmitting}
       />
     </div>
   );
