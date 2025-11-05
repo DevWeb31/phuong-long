@@ -17,9 +17,9 @@ interface CardProps extends ComponentProps<'div'> {
 }
 
 const variantStyles = {
-  default: 'bg-white',
-  bordered: 'bg-white border border-gray-200',
-  elevated: 'bg-white shadow-md hover:shadow-lg transition-shadow',
+  default: 'bg-white shadow-lg shadow-gray-200/50',
+  bordered: 'bg-white/95 backdrop-blur-sm border border-gray-200/60 shadow-md',
+  elevated: 'bg-white shadow-2xl shadow-gray-300/20',
 };
 
 const paddingStyles = {
@@ -45,10 +45,10 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(
       <div
         ref={ref}
         className={cn(
-          'rounded-lg',
+          'rounded-2xl overflow-hidden',
           variantStyles[variant],
           paddingStyles[padding],
-          hoverable && 'transition-transform hover:scale-[1.02] cursor-pointer',
+          hoverable && 'transition-all duration-500 hover:shadow-2xl hover:shadow-primary/10 hover:-translate-y-2 hover:scale-[1.03] cursor-pointer group',
           className
         )}
         {...props}

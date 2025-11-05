@@ -18,10 +18,10 @@ interface ButtonProps extends ComponentProps<'button'> {
 }
 
 const variantStyles = {
-  primary: 'bg-primary text-white hover:bg-primary-dark focus:ring-primary',
-  secondary: 'bg-secondary text-white hover:bg-secondary-dark focus:ring-secondary',
-  ghost: 'bg-transparent text-gray-700 hover:bg-gray-100 focus:ring-gray-300',
-  danger: 'bg-red-600 text-white hover:bg-red-700 focus:ring-red-500',
+  primary: 'bg-gradient-to-r from-primary via-primary-dark to-primary text-white hover:shadow-xl hover:shadow-primary/30 hover:scale-105 focus:ring-primary/50 bg-[length:200%] hover:bg-[position:100%] transition-all duration-500',
+  secondary: 'bg-gradient-to-r from-secondary via-secondary-dark to-secondary text-gray-900 hover:shadow-xl hover:shadow-secondary/30 hover:scale-105 focus:ring-secondary/50 bg-[length:200%] hover:bg-[position:100%] transition-all duration-500',
+  ghost: 'bg-white/60 backdrop-blur-sm border border-gray-200/60 text-gray-700 hover:bg-white hover:shadow-lg hover:border-gray-300 hover:scale-105 focus:ring-gray-300 transition-all duration-300',
+  danger: 'bg-gradient-to-r from-red-600 to-red-700 text-white hover:shadow-xl hover:shadow-red-500/30 hover:scale-105 focus:ring-red-500/50 transition-all duration-500',
 };
 
 const sizeStyles = {
@@ -48,10 +48,10 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       <button
         ref={ref}
         className={cn(
-          'inline-flex items-center justify-center rounded-lg font-medium',
-          'transition-colors duration-200',
-          'focus:outline-none focus:ring-2 focus:ring-offset-2',
-          'disabled:opacity-50 disabled:cursor-not-allowed',
+          'inline-flex items-center justify-center rounded-xl font-semibold',
+          'focus:outline-none focus:ring-4 focus:ring-offset-2',
+          'disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100',
+          'active:scale-95',
           variantStyles[variant],
           sizeStyles[size],
           fullWidth && 'w-full',
