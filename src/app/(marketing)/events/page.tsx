@@ -9,10 +9,11 @@
 
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { Container, Card, CardHeader, CardTitle, Badge, Button } from '@/components/common';
+import { Container, Card, CardHeader, CardTitle, Badge, Button, ParallaxBackground } from '@/components/common';
 import { createServerClient } from '@/lib/supabase/server';
 import type { Event } from '@/lib/types';
 import { CalendarIcon, MapPinIcon, UsersIcon } from '@heroicons/react/24/outline';
+import { EventsHeroContent } from '@/components/marketing/EventsHeroContent';
 
 export const metadata: Metadata = {
   title: 'Événements',
@@ -53,100 +54,26 @@ export default async function EventsPage() {
 
   return (
     <>
-      {/* Hero - Full Screen Immersive */}
+      {/* Hero - Full Screen Immersive with Parallax */}
       <section className="relative bg-gradient-to-br from-primary via-primary-dark to-[#B91C1C] min-h-screen flex items-center overflow-hidden">
-        {/* Background decoration */}
-        <div className="absolute inset-0 opacity-[0.07]">
+        {/* Parallax Background */}
+        <ParallaxBackground>
           <div className="absolute inset-0" style={{
             backgroundImage: `url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M50 50c0-5.523 4.477-10 10-10s10 4.477 10 10-4.477 10-10 10c0-5.523-4.477-10-10-10zm-20 0c0-5.523-4.477-10-10-10S10 44.477 10 50s4.477 10 10 10c0-5.523 4.477-10 10-10zM50 30c0-5.523 4.477-10 10-10s10 4.477 10 10-4.477 10-10 10c0-5.523-4.477-10-10-10zm-20 0c0-5.523-4.477-10-10-10S10 24.477 10 30s4.477 10 10 10c0-5.523 4.477-10 10-10z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
           }} />
-        </div>
+        </ParallaxBackground>
         
-        {/* Glow effects */}
-        <div className="absolute top-1/4 -left-48 w-96 h-96 bg-secondary/20 rounded-full blur-3xl animate-pulse-slow" />
-        <div className="absolute bottom-1/4 -right-48 w-96 h-96 bg-primary/20 rounded-full blur-3xl animate-pulse-slow" />
+        {/* Gradient Overlay pour profondeur */}
+        <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-transparent to-black/30" />
         
         <Container className="relative z-10 py-20">
-          <div className="text-center text-white max-w-5xl mx-auto">
-            <div className="inline-flex items-center px-5 py-2.5 mb-8 bg-white/10 backdrop-blur-md text-white border border-white/20 rounded-full shadow-lg shadow-black/10 animate-fade-in">
-              <span className="text-secondary mr-2 text-xl">📅</span>
-              <span className="font-semibold text-sm">{typedEvents?.length || 0} événements à venir</span>
-            </div>
-            
-            <h1 className="text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold mb-8 animate-slide-up tracking-tight">
-              Événements & <span className="text-transparent bg-clip-text bg-gradient-to-r from-secondary via-secondary-light to-secondary">Compétitions</span>
-            </h1>
-            
-            <p className="text-xl md:text-2xl lg:text-3xl text-white/90 max-w-3xl mx-auto leading-relaxed mb-12 animate-fade-in">
-              Participez aux stages, compétitions et démonstrations dans toute la France
-            </p>
-            
-            {/* Event Types Grid */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto mb-12 animate-scale-in">
-              <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl py-6 px-4 hover:bg-white/10 transition-all duration-300 hover:scale-105">
-                <div className="text-3xl mb-2">🥋</div>
-                <p className="text-white font-bold text-lg mb-1">{eventsByType?.stage?.length || 0}</p>
-                <p className="text-white/70 text-xs uppercase tracking-wider">Stages</p>
-              </div>
-              <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl py-6 px-4 hover:bg-white/10 transition-all duration-300 hover:scale-105">
-                <div className="text-3xl mb-2">🏆</div>
-                <p className="text-white font-bold text-lg mb-1">{eventsByType?.competition?.length || 0}</p>
-                <p className="text-white/70 text-xs uppercase tracking-wider">Compétitions</p>
-              </div>
-              <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl py-6 px-4 hover:bg-white/10 transition-all duration-300 hover:scale-105">
-                <div className="text-3xl mb-2">🎭</div>
-                <p className="text-white font-bold text-lg mb-1">{eventsByType?.demonstration?.length || 0}</p>
-                <p className="text-white/70 text-xs uppercase tracking-wider">Démonstrations</p>
-              </div>
-              <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl py-6 px-4 hover:bg-white/10 transition-all duration-300 hover:scale-105">
-                <div className="text-3xl mb-2">📚</div>
-                <p className="text-white font-bold text-lg mb-1">{eventsByType?.seminar?.length || 0}</p>
-                <p className="text-white/70 text-xs uppercase tracking-wider">Séminaires</p>
-              </div>
-            </div>
-            
-            {/* Benefits */}
-            <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto mb-12 animate-fade-in">
-              <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6 hover:bg-white/10 transition-all duration-300">
-                <div className="text-4xl mb-3">🎯</div>
-                <h3 className="text-white font-bold text-lg mb-2">Progression Technique</h3>
-                <p className="text-white/70 text-sm">Améliorez vos compétences</p>
-              </div>
-              <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6 hover:bg-white/10 transition-all duration-300">
-                <div className="text-4xl mb-3">🤝</div>
-                <h3 className="text-white font-bold text-lg mb-2">Rencontres</h3>
-                <p className="text-white/70 text-sm">Échangez avec d'autres pratiquants</p>
-              </div>
-              <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6 hover:bg-white/10 transition-all duration-300">
-                <div className="text-4xl mb-3">🏅</div>
-                <h3 className="text-white font-bold text-lg mb-2">Compétition</h3>
-                <p className="text-white/70 text-sm">Testez-vous en combat</p>
-              </div>
-            </div>
-            
-            <div className="flex flex-col sm:flex-row gap-6 justify-center items-center mb-12 animate-scale-in">
-              <Link href="#events">
-                <Button size="lg" className="bg-white text-primary hover:bg-gray-50 shadow-2xl shadow-black/20 hover:shadow-white/40 min-w-[240px] text-lg py-4 px-8">
-                  📅 Voir les Événements
-                </Button>
-              </Link>
-              <Link href="/contact">
-                <Button size="lg" variant="secondary" className="min-w-[240px] text-lg py-4 px-8 shadow-2xl shadow-black/20">
-                  ✉️ Organiser un Événement
-                </Button>
-              </Link>
-            </div>
-            
-            {/* Scroll Indicator */}
-            <div className="animate-bounce">
-              <div className="flex flex-col items-center gap-2 text-white/60 hover:text-white/90 transition-colors">
-                <span className="text-sm font-medium uppercase tracking-wider">Découvrir</span>
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-                </svg>
-              </div>
-            </div>
-          </div>
+          <EventsHeroContent
+            totalEvents={typedEvents?.length || 0}
+            stagesCount={eventsByType?.stage?.length || 0}
+            competitionsCount={eventsByType?.competition?.length || 0}
+            demonstrationsCount={eventsByType?.demonstration?.length || 0}
+            seminarsCount={eventsByType?.seminar?.length || 0}
+          />
         </Container>
       </section>
 

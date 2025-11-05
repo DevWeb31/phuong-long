@@ -9,10 +9,11 @@
 
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { Container, Button, Card, CardHeader, CardTitle, CardDescription, CardContent, Badge } from '@/components/common';
+import { Container, Button, Card, CardHeader, CardTitle, CardDescription, CardContent, Badge, ParallaxBackground } from '@/components/common';
 import { createServerClient } from '@/lib/supabase/server';
 import type { Club, Event } from '@/lib/types';
 import { BoltIcon, TrophyIcon, UserGroupIcon, ShieldCheckIcon, UsersIcon, MapPinIcon } from '@heroicons/react/24/outline';
+import { HeroContent } from '@/components/marketing/HeroContent';
 
 export const metadata: Metadata = {
   title: 'Accueil - Art Martial Vietnamien',
@@ -44,115 +45,20 @@ export default async function HomePage() {
 
   return (
     <>
-      {/* Hero Section - Arts Martiaux - Full Screen Immersive */}
+      {/* Hero Section - Arts Martiaux - Full Screen Immersive with Parallax */}
       <section className="relative bg-gradient-to-br from-primary via-primary-dark to-[#B91C1C] min-h-screen flex items-center overflow-hidden">
-        {/* Background Pattern - Motif Asiatique */}
-        <div className="absolute inset-0 opacity-[0.07]">
+        {/* Parallax Background */}
+        <ParallaxBackground>
           <div className="absolute inset-0" style={{
             backgroundImage: `url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M50 50c0-5.523 4.477-10 10-10s10 4.477 10 10-4.477 10-10 10c0-5.523-4.477-10-10-10zm-20 0c0-5.523-4.477-10-10-10S10 44.477 10 50s4.477 10 10 10c0-5.523 4.477-10 10-10zM50 30c0-5.523 4.477-10 10-10s10 4.477 10 10-4.477 10-10 10c0-5.523-4.477-10-10-10zm-20 0c0-5.523-4.477-10-10-10S10 24.477 10 30s4.477 10 10 10c0-5.523 4.477-10 10-10z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
           }} />
-        </div>
+        </ParallaxBackground>
 
         {/* Gradient Overlay pour profondeur */}
         <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-transparent to-black/30" />
-        
-        {/* Glow effects */}
-        <div className="absolute top-1/4 -left-48 w-96 h-96 bg-secondary/20 rounded-full blur-3xl animate-pulse-slow" />
-        <div className="absolute bottom-1/4 -right-48 w-96 h-96 bg-primary/20 rounded-full blur-3xl animate-pulse-slow" />
 
         <Container className="relative z-10 py-20">
-          <div className="max-w-5xl mx-auto text-center">
-            {/* Trust Badges */}
-            <div className="flex flex-wrap justify-center gap-4 mb-10 animate-fade-in">
-              <div className="inline-flex items-center px-4 py-2 bg-white/10 backdrop-blur-md text-white border border-white/20 rounded-full shadow-lg">
-                <span className="text-secondary mr-2 text-lg">⭐</span>
-                <span className="font-semibold text-xs">40 ans d'expérience</span>
-              </div>
-              <div className="inline-flex items-center px-4 py-2 bg-white/10 backdrop-blur-md text-white border border-white/20 rounded-full shadow-lg">
-                <span className="text-secondary mr-2 text-lg">🥋</span>
-                <span className="font-semibold text-xs">Enseignement traditionnel</span>
-              </div>
-              <div className="inline-flex items-center px-4 py-2 bg-white/10 backdrop-blur-md text-white border border-white/20 rounded-full shadow-lg">
-                <span className="text-secondary mr-2 text-lg">🎯</span>
-                <span className="font-semibold text-xs">Cours d'essai gratuit</span>
-              </div>
-            </div>
-            
-            <h1 className="text-5xl md:text-7xl lg:text-8xl xl:text-9xl font-bold text-white mb-8 animate-slide-up tracking-tight leading-tight">
-              Phuong Long
-              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-secondary via-secondary-light to-secondary mt-4 animate-shimmer">
-                Vo Dao
-              </span>
-            </h1>
-            
-            <p className="text-2xl md:text-3xl lg:text-4xl text-white/95 mb-8 animate-slide-up font-medium tracking-wide">
-              L'art martial vietnamien traditionnel
-            </p>
-            
-            <p className="text-lg md:text-xl text-white/80 mb-12 max-w-3xl mx-auto leading-relaxed animate-fade-in">
-              Découvrez une discipline complète alliant <span className="text-secondary-light font-bold">techniques de combat</span>, 
-              <span className="text-secondary-light font-bold"> développement personnel</span> et 
-              <span className="text-secondary-light font-bold"> valeurs traditionnelles</span>. 
-            </p>
-            
-            {/* Value Propositions */}
-            <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto mb-12 animate-fade-in">
-              <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6 hover:bg-white/10 transition-all duration-300 hover:scale-105">
-                <div className="text-4xl mb-3">💪</div>
-                <h3 className="text-white font-bold text-lg mb-2">Force & Agilité</h3>
-                <p className="text-white/70 text-sm">Développez votre condition physique</p>
-              </div>
-              <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6 hover:bg-white/10 transition-all duration-300 hover:scale-105">
-                <div className="text-4xl mb-3">🧠</div>
-                <h3 className="text-white font-bold text-lg mb-2">Esprit & Discipline</h3>
-                <p className="text-white/70 text-sm">Cultivez concentration et persévérance</p>
-              </div>
-              <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6 hover:bg-white/10 transition-all duration-300 hover:scale-105">
-                <div className="text-4xl mb-3">🤝</div>
-                <h3 className="text-white font-bold text-lg mb-2">Communauté</h3>
-                <p className="text-white/70 text-sm">Rejoignez une famille passionnée</p>
-              </div>
-            </div>
-            
-            <div className="flex flex-col sm:flex-row gap-6 justify-center items-center mb-16 animate-scale-in">
-              <Link href="/clubs">
-                <Button size="lg" className="bg-white text-primary hover:bg-gray-50 shadow-2xl shadow-black/20 hover:shadow-white/40 min-w-[240px] text-lg py-4 px-8">
-                  🥋 Trouver un Club
-                </Button>
-              </Link>
-              <Link href="/contact">
-                <Button size="lg" variant="secondary" className="min-w-[240px] text-lg py-4 px-8 shadow-2xl shadow-black/20">
-                  ✨ Essai Gratuit
-                </Button>
-              </Link>
-            </div>
-
-            {/* Stats - Social Proof */}
-            <div className="grid grid-cols-3 gap-8 max-w-3xl mx-auto mb-8">
-              <div className="text-center group">
-                <div className="text-5xl lg:text-6xl font-bold text-white mb-2 group-hover:scale-110 transition-transform duration-300">40+</div>
-                <div className="text-xs text-white/70 uppercase tracking-widest font-semibold">Ans d'expérience</div>
-              </div>
-              <div className="text-center group">
-                <div className="text-5xl lg:text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-secondary via-secondary-light to-secondary mb-2 group-hover:scale-110 transition-transform duration-300">5</div>
-                <div className="text-xs text-white/70 uppercase tracking-widest font-semibold">Clubs actifs</div>
-              </div>
-              <div className="text-center group">
-                <div className="text-5xl lg:text-6xl font-bold text-white mb-2 group-hover:scale-110 transition-transform duration-300">500+</div>
-                <div className="text-xs text-white/70 uppercase tracking-widest font-semibold">Pratiquants</div>
-              </div>
-            </div>
-            
-            {/* Scroll Indicator */}
-            <div className="animate-bounce mt-8">
-              <div className="flex flex-col items-center gap-2 text-white/60 hover:text-white/90 transition-colors cursor-pointer">
-                <span className="text-sm font-medium uppercase tracking-wider">Découvrir</span>
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-                </svg>
-              </div>
-            </div>
-          </div>
+          <HeroContent />
         </Container>
       </section>
 
