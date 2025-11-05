@@ -9,7 +9,7 @@
 
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { Container, Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter, Button, Badge, ParallaxBackground } from '@/components/common';
+import { Container, Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter, Button, Badge, ParallaxBackground, ClubImage } from '@/components/common';
 import { createServerClient } from '@/lib/supabase/server';
 import type { Club } from '@/lib/types';
 import { ClubsHeroContent } from '@/components/marketing/ClubsHeroContent';
@@ -83,13 +83,12 @@ export default async function ClubsPage() {
                 {/* Image de couverture */}
                 <div className="relative aspect-video w-full bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden group">
                   {club.cover_image_url ? (
-                    <img
+                    <ClubImage
                       src={club.cover_image_url}
                       alt={club.name}
+                      clubName={club.name}
+                      clubCity={club.city}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="225"%3E%3Crect fill="%23f3f4f6" width="400" height="225"/%3E%3Ctext x="50%25" y="45%25" dominant-baseline="middle" text-anchor="middle" fill="%239ca3af" font-family="sans-serif" font-size="18" font-weight="bold"%3E' + encodeURIComponent(club.name) + '%3C/text%3E%3Ctext x="50%25" y="60%25" dominant-baseline="middle" text-anchor="middle" fill="%23d1d5db" font-family="sans-serif" font-size="14"%3E' + encodeURIComponent(club.city) + '%3C/text%3E%3C/svg%3E';
-                      }}
                     />
                   ) : (
                     <div className="w-full h-full flex flex-col items-center justify-center text-center p-6">
