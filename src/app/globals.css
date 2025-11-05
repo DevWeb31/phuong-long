@@ -35,9 +35,9 @@
     --spacing-xl: 2rem;
     --spacing-2xl: 3rem;
     
-    /* Typography */
-    --font-sans: var(--font-inter), system-ui, -apple-system, sans-serif;
-    --font-heading: var(--font-poppins), system-ui, sans-serif;
+    /* Typography - Roboto (05/11/2025) */
+    /* Variables définies automatiquement par Next.js via layout.tsx */
+    /* --font-sans et --font-heading sont injectées par next/font */
     
     /* Transitions */
     --transition-fast: 150ms ease;
