@@ -60,6 +60,16 @@ Format basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/).
 - Formats : JPG, WebP, PNG
 - Badges en overlay (ville + statut actif)
 
+### 🔤 Typographie (05/11/2025 06:05)
+
+#### Modifié
+- **Police complète du site** : Remplacement de Inter et Poppins par [Roboto](https://fonts.google.com/specimen/Roboto)
+- **Poids disponibles** : 300 (Light), 400 (Regular), 500 (Medium), 700 (Bold), 900 (Black)
+- **Usage** :
+  - Texte de base : `font-sans` (Roboto 300/400/500/700/900)
+  - Titres : `font-heading` (Roboto 500/700/900)
+- **Avantages** : Police moderne, très lisible, optimisée web, excellent rendu tous supports
+
 ---
 
 ## [1.0.0] - 2025-11-04
