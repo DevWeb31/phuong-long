@@ -1,17 +1,18 @@
 import type { Metadata } from 'next';
-import { Inter, Poppins } from 'next/font/google';
+import { Roboto } from 'next/font/google';
 import { CartProvider } from '@/lib/contexts/CartContext';
 import './globals.css';
 
-const inter = Inter({
+const roboto = Roboto({
   subsets: ['latin'],
+  weight: ['300', '400', '500', '700', '900'],
   display: 'swap',
   variable: '--font-sans',
 });
 
-const heading = Poppins({
+const heading = Roboto({
   subsets: ['latin'],
-  weight: ['400', '600', '700', '800'],
+  weight: ['500', '700', '900'],
   display: 'swap',
   variable: '--font-heading',
 });
@@ -79,7 +80,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="fr" className={`${inter.variable} ${heading.variable}`}>
+    <html lang="fr" className={`${roboto.variable} ${heading.variable}`}>
       <body className="font-sans antialiased flex flex-col min-h-screen">
         <CartProvider>
           {children}
