@@ -99,14 +99,13 @@ export async function middleware(request: NextRequest) {
 
       // Si pas de rôle admin, rediriger vers le dashboard user
       if (roleError || !isAdmin) {
-        console.warn(`User ${user.id} attempted to access admin panel without admin role`);
         const url = request.nextUrl.clone();
         url.pathname = '/dashboard';
         url.searchParams.set('error', 'unauthorized');
         return NextResponse.redirect(url);
       }
 
-      console.log(`Admin access granted for user ${user.id}`);
+      // Admin access OK (log removed for clean console)
     } catch (error) {
       console.error('Error checking admin role:', error);
       // En cas d'erreur, on redirige par sécurité

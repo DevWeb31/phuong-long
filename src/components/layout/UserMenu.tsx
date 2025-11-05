@@ -12,7 +12,6 @@
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/lib/hooks/useAuth';
-import { useIsAdmin } from '@/lib/hooks/useIsAdmin';
 import { 
   UserIcon, 
   Cog6ToothIcon, 
@@ -20,12 +19,38 @@ import {
   ChevronDownIcon,
   ShieldCheckIcon
 } from '@heroicons/react/24/outline';
+import { createClient } from '@/lib/supabase/client';
 
 export function UserMenu() {
   const { user, signOut } = useAuth();
-  const { isAdmin } = useIsAdmin();
+  const [isAdmin, setIsAdmin] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const checkedRef = useRef(false);
+
+  // Vérifier le rôle admin une seule fois
+  useEffect(() => {
+    if (!user || checkedRef.current) return;
+
+    const checkAdmin = async () => {
+      try {
+        const supabase = createClient();
+        const { data } = await supabase
+          .from('user_roles')
+          .select('role_id, roles(name)')
+          .eq('user_id', user.id)
+          .maybeSingle();
+
+        setIsAdmin(!!(data && (data as any).roles?.name === 'admin'));
+        checkedRef.current = true;
+      } catch {
+        setIsAdmin(false);
+        checkedRef.current = true;
+      }
+    };
+
+    checkAdmin();
+  }, [user?.id]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {

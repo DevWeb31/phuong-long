@@ -9,7 +9,7 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useAuth } from './useAuth';
 import { createClient } from '@/lib/supabase/client';
 
@@ -17,7 +17,8 @@ export function useIsAdmin() {
   const { user } = useAuth();
   const [isAdmin, setIsAdmin] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [checkedUserId, setCheckedUserId] = useState<string | null>(null);
+  const checkedUserIdRef = useRef<string | null>(null);
+  const hasCheckedRef = useRef(false);
 
   useEffect(() => {
     const checkAdminRole = async () => {
@@ -25,17 +26,25 @@ export function useIsAdmin() {
       if (!user) {
         setIsAdmin(false);
         setIsLoading(false);
-        setCheckedUserId(null);
+        checkedUserIdRef.current = null;
+        hasCheckedRef.current = false;
         return;
       }
 
       // Si déjà vérifié pour cet utilisateur, ne pas refaire la requête
-      if (checkedUserId === user.id) {
+      if (hasCheckedRef.current && checkedUserIdRef.current === user.id) {
+        return;
+      }
+
+      // Marquer comme en cours de vérification pour éviter les doublons
+      if (checkedUserIdRef.current === user.id) {
         return;
       }
 
       try {
         setIsLoading(true);
+        checkedUserIdRef.current = user.id; // Marquer immédiatement pour éviter doubles requêtes
+        
         const supabase = createClient();
         
         const { data: userRole } = await supabase
@@ -45,17 +54,18 @@ export function useIsAdmin() {
           .maybeSingle();
 
         setIsAdmin(!!(userRole && (userRole as any).roles?.name === 'admin'));
-        setCheckedUserId(user.id);
+        hasCheckedRef.current = true;
       } catch (error) {
         console.error('Error checking admin role:', error);
         setIsAdmin(false);
+        hasCheckedRef.current = true;
       } finally {
         setIsLoading(false);
       }
     };
 
     checkAdminRole();
-  }, [user?.id]); // Utiliser user?.id au lieu de user complet
+  }, [user?.id]);
 
   return { isAdmin, isLoading };
 }
