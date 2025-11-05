@@ -22,6 +22,7 @@ interface BlogPost {
   tags?: string[];
   created_at: string;
   slug?: string;
+  views_count?: number;
 }
 
 const statusLabels: Record<string, string> = {
@@ -101,10 +102,12 @@ export default function AdminBlogPage() {
       key: 'views_count',
       label: 'Vues',
       sortable: true,
-      render: (value) => (
+      render: (value) => value ? (
         <span className="text-gray-700 font-medium">
           {value.toLocaleString('fr-FR')}
         </span>
+      ) : (
+        <span className="text-gray-400 text-sm">0</span>
       ),
     },
     {

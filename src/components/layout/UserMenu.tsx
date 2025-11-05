@@ -12,15 +12,18 @@
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/lib/hooks/useAuth';
+import { useIsAdmin } from '@/lib/hooks/useIsAdmin';
 import { 
   UserIcon, 
   Cog6ToothIcon, 
   ArrowRightOnRectangleIcon,
-  ChevronDownIcon 
+  ChevronDownIcon,
+  ShieldCheckIcon
 } from '@heroicons/react/24/outline';
 
 export function UserMenu() {
   const { user, signOut } = useAuth();
+  const { isAdmin } = useIsAdmin();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -118,6 +121,21 @@ export function UserMenu() {
               <Cog6ToothIcon className="w-5 h-5" />
               Paramètres
             </Link>
+
+            {/* Admin Panel - Conditionnel */}
+            {isAdmin && (
+              <>
+                <div className="border-t border-gray-200 my-2" />
+                <Link
+                  href="/admin"
+                  className="flex items-center gap-3 px-4 py-2 text-sm font-semibold text-primary hover:bg-primary/5 transition-colors group"
+                  onClick={() => setIsOpen(false)}
+                >
+                  <ShieldCheckIcon className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                  Panel Administrateur
+                </Link>
+              </>
+            )}
           </div>
 
           {/* Separator */}
