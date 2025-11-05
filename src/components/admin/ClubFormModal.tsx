@@ -23,6 +23,7 @@ export interface Club {
   phone?: string;
   email?: string;
   description?: string;
+  cover_image_url?: string;
   active: boolean;
   members_count?: number;
   created_at?: string;
@@ -46,6 +47,7 @@ export function ClubFormModal({ isOpen, onClose, onSubmit, club, isLoading = fal
     phone: '',
     email: '',
     description: '',
+    cover_image_url: '',
     active: true,
   });
 
@@ -62,6 +64,7 @@ export function ClubFormModal({ isOpen, onClose, onSubmit, club, isLoading = fal
         phone: '',
         email: '',
         description: '',
+        cover_image_url: '',
         active: true,
       });
     }
@@ -210,6 +213,42 @@ export function ClubFormModal({ isOpen, onClose, onSubmit, club, isLoading = fal
               className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
               placeholder="club@phuonglong.fr"
             />
+          </div>
+
+          {/* Image de couverture */}
+          <div className="md:col-span-2">
+            <label htmlFor="cover_image_url" className="block text-sm font-semibold text-gray-700 mb-2">
+              Image de couverture (URL) 🖼️
+            </label>
+            <input
+              type="url"
+              id="cover_image_url"
+              name="cover_image_url"
+              value={formData.cover_image_url || ''}
+              onChange={handleChange}
+              className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+              placeholder="https://example.com/club-image.jpg"
+            />
+            <p className="mt-1.5 text-xs text-gray-500">
+              💡 Conseil : Utilisez une image 16:9 (ex: 1200x675px) pour un meilleur rendu
+            </p>
+            
+            {/* Preview */}
+            {formData.cover_image_url && (
+              <div className="mt-4">
+                <p className="text-xs font-semibold text-gray-700 mb-2">Aperçu :</p>
+                <div className="relative aspect-video w-full max-w-md rounded-xl overflow-hidden border-2 border-gray-200">
+                  <img
+                    src={formData.cover_image_url}
+                    alt="Aperçu"
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="300"%3E%3Crect fill="%23f3f4f6" width="400" height="300"/%3E%3Ctext x="50%25" y="50%25" dominant-baseline="middle" text-anchor="middle" fill="%239ca3af" font-family="sans-serif" font-size="18"%3EImage invalide%3C/text%3E%3C/svg%3E';
+                    }}
+                  />
+                </div>
+              </div>
+            )}
           </div>
         </div>
 

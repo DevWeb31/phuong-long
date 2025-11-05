@@ -21,6 +21,7 @@ interface Club {
   address: string;
   postal_code?: string;
   slug?: string;
+  cover_image_url?: string;
   active: boolean;
   members_count?: number;
   created_at: string;
@@ -55,6 +56,28 @@ export default function AdminClubsPage() {
   };
 
   const columns: DataTableColumn<Club>[] = [
+    {
+      key: 'cover_image_url',
+      label: 'Image',
+      sortable: false,
+      render: (value, row) => (
+        <div className="w-16 h-16 rounded-lg overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
+          {value ? (
+            <img
+              src={value as string}
+              alt={row.name}
+              className="w-full h-full object-cover"
+              onError={(e) => {
+                (e.target as HTMLImageElement).style.display = 'none';
+                (e.target as HTMLImageElement).parentElement!.innerHTML = '<div class="text-2xl">🥋</div>';
+              }}
+            />
+          ) : (
+            <div className="text-2xl">🥋</div>
+          )}
+        </div>
+      ),
+    },
     {
       key: 'name',
       label: 'Nom du club',

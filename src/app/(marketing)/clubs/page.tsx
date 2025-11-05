@@ -79,14 +79,40 @@ export default async function ClubsPage() {
           {/* Clubs List */}
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-10 lg:gap-12">
             {typedClubs?.map((club) => (
-              <Card key={club.id} hoverable className="flex flex-col border-none shadow-xl hover:shadow-2xl">
-                <CardHeader>
-                  <div className="flex items-start justify-between mb-2">
+              <Card key={club.id} hoverable className="flex flex-col border-none shadow-xl hover:shadow-2xl overflow-hidden">
+                {/* Image de couverture */}
+                <div className="relative aspect-video w-full bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden group">
+                  {club.cover_image_url ? (
+                    <img
+                      src={club.cover_image_url}
+                      alt={club.name}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="225"%3E%3Crect fill="%23f3f4f6" width="400" height="225"/%3E%3Ctext x="50%25" y="45%25" dominant-baseline="middle" text-anchor="middle" fill="%239ca3af" font-family="sans-serif" font-size="18" font-weight="bold"%3E' + encodeURIComponent(club.name) + '%3C/text%3E%3Ctext x="50%25" y="60%25" dominant-baseline="middle" text-anchor="middle" fill="%23d1d5db" font-family="sans-serif" font-size="14"%3E' + encodeURIComponent(club.city) + '%3C/text%3E%3C/svg%3E';
+                      }}
+                    />
+                  ) : (
+                    <div className="w-full h-full flex flex-col items-center justify-center text-center p-6">
+                      <div className="text-5xl mb-3">🥋</div>
+                      <div className="font-bold text-gray-700 text-lg">{club.name}</div>
+                      <div className="text-gray-500 text-sm mt-1">{club.city}</div>
+                    </div>
+                  )}
+                  
+                  {/* Badge ville en overlay */}
+                  <div className="absolute top-4 left-4">
                     <Badge variant="primary">{club.city}</Badge>
-                    {club.active && (
-                      <Badge variant="success" size="sm">Actif</Badge>
-                    )}
                   </div>
+                  
+                  {/* Badge actif en overlay */}
+                  {club.active && (
+                    <div className="absolute top-4 right-4">
+                      <Badge variant="success" size="sm">Actif</Badge>
+                    </div>
+                  )}
+                </div>
+
+                <CardHeader>
                   <CardTitle>{club.name}</CardTitle>
                   <CardDescription className="line-clamp-3 mt-2">
                     {club.description}
