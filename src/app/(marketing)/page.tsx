@@ -45,66 +45,73 @@ export default async function HomePage() {
   return (
     <>
       {/* Hero Section - Arts Martiaux */}
-      <section className="relative bg-gradient-to-br from-primary via-primary-dark to-[#B91C1C] py-20 lg:py-32 overflow-hidden">
+      <section className="relative bg-gradient-to-br from-primary via-primary-dark to-[#B91C1C] py-24 lg:py-40 overflow-hidden">
         {/* Background Pattern - Motif Asiatique */}
-        <div className="absolute inset-0 opacity-10">
+        <div className="absolute inset-0 opacity-[0.07]">
           <div className="absolute inset-0" style={{
             backgroundImage: `url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M50 50c0-5.523 4.477-10 10-10s10 4.477 10 10-4.477 10-10 10c0-5.523-4.477-10-10-10zm-20 0c0-5.523-4.477-10-10-10S10 44.477 10 50s4.477 10 10 10c0-5.523 4.477-10 10-10zM50 30c0-5.523 4.477-10 10-10s10 4.477 10 10-4.477 10-10 10c0-5.523-4.477-10-10-10zm-20 0c0-5.523-4.477-10-10-10S10 24.477 10 30s4.477 10 10 10c0-5.523 4.477-10 10-10z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
           }} />
         </div>
 
         {/* Gradient Overlay pour profondeur */}
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/20" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-transparent to-black/30" />
+        
+        {/* Glow effects */}
+        <div className="absolute top-1/4 -left-48 w-96 h-96 bg-secondary/20 rounded-full blur-3xl" />
+        <div className="absolute bottom-1/4 -right-48 w-96 h-96 bg-primary/20 rounded-full blur-3xl" />
 
         <Container className="relative z-10">
           <div className="max-w-4xl mx-auto text-center">
             {/* Badge avec Or */}
-            <div className="inline-flex items-center px-4 py-2 mb-6 bg-secondary/20 text-white border border-secondary/40 rounded-full backdrop-blur-sm">
-              <span className="text-secondary mr-2">⭐</span>
-              <span className="font-medium">5 clubs en France</span>
+            <div className="inline-flex items-center px-5 py-2.5 mb-8 bg-white/10 backdrop-blur-md text-white border border-white/20 rounded-full shadow-lg shadow-black/10 animate-fade-in">
+              <span className="text-secondary mr-2 text-xl animate-float">⭐</span>
+              <span className="font-semibold text-sm">5 clubs en France</span>
             </div>
             
-            <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-6 animate-fade-in tracking-tight">
-              Phuong Long<span className="block text-secondary mt-2">Vo Dao</span>
+            <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold text-white mb-8 animate-slide-up tracking-tight leading-tight">
+              Phuong Long
+              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-secondary via-secondary-light to-secondary mt-4 animate-shimmer">
+                Vo Dao
+              </span>
             </h1>
             
-            <p className="text-2xl md:text-3xl text-white/95 mb-8 animate-slide-up font-medium">
+            <p className="text-2xl md:text-3xl lg:text-4xl text-white/95 mb-10 animate-slide-up font-medium tracking-wide">
               L'art martial vietnamien traditionnel
             </p>
             
-            <p className="text-lg md:text-xl text-white/85 mb-10 max-w-3xl mx-auto leading-relaxed">
-              Découvrez une discipline complète alliant <span className="text-secondary font-semibold">techniques de combat</span>, 
-              <span className="text-secondary font-semibold"> développement personnel</span> et 
-              <span className="text-secondary font-semibold"> valeurs traditionnelles</span>. 
+            <p className="text-lg md:text-xl text-white/80 mb-12 max-w-3xl mx-auto leading-relaxed animate-fade-in">
+              Découvrez une discipline complète alliant <span className="text-secondary-light font-bold">techniques de combat</span>, 
+              <span className="text-secondary-light font-bold"> développement personnel</span> et 
+              <span className="text-secondary-light font-bold"> valeurs traditionnelles</span>. 
               Rejoignez l'un de nos 5 clubs et bénéficiez d'un cours d'essai gratuit.
             </p>
             
-            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+            <div className="flex flex-col sm:flex-row gap-6 justify-center items-center animate-scale-in">
               <Link href="/clubs">
-                <Button size="lg" className="bg-white text-primary hover:bg-gray-50 hover:shadow-lg hover:shadow-primary/20 transition-all min-w-[220px] font-semibold">
+                <Button size="lg" className="bg-white text-primary hover:bg-gray-50 shadow-2xl shadow-black/20 hover:shadow-white/40 min-w-[240px] text-lg py-4 px-8">
                   🥋 Trouver un Club
                 </Button>
               </Link>
               <Link href="/contact">
-                <Button size="lg" className="bg-secondary text-gray-900 hover:bg-secondary-light hover:shadow-lg hover:shadow-secondary/30 transition-all min-w-[220px] font-semibold">
+                <Button size="lg" variant="secondary" className="min-w-[240px] text-lg py-4 px-8 shadow-2xl shadow-black/20">
                   ✨ Essai Gratuit
                 </Button>
               </Link>
             </div>
 
             {/* Stats */}
-            <div className="mt-16 grid grid-cols-3 gap-8 max-w-2xl mx-auto">
-              <div className="text-center">
-                <div className="text-4xl font-bold text-white mb-2">40+</div>
-                <div className="text-sm text-white/70 uppercase tracking-wide">Ans d'expérience</div>
+            <div className="mt-20 grid grid-cols-3 gap-12 max-w-3xl mx-auto">
+              <div className="text-center group">
+                <div className="text-5xl lg:text-6xl font-bold text-white mb-3 group-hover:scale-110 transition-transform duration-300">40+</div>
+                <div className="text-sm text-white/70 uppercase tracking-widest font-semibold">Ans d'expérience</div>
               </div>
-              <div className="text-center">
-                <div className="text-4xl font-bold text-white mb-2">5</div>
-                <div className="text-sm text-white/70 uppercase tracking-wide">Clubs actifs</div>
+              <div className="text-center group">
+                <div className="text-5xl lg:text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-secondary via-secondary-light to-secondary mb-3 group-hover:scale-110 transition-transform duration-300">5</div>
+                <div className="text-sm text-white/70 uppercase tracking-widest font-semibold">Clubs actifs</div>
               </div>
-              <div className="text-center">
-                <div className="text-4xl font-bold text-white mb-2">500+</div>
-                <div className="text-sm text-white/70 uppercase tracking-wide">Pratiquants</div>
+              <div className="text-center group">
+                <div className="text-5xl lg:text-6xl font-bold text-white mb-3 group-hover:scale-110 transition-transform duration-300">500+</div>
+                <div className="text-sm text-white/70 uppercase tracking-widest font-semibold">Pratiquants</div>
               </div>
             </div>
           </div>
@@ -112,55 +119,59 @@ export default async function HomePage() {
       </section>
 
       {/* Features Section */}
-      <section className="py-16 lg:py-24 bg-white">
-        <Container>
-          <div className="text-center mb-12">
-            <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
-              Pourquoi choisir le Vo Dao ?
+      <section className="py-24 lg:py-32 bg-gradient-to-b from-gray-50 to-white relative overflow-hidden">
+        {/* Subtle background decoration */}
+        <div className="absolute top-0 right-0 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
+        <div className="absolute bottom-0 left-0 w-96 h-96 bg-secondary/5 rounded-full blur-3xl" />
+        
+        <Container className="relative z-10">
+          <div className="text-center mb-16 animate-fade-in">
+            <h2 className="text-4xl lg:text-5xl xl:text-6xl font-bold text-gray-900 mb-6 tracking-tight">
+              Pourquoi choisir le <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-primary-dark">Vo Dao</span> ?
             </h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            <p className="text-xl lg:text-2xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
               Une discipline complète qui développe le corps et l'esprit
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-3 gap-10 lg:gap-12">
             {/* Technique & Combat */}
-            <Card variant="bordered" hoverable className="text-center border-2 hover:border-primary/50 hover:shadow-lg hover:shadow-primary/10 transition-all">
-              <CardContent className="pt-8 pb-8">
-                <div className="w-16 h-16 bg-gradient-to-br from-primary/10 to-primary/5 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                  <BoltIcon className="w-8 h-8 text-primary" />
+            <Card variant="bordered" hoverable className="text-center border-none bg-white shadow-xl hover:shadow-2xl">
+              <CardContent className="pt-10 pb-10 px-8">
+                <div className="w-20 h-20 bg-gradient-to-br from-primary via-primary-dark to-primary rounded-3xl flex items-center justify-center mx-auto mb-8 shadow-lg shadow-primary/20 group-hover:shadow-xl group-hover:shadow-primary/40 group-hover:scale-110 transition-all duration-500">
+                  <BoltIcon className="w-10 h-10 text-white" />
                 </div>
-                <CardTitle className="mb-3 text-gray-900">Technique & Combat</CardTitle>
+                <CardTitle className="mb-4 text-gray-900 text-2xl">Technique & Combat</CardTitle>
                 <CardDescription className="text-gray-600 text-base leading-relaxed">
-                  Maîtrisez les <span className="text-primary font-semibold">techniques de frappe</span>, blocage et combat. 
+                  Maîtrisez les <span className="text-primary font-bold">techniques de frappe</span>, blocage et combat. 
                   Développez réflexes, coordination et self-défense efficace.
                 </CardDescription>
               </CardContent>
             </Card>
 
             {/* Excellence & Tradition */}
-            <Card variant="bordered" hoverable className="text-center border-2 hover:border-secondary/50 hover:shadow-lg hover:shadow-secondary/10 transition-all">
-              <CardContent className="pt-8 pb-8">
-                <div className="w-16 h-16 bg-gradient-to-br from-secondary/10 to-secondary/5 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                  <TrophyIcon className="w-8 h-8 text-secondary" />
+            <Card variant="bordered" hoverable className="text-center border-none bg-white shadow-xl hover:shadow-2xl">
+              <CardContent className="pt-10 pb-10 px-8">
+                <div className="w-20 h-20 bg-gradient-to-br from-secondary via-secondary-dark to-secondary rounded-3xl flex items-center justify-center mx-auto mb-8 shadow-lg shadow-secondary/20 group-hover:shadow-xl group-hover:shadow-secondary/40 group-hover:scale-110 transition-all duration-500">
+                  <TrophyIcon className="w-10 h-10 text-gray-900" />
                 </div>
-                <CardTitle className="mb-3 text-gray-900">Excellence & Tradition</CardTitle>
+                <CardTitle className="mb-4 text-gray-900 text-2xl">Excellence & Tradition</CardTitle>
                 <CardDescription className="text-gray-600 text-base leading-relaxed">
-                  Cultivez les valeurs martiales : <span className="text-secondary font-semibold">respect, humilité, persévérance</span>. 
+                  Cultivez les valeurs martiales : <span className="text-secondary-dark font-bold">respect, humilité, persévérance</span>. 
                   Un cadre structurant pour enfants et adultes.
                 </CardDescription>
               </CardContent>
             </Card>
 
             {/* Communauté */}
-            <Card variant="bordered" hoverable className="text-center border-2 hover:border-accent/50 hover:shadow-lg hover:shadow-accent/10 transition-all">
-              <CardContent className="pt-8 pb-8">
-                <div className="w-16 h-16 bg-gradient-to-br from-accent/10 to-accent/5 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                  <UserGroupIcon className="w-8 h-8 text-accent" />
+            <Card variant="bordered" hoverable className="text-center border-none bg-white shadow-xl hover:shadow-2xl">
+              <CardContent className="pt-10 pb-10 px-8">
+                <div className="w-20 h-20 bg-gradient-to-br from-accent via-green-600 to-accent rounded-3xl flex items-center justify-center mx-auto mb-8 shadow-lg shadow-accent/20 group-hover:shadow-xl group-hover:shadow-accent/40 group-hover:scale-110 transition-all duration-500">
+                  <UserGroupIcon className="w-10 h-10 text-white" />
                 </div>
-                <CardTitle className="mb-3 text-gray-900">Communauté Passionnée</CardTitle>
+                <CardTitle className="mb-4 text-gray-900 text-2xl">Communauté Passionnée</CardTitle>
                 <CardDescription className="text-gray-600 text-base leading-relaxed">
-                  Rejoignez une <span className="text-accent font-semibold">famille soudée</span>. 
+                  Rejoignez une <span className="text-accent font-bold">famille soudée</span>. 
                   Participez à des stages, compétitions et événements dans toute la France.
                 </CardDescription>
               </CardContent>
