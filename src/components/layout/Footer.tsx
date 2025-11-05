@@ -140,6 +140,7 @@ export function Footer() {
               <p className="mt-2 text-base text-gray-600 mb-6">
                 Recevez nos actualités, événements et promotions.
               </p>
+            </div>
             <form className="mt-4 sm:flex sm:max-w-md">
               <label htmlFor="email-address" className="sr-only">
                 Email
