@@ -46,9 +46,9 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100">
       {/* Header */}
-      <header className="bg-white border-b border-gray-200 sticky top-0 z-40">
+      <header className="bg-white/80 backdrop-blur-lg border-b border-gray-200/60 shadow-sm sticky top-0 z-40">
         <Container>
           <div className="flex items-center justify-between h-16">
             <Link href="/admin" className="flex items-center gap-3 group">
@@ -88,17 +88,17 @@ export default function AdminLayout({
 
       <div className="flex">
         {/* Sidebar */}
-        <aside className="hidden lg:block w-64 min-h-[calc(100vh-4rem)] bg-white border-r border-gray-200">
-          <nav className="p-4 space-y-1">
+        <aside className="hidden lg:block w-64 min-h-[calc(100vh-4rem)] bg-white/95 backdrop-blur-sm border-r border-gray-200/60 shadow-sm">
+          <nav className="p-6 space-y-2">
             {navigation.map((item) => {
               const Icon = item.icon;
               return (
                 <Link
                   key={item.href}
                   href={item.href}
-                  className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-700 rounded-lg hover:bg-primary/5 hover:text-primary transition-colors"
+                  className="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-700 rounded-xl hover:bg-gradient-to-r hover:from-primary/10 hover:to-primary/5 hover:text-primary hover:shadow-md transition-all duration-300 group"
                 >
-                  <Icon className="w-5 h-5" />
+                  <Icon className="w-5 h-5 group-hover:scale-110 transition-transform" />
                   {item.name}
                 </Link>
               );

@@ -9,71 +9,50 @@
 
 'use client';
 
-import { useState } from 'react';
-import { DataTable, DataTableColumn } from '@/components/admin';
-import { Badge } from '@/components/common';
+import { useState, useEffect } from 'react';
+import { DataTable, DataTableColumn, ConfirmModal } from '@/components/admin';
+import { ClubFormModal } from '@/components/admin/ClubFormModal';
+import { Badge, Button } from '@/components/common';
 
 interface Club {
   id: string;
   name: string;
   city: string;
   address: string;
+  postal_code?: string;
+  slug?: string;
   active: boolean;
-  members_count: number;
+  members_count?: number;
   created_at: string;
 }
 
-// Données de démonstration
-const mockClubs: Club[] = [
-  {
-    id: '1',
-    name: 'Marseille Centre',
-    city: 'Marseille',
-    address: '12 Rue de la République, 13001 Marseille',
-    active: true,
-    members_count: 85,
-    created_at: '2020-01-15',
-  },
-  {
-    id: '2',
-    name: 'Paris Bastille',
-    city: 'Paris',
-    address: '45 Boulevard Beaumarchais, 75011 Paris',
-    active: true,
-    members_count: 120,
-    created_at: '2018-09-10',
-  },
-  {
-    id: '3',
-    name: 'Nice Promenade',
-    city: 'Nice',
-    address: '8 Promenade des Anglais, 06000 Nice',
-    active: true,
-    members_count: 65,
-    created_at: '2021-03-20',
-  },
-  {
-    id: '4',
-    name: 'Créteil Université',
-    city: 'Créteil',
-    address: '23 Avenue du Général de Gaulle, 94000 Créteil',
-    active: true,
-    members_count: 42,
-    created_at: '2022-01-05',
-  },
-  {
-    id: '5',
-    name: 'Strasbourg Centre',
-    city: 'Strasbourg',
-    address: '15 Rue du Dôme, 67000 Strasbourg',
-    active: false,
-    members_count: 30,
-    created_at: '2019-11-12',
-  },
-];
-
 export default function AdminClubsPage() {
-  const [clubs] = useState<Club[]>(mockClubs);
+  const [clubs, setClubs] = useState<Club[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [selectedClub, setSelectedClub] = useState<Club | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Charger les clubs depuis l'API
+  useEffect(() => {
+    loadClubs();
+  }, []);
+
+  const loadClubs = async () => {
+    try {
+      setIsLoading(true);
+      const response = await fetch('/api/admin/clubs');
+      if (response.ok) {
+        const data = await response.json();
+        setClubs(data);
+      }
+    } catch (error) {
+      console.error('Error loading clubs:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const columns: DataTableColumn<Club>[] = [
     {
@@ -96,10 +75,12 @@ export default function AdminClubsPage() {
       key: 'members_count',
       label: 'Membres',
       sortable: true,
-      render: (value) => (
+      render: (value) => value ? (
         <Badge variant="primary" size="sm">
           {value} membres
         </Badge>
+      ) : (
+        <span className="text-gray-400 text-sm">-</span>
       ),
     },
     {
@@ -121,43 +102,140 @@ export default function AdminClubsPage() {
   ];
 
   const handleEdit = (club: Club) => {
-    console.log('Edit club:', club);
-    // TODO: Rediriger vers /admin/clubs/[id]/edit
+    setSelectedClub(club);
+    setIsFormOpen(true);
   };
 
   const handleDelete = (club: Club) => {
-    if (confirm(`Êtes-vous sûr de vouloir supprimer le club "${club.name}" ?`)) {
-      console.log('Delete club:', club);
-      // TODO: Implémenter la suppression
-    }
+    setSelectedClub(club);
+    setIsDeleteOpen(true);
   };
 
   const handleView = (club: Club) => {
-    console.log('View club:', club);
-    // TODO: Rediriger vers /clubs/[slug]
+    window.open(`/clubs/${club.slug || club.id}`, '_blank');
+  };
+
+  const handleCreateNew = () => {
+    setSelectedClub(null);
+    setIsFormOpen(true);
+  };
+
+  const handleSubmit = async (clubData: Partial<Club>) => {
+    try {
+      setIsSubmitting(true);
+      
+      if (selectedClub) {
+        // Update
+        const response = await fetch(`/api/admin/clubs/${selectedClub.id}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(clubData),
+        });
+
+        if (!response.ok) throw new Error('Erreur lors de la mise à jour');
+      } else {
+        // Create
+        const response = await fetch('/api/admin/clubs', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(clubData),
+        });
+
+        if (!response.ok) throw new Error('Erreur lors de la création');
+      }
+
+      await loadClubs();
+      setIsFormOpen(false);
+      setSelectedClub(null);
+    } catch (error) {
+      console.error('Error submitting club:', error);
+      alert('Une erreur est survenue');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!selectedClub) return;
+
+    try {
+      setIsSubmitting(true);
+      
+      const response = await fetch(`/api/admin/clubs/${selectedClub.id}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) throw new Error('Erreur lors de la suppression');
+
+      await loadClubs();
+      setIsDeleteOpen(false);
+      setSelectedClub(null);
+    } catch (error) {
+      console.error('Error deleting club:', error);
+      alert('Une erreur est survenue');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Gestion des Clubs</h1>
-        <p className="text-gray-600">
-          Gérez les clubs, leurs informations et leurs membres
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Gestion des Clubs</h1>
+          <p className="text-gray-600">
+            Gérez les clubs, leurs informations et leurs membres
+          </p>
+        </div>
+        <Button variant="primary" onClick={handleCreateNew}>
+          ➕ Nouveau Club
+        </Button>
       </div>
 
       {/* DataTable */}
-      <DataTable
-        data={clubs}
-        columns={columns}
-        onEdit={handleEdit}
-        onDelete={handleDelete}
-        onView={handleView}
-        searchPlaceholder="Rechercher un club..."
-        newItemLabel="Nouveau Club"
-        newItemHref="/admin/clubs/new"
-        emptyMessage="Aucun club trouvé"
+      {isLoading ? (
+        <div className="text-center py-12">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-gray-200 border-t-primary"></div>
+          <p className="mt-4 text-gray-600">Chargement...</p>
+        </div>
+      ) : (
+        <DataTable
+          data={clubs}
+          columns={columns}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+          onView={handleView}
+          searchPlaceholder="Rechercher un club..."
+          emptyMessage="Aucun club trouvé"
+        />
+      )}
+
+      {/* Modals */}
+      <ClubFormModal
+        isOpen={isFormOpen}
+        onClose={() => {
+          setIsFormOpen(false);
+          setSelectedClub(null);
+        }}
+        onSubmit={handleSubmit}
+        club={selectedClub}
+        isLoading={isSubmitting}
+      />
+
+      <ConfirmModal
+        isOpen={isDeleteOpen}
+        onClose={() => {
+          setIsDeleteOpen(false);
+          setSelectedClub(null);
+        }}
+        onConfirm={handleConfirmDelete}
+        title="Supprimer le club"
+        message={`Êtes-vous sûr de vouloir supprimer le club "${selectedClub?.name}" ? Cette action est irréversible.`}
+        confirmLabel="Supprimer"
+        cancelLabel="Annuler"
+        variant="danger"
+        isLoading={isSubmitting}
       />
     </div>
   );
