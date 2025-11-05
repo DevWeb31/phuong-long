@@ -66,13 +66,9 @@ export default async function EventsPage() {
         {/* Gradient Overlay pour profondeur */}
         <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-transparent to-black/30" />
         
-        <Container className="relative z-10 py-20">
+        <Container className="relative z-10">
           <EventsHeroContent
             totalEvents={typedEvents?.length || 0}
-            stagesCount={eventsByType?.stage?.length || 0}
-            competitionsCount={eventsByType?.competition?.length || 0}
-            demonstrationsCount={eventsByType?.demonstration?.length || 0}
-            seminarsCount={eventsByType?.seminar?.length || 0}
           />
         </Container>
       </section>

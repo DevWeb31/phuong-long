@@ -48,7 +48,7 @@ export default async function ClubsPage() {
         {/* Gradient Overlay pour profondeur */}
         <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-transparent to-black/30" />
         
-        <Container className="relative z-10 py-20">
+        <Container className="relative z-10">
           <ClubsHeroContent />
         </Container>
       </section>
