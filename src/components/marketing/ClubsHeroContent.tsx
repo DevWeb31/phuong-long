@@ -16,10 +16,10 @@ import { useParallax, getParallaxOffset } from '@/lib/hooks/useParallax';
 export function ClubsHeroContent() {
   const scrollY = useParallax();
   
-  const contentOffset = getParallaxOffset(scrollY, 0.15);
-  const badgeOffset = getParallaxOffset(scrollY, 0.25);
-  const citiesOffset = getParallaxOffset(scrollY, 0.2);
-  const benefitsOffset = getParallaxOffset(scrollY, 0.1);
+  const contentOffset = getParallaxOffset(scrollY, 0.08);
+  const badgeOffset = getParallaxOffset(scrollY, 0.12);
+  const citiesOffset = getParallaxOffset(scrollY, 0.1);
+  const benefitsOffset = getParallaxOffset(scrollY, 0.05);
 
   return (
     <div className="text-center text-white max-w-5xl mx-auto">

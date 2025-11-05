@@ -16,10 +16,10 @@ import { useParallax, getParallaxOffset } from '@/lib/hooks/useParallax';
 export function HeroContent() {
   const scrollY = useParallax();
   
-  // Content moves slower for depth effect
-  const contentOffset = getParallaxOffset(scrollY, 0.15);
-  const badgesOffset = getParallaxOffset(scrollY, 0.25);
-  const statsOffset = getParallaxOffset(scrollY, 0.1);
+  // Content moves slower for depth effect (réduit pour effet léger)
+  const contentOffset = getParallaxOffset(scrollY, 0.08);
+  const badgesOffset = getParallaxOffset(scrollY, 0.12);
+  const statsOffset = getParallaxOffset(scrollY, 0.05);
 
   return (
     <div className="max-w-5xl mx-auto text-center">

@@ -42,12 +42,12 @@ interface ParallaxBackgroundProps {
 export function ParallaxBackground({ children }: ParallaxBackgroundProps) {
   const scrollY = useParallax();
   
-  // Background moves slower (0.3x)
-  const bgOffset = getParallaxOffset(scrollY, 0.3);
+  // Background moves slower (0.15x - très léger)
+  const bgOffset = getParallaxOffset(scrollY, 0.15);
   
-  // Glow effects move at different speeds
-  const glow1Offset = getParallaxOffset(scrollY, 0.4);
-  const glow2Offset = getParallaxOffset(scrollY, 0.2);
+  // Glow effects move at different speeds (réduit pour effet subtil)
+  const glow1Offset = getParallaxOffset(scrollY, 0.2);
+  const glow2Offset = getParallaxOffset(scrollY, 0.1);
 
   return (
     <>

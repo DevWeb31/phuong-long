@@ -11,10 +11,15 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Container, Card, CardHeader, CardTitle, CardDescription, CardContent, Button } from '@/components/common';
+import { Container, Card, CardHeader, CardTitle, CardDescription, CardContent, Button, ParallaxBackground } from '@/components/common';
 import { EnvelopeIcon, PhoneIcon, MapPinIcon, ClockIcon } from '@heroicons/react/24/outline';
+import { useParallax, getParallaxOffset } from '@/lib/hooks/useParallax';
 
 export default function ContactPage() {
+  const scrollY = useParallax();
+  const badgeOffset = getParallaxOffset(scrollY, 0.12);
+  const contentOffset = getParallaxOffset(scrollY, 0.08);
+  
   const [formState, setFormState] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [formData, setFormData] = useState({
     name: '',
@@ -63,28 +68,43 @@ export default function ContactPage() {
 
   return (
     <>
-      {/* Hero Section */}
-      <section className="relative bg-gradient-to-br from-primary via-primary-dark to-[#B91C1C] py-16 lg:py-20">
-        <div className="absolute inset-0 opacity-10">
+      {/* Hero Section with Parallax */}
+      <section className="relative bg-gradient-to-br from-primary via-primary-dark to-[#B91C1C] py-20 lg:py-24 overflow-hidden">
+        <ParallaxBackground>
           <div className="absolute inset-0" style={{
             backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
           }} />
-        </div>
+        </ParallaxBackground>
+
+        <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-transparent to-black/20" />
 
         <Container className="relative z-10">
-          <div className="max-w-3xl mx-auto text-center">
-            <div className="inline-flex items-center px-4 py-2 mb-6 bg-secondary/20 text-white border border-secondary/40 rounded-full backdrop-blur-sm">
-              <span className="text-secondary mr-2">✉️</span>
-              <span className="font-medium">Contactez-nous</span>
+          <div className="max-w-4xl mx-auto text-center">
+            <div 
+              className="inline-flex items-center px-5 py-2.5 mb-8 bg-white/10 backdrop-blur-md text-white border border-white/20 rounded-full shadow-lg shadow-black/10 animate-fade-in"
+              style={{
+                transform: `translateY(${badgeOffset}px)`,
+                willChange: 'transform',
+              }}
+            >
+              <span className="text-secondary mr-2 text-xl">✉️</span>
+              <span className="font-semibold text-sm">Contactez-nous - Réponse sous 24h</span>
             </div>
 
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6">
-              Nous Contacter
-            </h1>
+            <div
+              style={{
+                transform: `translateY(${contentOffset}px)`,
+                willChange: 'transform',
+              }}
+            >
+              <h1 className="text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold text-white mb-8 animate-slide-up tracking-tight">
+                Nous <span className="text-transparent bg-clip-text bg-gradient-to-r from-secondary via-secondary-light to-secondary">Contacter</span>
+              </h1>
 
-            <p className="text-lg md:text-xl text-white/90 leading-relaxed">
-              Une question ? Un projet ? Notre équipe est à votre écoute pour vous accompagner dans votre pratique du Vo Dao.
-            </p>
+              <p className="text-xl md:text-2xl text-white/90 leading-relaxed animate-fade-in max-w-3xl mx-auto">
+                Une question ? Un projet ? Notre équipe est à votre écoute pour vous accompagner dans votre pratique du Vo Dao.
+              </p>
+            </div>
           </div>
         </Container>
       </section>
