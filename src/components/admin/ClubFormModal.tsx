@@ -304,21 +304,9 @@ export function ClubFormModal({ isOpen, onClose, onSubmit, club, isLoading = fal
 
         {/* Coordonnées GPS */}
         <div className="border-t dark:border-gray-700 pt-6">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-              🗺️ Coordonnées GPS
-            </h3>
-            <a
-              href={`https://www.openstreetmap.org/search?query=${encodeURIComponent(
-                `${formData.address || ''} ${formData.postal_code || ''} ${formData.city || ''}`
-              )}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-xs text-primary hover:text-primary-dark underline"
-            >
-              🔍 Trouver les coordonnées
-            </a>
-          </div>
+          <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-4">
+            🗺️ Coordonnées GPS (pour la carte)
+          </h3>
           
           <div className="grid md:grid-cols-2 gap-6">
             {/* Latitude */}
@@ -333,14 +321,9 @@ export function ClubFormModal({ isOpen, onClose, onSubmit, club, isLoading = fal
                 value={formData.latitude ?? ''}
                 onChange={handleChange}
                 step="0.000001"
-                min="-90"
-                max="90"
                 className="w-full px-4 py-2.5 border dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
-                placeholder="Ex: 48.8566"
+                placeholder="47.765663"
               />
-              <p className="mt-1.5 text-xs text-slate-500 dark:text-slate-400">
-                Entre -90 et 90
-              </p>
             </div>
 
             {/* Longitude */}
@@ -355,44 +338,11 @@ export function ClubFormModal({ isOpen, onClose, onSubmit, club, isLoading = fal
                 value={formData.longitude ?? ''}
                 onChange={handleChange}
                 step="0.000001"
-                min="-180"
-                max="180"
                 className="w-full px-4 py-2.5 border dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
-                placeholder="Ex: 2.3522"
+                placeholder="-3.358848"
               />
-              <p className="mt-1.5 text-xs text-slate-500 dark:text-slate-400">
-                Entre -180 et 180
-              </p>
             </div>
           </div>
-
-          {/* Helper info */}
-          <div className="mt-4 p-4 bg-blue-50 dark:bg-blue-950/30 rounded-xl border border-blue-200 dark:border-blue-800">
-            <p className="text-sm text-blue-900 dark:text-blue-100 mb-2 font-medium">
-              💡 Comment trouver les coordonnées GPS ?
-            </p>
-            <ul className="text-xs text-blue-800 dark:text-blue-200 space-y-1 list-disc list-inside">
-              <li>Cliquez sur "🔍 Trouver les coordonnées" ci-dessus</li>
-              <li>Sur OpenStreetMap, cliquez sur le bon emplacement</li>
-              <li>Les coordonnées s'afficheront à gauche (Lat: XX.XXXX, Lon: YY.YYYY)</li>
-              <li>Copiez-les dans les champs ci-dessus</li>
-            </ul>
-          </div>
-
-          {/* Preview carte */}
-          {formData.latitude && formData.longitude && (
-            <div className="mt-4">
-              <p className="text-xs font-semibold dark:text-gray-300 mb-2">📍 Position sur la carte :</p>
-              <a
-                href={`https://www.openstreetmap.org/?mlat=${formData.latitude}&mlon=${formData.longitude}#map=16/${formData.latitude}/${formData.longitude}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 text-primary hover:bg-primary/20 rounded-lg text-sm font-medium transition-colors"
-              >
-                🗺️ Voir sur OpenStreetMap →
-              </a>
-            </div>
-          )}
         </div>
 
         {/* Actif */}
