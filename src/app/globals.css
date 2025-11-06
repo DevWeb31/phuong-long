@@ -2,6 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Leaflet styles */
+@import '../styles/leaflet-custom.css';
+
 @layer base {
   :root {
     /* Colors - Thème Moderne Premium - LIGHT MODE */

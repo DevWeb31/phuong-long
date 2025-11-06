@@ -13,6 +13,7 @@ import { Container, Card, CardHeader, CardTitle, CardDescription, CardContent, C
 import { createServerClient } from '@/lib/supabase/server';
 import type { Club } from '@/lib/types';
 import { ClubsHeroContent } from '@/components/marketing/ClubsHeroContent';
+import { ClubsMap } from '@/components/marketing/ClubsMap';
 
 export const metadata: Metadata = {
   title: 'Nos Clubs',
@@ -60,21 +61,8 @@ export default async function ClubsPage() {
         <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-gradient-to-tr from-secondary/5 to-transparent rounded-full blur-3xl" />
         
         <Container className="relative z-10">
-          {/* Map Placeholder - Modern illustration */}
-          <div className="mb-16 p-10 bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-800/50 dark:to-slate-900/50 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-xl">
-            <div className="text-center">
-              <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-primary to-secondary rounded-2xl mb-6 shadow-xl shadow-primary/20">
-                <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
-                </svg>
-              </div>
-              <h2 className="text-2xl lg:text-3xl font-bold text-slate-900 dark:text-slate-100 mb-3">Carte Interactive des Clubs</h2>
-              <p className="text-lg text-slate-600 dark:text-slate-400 mb-4 font-medium">Marseille • Paris • Nice • Créteil • Strasbourg</p>
-              <p className="text-sm text-slate-500 dark:text-slate-500 inline-flex items-center gap-2 bg-white/50 dark:bg-slate-800/50 px-4 py-2 rounded-full">
-                <span className="text-lg">🗺️</span> Intégration Google Maps à venir
-              </p>
-            </div>
-          </div>
+          {/* Carte Interactive */}
+          <ClubsMap clubs={typedClubs} />
 
           {/* Clubs List */}
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
