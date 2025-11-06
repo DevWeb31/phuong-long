@@ -27,7 +27,7 @@ L.Icon.Default.mergeOptions({
 
 // Icône personnalisée pour les clubs
 const clubIcon = new L.Icon({
-  iconUrl: 'data:image/svg+xml;base64,' + btoa(`
+  iconUrl: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
     <svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
       <circle cx="16" cy="16" r="14" fill="#2563eb" stroke="white" stroke-width="3"/>
       <text x="16" y="22" text-anchor="middle" fill="white" font-size="16" font-weight="bold">🥋</text>
