@@ -24,6 +24,8 @@ export interface Club {
   email?: string;
   description?: string;
   cover_image_url?: string;
+  latitude?: number | null;
+  longitude?: number | null;
   active: boolean;
   members_count?: number;
   created_at?: string;
@@ -48,6 +50,8 @@ export function ClubFormModal({ isOpen, onClose, onSubmit, club, isLoading = fal
     email: '',
     description: '',
     cover_image_url: '',
+    latitude: null,
+    longitude: null,
     active: true,
   });
 
@@ -65,6 +69,8 @@ export function ClubFormModal({ isOpen, onClose, onSubmit, club, isLoading = fal
         email: '',
         description: '',
         cover_image_url: '',
+        latitude: null,
+        longitude: null,
         active: true,
       });
     }
@@ -77,6 +83,17 @@ export function ClubFormModal({ isOpen, onClose, onSubmit, club, isLoading = fal
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
+    
+    // Conversion pour les nombres (latitude/longitude)
+    if (name === 'latitude' || name === 'longitude') {
+      const numValue = value === '' ? null : parseFloat(value);
+      setFormData(prev => ({
+        ...prev,
+        [name]: numValue,
+      }));
+      return;
+    }
+    
     setFormData(prev => ({
       ...prev,
       [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value,
@@ -283,6 +300,99 @@ export function ClubFormModal({ isOpen, onClose, onSubmit, club, isLoading = fal
             className="w-full px-4 py-2.5 border dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all resize-none"
             placeholder="Décrivez le club..."
           />
+        </div>
+
+        {/* Coordonnées GPS */}
+        <div className="border-t dark:border-gray-700 pt-6">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+              🗺️ Coordonnées GPS
+            </h3>
+            <a
+              href={`https://www.openstreetmap.org/search?query=${encodeURIComponent(
+                `${formData.address || ''} ${formData.postal_code || ''} ${formData.city || ''}`
+              )}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-xs text-primary hover:text-primary-dark underline"
+            >
+              🔍 Trouver les coordonnées
+            </a>
+          </div>
+          
+          <div className="grid md:grid-cols-2 gap-6">
+            {/* Latitude */}
+            <div>
+              <label htmlFor="latitude" className="block text-sm font-semibold dark:text-gray-300 mb-2">
+                Latitude
+              </label>
+              <input
+                type="number"
+                id="latitude"
+                name="latitude"
+                value={formData.latitude ?? ''}
+                onChange={handleChange}
+                step="0.000001"
+                min="-90"
+                max="90"
+                className="w-full px-4 py-2.5 border dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                placeholder="Ex: 48.8566"
+              />
+              <p className="mt-1.5 text-xs text-slate-500 dark:text-slate-400">
+                Entre -90 et 90
+              </p>
+            </div>
+
+            {/* Longitude */}
+            <div>
+              <label htmlFor="longitude" className="block text-sm font-semibold dark:text-gray-300 mb-2">
+                Longitude
+              </label>
+              <input
+                type="number"
+                id="longitude"
+                name="longitude"
+                value={formData.longitude ?? ''}
+                onChange={handleChange}
+                step="0.000001"
+                min="-180"
+                max="180"
+                className="w-full px-4 py-2.5 border dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                placeholder="Ex: 2.3522"
+              />
+              <p className="mt-1.5 text-xs text-slate-500 dark:text-slate-400">
+                Entre -180 et 180
+              </p>
+            </div>
+          </div>
+
+          {/* Helper info */}
+          <div className="mt-4 p-4 bg-blue-50 dark:bg-blue-950/30 rounded-xl border border-blue-200 dark:border-blue-800">
+            <p className="text-sm text-blue-900 dark:text-blue-100 mb-2 font-medium">
+              💡 Comment trouver les coordonnées GPS ?
+            </p>
+            <ul className="text-xs text-blue-800 dark:text-blue-200 space-y-1 list-disc list-inside">
+              <li>Cliquez sur "🔍 Trouver les coordonnées" ci-dessus</li>
+              <li>Sur OpenStreetMap, cliquez sur le bon emplacement</li>
+              <li>Les coordonnées s'afficheront à gauche (Lat: XX.XXXX, Lon: YY.YYYY)</li>
+              <li>Copiez-les dans les champs ci-dessus</li>
+            </ul>
+          </div>
+
+          {/* Preview carte */}
+          {formData.latitude && formData.longitude && (
+            <div className="mt-4">
+              <p className="text-xs font-semibold dark:text-gray-300 mb-2">📍 Position sur la carte :</p>
+              <a
+                href={`https://www.openstreetmap.org/?mlat=${formData.latitude}&mlon=${formData.longitude}#map=16/${formData.latitude}/${formData.longitude}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 text-primary hover:bg-primary/20 rounded-lg text-sm font-medium transition-colors"
+              >
+                🗺️ Voir sur OpenStreetMap →
+              </a>
+            </div>
+          )}
         </div>
 
         {/* Actif */}
