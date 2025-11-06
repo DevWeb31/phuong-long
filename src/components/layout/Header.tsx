@@ -18,7 +18,7 @@ import { UserMenu } from './UserMenu';
 import { CartButton } from './CartButton';
 // import { SearchBar } from './SearchBar'; // Désactivé
 import { ThemeToggle } from './ThemeToggle';
-import { MegaMenu, clubsMegaMenu, shopMegaMenu } from './MegaMenu';
+import { MegaMenu, MegaMenuSection, shopMegaMenu } from './MegaMenu';
 import { cn } from '@/lib/utils/cn';
 import { 
   Home, 
@@ -29,7 +29,12 @@ import {
   Mail,
   Menu,
   X,
-  ChevronDown
+  ChevronDown,
+  MapPin,
+  Clock,
+  Award,
+  Phone,
+  Sparkles
 } from 'lucide-react';
 
 interface NavItem {
@@ -48,13 +53,39 @@ const navigation: NavItem[] = [
   { name: 'Contact', href: '/contact', icon: Mail },
 ];
 
+interface Club {
+  id: string;
+  name: string;
+  slug: string;
+  city: string;
+  postal_code: string | null;
+}
+
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [activeMegaMenu, setActiveMegaMenu] = useState<string | null>(null);
   const [hoveredItem, setHoveredItem] = useState<string | null>(null);
+  const [clubs, setClubs] = useState<Club[]>([]);
   const pathname = usePathname();
   const megaMenuTimeout = useRef<NodeJS.Timeout>();
+
+  // Charger les clubs depuis l'API
+  useEffect(() => {
+    const fetchClubs = async () => {
+      try {
+        const response = await fetch('/api/clubs');
+        if (response.ok) {
+          const data = await response.json();
+          setClubs(data);
+        }
+      } catch (error) {
+        console.error('Failed to fetch clubs:', error);
+      }
+    };
+    
+    fetchClubs();
+  }, []);
 
   // Détection du scroll pour effet visuel
   useEffect(() => {
@@ -109,8 +140,53 @@ export function Header() {
     }, 150);
   };
 
-  const getMegaMenuData = (itemName: string) => {
-    if (itemName === 'Clubs') return clubsMegaMenu;
+  const getMegaMenuData = (itemName: string): MegaMenuSection[] => {
+    if (itemName === 'Clubs') {
+      // Construire dynamiquement le mega menu des clubs
+      return [
+        {
+          title: 'Nos Clubs',
+          icon: MapPin,
+          items: clubs.map(club => ({
+            name: club.name,
+            href: `/clubs/${club.slug}`,
+            description: `${club.postal_code || ''} - ${club.city}`.trim(),
+            icon: MapPin,
+          })),
+        },
+        {
+          title: 'Informations',
+          icon: Clock,
+          items: [
+            {
+              name: 'Horaires & Tarifs',
+              href: '/clubs#tarifs',
+              description: 'Planning complet',
+              icon: Clock,
+            },
+            {
+              name: 'Cours Essai Gratuit',
+              href: '/signup',
+              description: 'Réservez maintenant',
+              icon: Sparkles,
+              isNew: true,
+            },
+            {
+              name: 'Nos Professeurs',
+              href: '/clubs#coaches',
+              description: 'Équipe pédagogique',
+              icon: Award,
+            },
+            {
+              name: 'Nous Contacter',
+              href: '/contact',
+              description: 'Questions ?',
+              icon: Phone,
+            },
+          ],
+        },
+      ];
+    }
     if (itemName === 'Boutique') return shopMegaMenu;
     return [];
   };

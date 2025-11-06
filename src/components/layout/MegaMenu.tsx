@@ -13,9 +13,6 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils/cn';
 import {
-  MapPin,
-  Phone,
-  Clock,
   TrendingUp,
   Sparkles,
   Shield,
@@ -204,77 +201,7 @@ export function MegaMenu({ sections, isOpen, onClose }: MegaMenuProps) {
   );
 }
 
-// Configuration des mega menus
-export const clubsMegaMenu: MegaMenuSection[] = [
-  {
-    title: 'Nos Clubs',
-    icon: MapPin,
-    items: [
-      {
-        name: 'Marseille Centre',
-        href: '/clubs/marseille-centre',
-        description: '13001 - Port Vieux',
-        icon: MapPin,
-      },
-      {
-        name: 'Paris Bastille',
-        href: '/clubs/paris-bastille',
-        description: '75011 - République',
-        icon: MapPin,
-      },
-      {
-        name: 'Nice Promenade',
-        href: '/clubs/nice-promenade',
-        description: '06000 - Vieux Nice',
-        icon: MapPin,
-      },
-      {
-        name: 'Créteil Université',
-        href: '/clubs/creteil-universite',
-        description: '94000 - Campus',
-        icon: MapPin,
-      },
-      {
-        name: 'Strasbourg Centre',
-        href: '/clubs/strasbourg-centre',
-        description: '67000 - Petite France',
-        icon: MapPin,
-      },
-    ],
-  },
-  {
-    title: 'Informations',
-    icon: Clock,
-    items: [
-      {
-        name: 'Horaires & Tarifs',
-        href: '/clubs#tarifs',
-        description: 'Planning complet',
-        icon: Clock,
-      },
-      {
-        name: 'Cours Essai Gratuit',
-        href: '/signup',
-        description: 'Réservez maintenant',
-        icon: Sparkles,
-        isNew: true,
-      },
-      {
-        name: 'Nos Professeurs',
-        href: '/clubs#coaches',
-        description: 'Équipe pédagogique',
-        icon: Award,
-      },
-      {
-        name: 'Nous Contacter',
-        href: '/contact',
-        description: 'Questions ?',
-        icon: Phone,
-      },
-    ],
-  },
-];
-
+// Configuration du mega menu boutique
 export const shopMegaMenu: MegaMenuSection[] = [
   {
     title: 'Équipements',
