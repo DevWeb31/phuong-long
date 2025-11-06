@@ -122,7 +122,7 @@ export function EventFormModal({ isOpen, onClose, onSubmit, event, clubs = [], i
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="grid md:grid-cols-2 gap-6">
           <div className="md:col-span-2">
-            <label htmlFor="title" className="block text-sm font-semibold text-gray-700 mb-2">
+            <label htmlFor="title" className="block text-sm font-semibold dark:text-gray-300 mb-2">
               Titre <span className="text-red-500">*</span>
             </label>
             <input
@@ -132,12 +132,12 @@ export function EventFormModal({ isOpen, onClose, onSubmit, event, clubs = [], i
               value={formData.title}
               onChange={handleTitleChange}
               required
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+              className="w-full px-4 py-2.5 border dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
             />
           </div>
 
           <div>
-            <label htmlFor="event_type" className="block text-sm font-semibold text-gray-700 mb-2">
+            <label htmlFor="event_type" className="block text-sm font-semibold dark:text-gray-300 mb-2">
               Type <span className="text-red-500">*</span>
             </label>
             <select
@@ -146,7 +146,7 @@ export function EventFormModal({ isOpen, onClose, onSubmit, event, clubs = [], i
               value={formData.event_type}
               onChange={handleChange}
               required
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+              className="w-full px-4 py-2.5 border dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
             >
               <option value="stage">Stage</option>
               <option value="competition">Compétition</option>
@@ -156,7 +156,7 @@ export function EventFormModal({ isOpen, onClose, onSubmit, event, clubs = [], i
           </div>
 
           <div>
-            <label htmlFor="club_id" className="block text-sm font-semibold text-gray-700 mb-2">
+            <label htmlFor="club_id" className="block text-sm font-semibold dark:text-gray-300 mb-2">
               Club
             </label>
             <select
@@ -164,7 +164,7 @@ export function EventFormModal({ isOpen, onClose, onSubmit, event, clubs = [], i
               name="club_id"
               value={formData.club_id || ''}
               onChange={handleChange}
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+              className="w-full px-4 py-2.5 border dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
             >
               <option value="">Tous les clubs</option>
               {clubs.map(club => (
@@ -174,7 +174,7 @@ export function EventFormModal({ isOpen, onClose, onSubmit, event, clubs = [], i
           </div>
 
           <div>
-            <label htmlFor="start_date" className="block text-sm font-semibold text-gray-700 mb-2">
+            <label htmlFor="start_date" className="block text-sm font-semibold dark:text-gray-300 mb-2">
               Date de début <span className="text-red-500">*</span>
             </label>
             <input
@@ -184,12 +184,12 @@ export function EventFormModal({ isOpen, onClose, onSubmit, event, clubs = [], i
               value={formData.start_date?.slice(0, 16) || ''}
               onChange={handleChange}
               required
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+              className="w-full px-4 py-2.5 border dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
             />
           </div>
 
           <div>
-            <label htmlFor="end_date" className="block text-sm font-semibold text-gray-700 mb-2">
+            <label htmlFor="end_date" className="block text-sm font-semibold dark:text-gray-300 mb-2">
               Date de fin
             </label>
             <input
@@ -198,12 +198,12 @@ export function EventFormModal({ isOpen, onClose, onSubmit, event, clubs = [], i
               name="end_date"
               value={formData.end_date?.slice(0, 16) || ''}
               onChange={handleChange}
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+              className="w-full px-4 py-2.5 border dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
             />
           </div>
 
           <div>
-            <label htmlFor="location" className="block text-sm font-semibold text-gray-700 mb-2">
+            <label htmlFor="location" className="block text-sm font-semibold dark:text-gray-300 mb-2">
               Lieu
             </label>
             <input
@@ -212,12 +212,12 @@ export function EventFormModal({ isOpen, onClose, onSubmit, event, clubs = [], i
               name="location"
               value={formData.location || ''}
               onChange={handleChange}
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+              className="w-full px-4 py-2.5 border dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
             />
           </div>
 
           <div>
-            <label htmlFor="max_attendees" className="block text-sm font-semibold text-gray-700 mb-2">
+            <label htmlFor="max_attendees" className="block text-sm font-semibold dark:text-gray-300 mb-2">
               Places max
             </label>
             <input
@@ -227,12 +227,12 @@ export function EventFormModal({ isOpen, onClose, onSubmit, event, clubs = [], i
               value={formData.max_attendees || ''}
               onChange={handleChange}
               min="0"
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+              className="w-full px-4 py-2.5 border dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
             />
           </div>
 
           <div>
-            <label htmlFor="price_cents" className="block text-sm font-semibold text-gray-700 mb-2">
+            <label htmlFor="price_cents" className="block text-sm font-semibold dark:text-gray-300 mb-2">
               Prix (€) <span className="text-red-500">*</span>
             </label>
             <input
@@ -246,12 +246,12 @@ export function EventFormModal({ isOpen, onClose, onSubmit, event, clubs = [], i
               min="0"
               step="1"
               required
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+              className="w-full px-4 py-2.5 border dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
             />
           </div>
 
           <div>
-            <label htmlFor="registration_deadline" className="block text-sm font-semibold text-gray-700 mb-2">
+            <label htmlFor="registration_deadline" className="block text-sm font-semibold dark:text-gray-300 mb-2">
               Inscription jusqu'au
             </label>
             <input
@@ -260,13 +260,13 @@ export function EventFormModal({ isOpen, onClose, onSubmit, event, clubs = [], i
               name="registration_deadline"
               value={formData.registration_deadline?.slice(0, 16) || ''}
               onChange={handleChange}
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+              className="w-full px-4 py-2.5 border dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
             />
           </div>
         </div>
 
         <div>
-          <label htmlFor="description" className="block text-sm font-semibold text-gray-700 mb-2">
+          <label htmlFor="description" className="block text-sm font-semibold dark:text-gray-300 mb-2">
             Description
           </label>
           <textarea
@@ -275,7 +275,7 @@ export function EventFormModal({ isOpen, onClose, onSubmit, event, clubs = [], i
             value={formData.description || ''}
             onChange={handleChange}
             rows={4}
-            className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all resize-none"
+            className="w-full px-4 py-2.5 border dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all resize-none"
           />
         </div>
 
@@ -286,9 +286,9 @@ export function EventFormModal({ isOpen, onClose, onSubmit, event, clubs = [], i
             name="active"
             checked={formData.active}
             onChange={handleChange}
-            className="w-5 h-5 text-primary border-gray-300 rounded focus:ring-2 focus:ring-primary"
+            className="w-5 h-5 text-primary border-gray-300 dark:border-gray-700 rounded focus:ring-2 focus:ring-primary"
           />
-          <label htmlFor="active" className="text-sm font-semibold text-gray-700">
+          <label htmlFor="active" className="text-sm font-semibold dark:text-gray-300">
             Événement actif
           </label>
         </div>

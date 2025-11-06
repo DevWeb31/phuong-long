@@ -109,7 +109,7 @@ export function ProductFormModal({ isOpen, onClose, onSubmit, product, isLoading
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="grid md:grid-cols-2 gap-6">
           <div className="md:col-span-2">
-            <label htmlFor="name" className="block text-sm font-semibold text-gray-700 mb-2">
+            <label htmlFor="name" className="block text-sm font-semibold dark:text-gray-300 mb-2">
               Nom du produit <span className="text-red-500">*</span>
             </label>
             <input
@@ -119,12 +119,12 @@ export function ProductFormModal({ isOpen, onClose, onSubmit, product, isLoading
               value={formData.name}
               onChange={handleNameChange}
               required
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+              className="w-full px-4 py-2.5 border dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
             />
           </div>
 
           <div>
-            <label htmlFor="category" className="block text-sm font-semibold text-gray-700 mb-2">
+            <label htmlFor="category" className="block text-sm font-semibold dark:text-gray-300 mb-2">
               Catégorie <span className="text-red-500">*</span>
             </label>
             <select
@@ -133,7 +133,7 @@ export function ProductFormModal({ isOpen, onClose, onSubmit, product, isLoading
               value={formData.category}
               onChange={handleChange}
               required
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+              className="w-full px-4 py-2.5 border dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
             >
               <option value="equipement">Équipement</option>
               <option value="vetements">Vêtements</option>
@@ -144,7 +144,7 @@ export function ProductFormModal({ isOpen, onClose, onSubmit, product, isLoading
           </div>
 
           <div>
-            <label htmlFor="price_cents" className="block text-sm font-semibold text-gray-700 mb-2">
+            <label htmlFor="price_cents" className="block text-sm font-semibold dark:text-gray-300 mb-2">
               Prix (€) <span className="text-red-500">*</span>
             </label>
             <input
@@ -158,12 +158,12 @@ export function ProductFormModal({ isOpen, onClose, onSubmit, product, isLoading
               min="0"
               step="0.01"
               required
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+              className="w-full px-4 py-2.5 border dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
             />
           </div>
 
           <div>
-            <label htmlFor="stock_quantity" className="block text-sm font-semibold text-gray-700 mb-2">
+            <label htmlFor="stock_quantity" className="block text-sm font-semibold dark:text-gray-300 mb-2">
               Stock <span className="text-red-500">*</span>
             </label>
             <input
@@ -174,12 +174,12 @@ export function ProductFormModal({ isOpen, onClose, onSubmit, product, isLoading
               onChange={handleChange}
               min="0"
               required
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+              className="w-full px-4 py-2.5 border dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
             />
           </div>
 
           <div>
-            <label htmlFor="image_url" className="block text-sm font-semibold text-gray-700 mb-2">
+            <label htmlFor="image_url" className="block text-sm font-semibold dark:text-gray-300 mb-2">
               Image (URL)
             </label>
             <input
@@ -188,13 +188,13 @@ export function ProductFormModal({ isOpen, onClose, onSubmit, product, isLoading
               name="image_url"
               value={formData.image_url || ''}
               onChange={handleChange}
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+              className="w-full px-4 py-2.5 border dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
             />
           </div>
         </div>
 
         <div>
-          <label htmlFor="description" className="block text-sm font-semibold text-gray-700 mb-2">
+          <label htmlFor="description" className="block text-sm font-semibold dark:text-gray-300 mb-2">
             Description
           </label>
           <textarea
@@ -203,7 +203,7 @@ export function ProductFormModal({ isOpen, onClose, onSubmit, product, isLoading
             value={formData.description || ''}
             onChange={handleChange}
             rows={4}
-            className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all resize-none"
+            className="w-full px-4 py-2.5 border dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all resize-none"
           />
         </div>
 
@@ -214,9 +214,9 @@ export function ProductFormModal({ isOpen, onClose, onSubmit, product, isLoading
             name="active"
             checked={formData.active}
             onChange={handleChange}
-            className="w-5 h-5 text-primary border-gray-300 rounded focus:ring-2 focus:ring-primary"
+            className="w-5 h-5 text-primary border-gray-300 dark:border-gray-700 rounded focus:ring-2 focus:ring-primary"
           />
-          <label htmlFor="active" className="text-sm font-semibold text-gray-700">
+          <label htmlFor="active" className="text-sm font-semibold dark:text-gray-300">
             Produit actif
           </label>
         </div>

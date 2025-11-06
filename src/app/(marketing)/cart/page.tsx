@@ -21,21 +21,21 @@ export default function CartPage() {
     return (
       <>
         {/* Hero */}
-        <section className="bg-gray-50 py-12">
+        <section className="bg-gray-50 dark:bg-gray-900 py-12">
           <Container>
-            <h1 className="text-3xl font-bold text-gray-900">Panier</h1>
+            <h1 className="text-3xl font-bold dark:text-gray-100">Panier</h1>
           </Container>
         </section>
 
         {/* Empty Cart */}
-        <section className="py-20 bg-white">
+        <section className="py-20 bg-white dark:bg-gray-900">
           <Container>
             <div className="max-w-2xl mx-auto text-center">
               <div className="text-6xl mb-6">🛒</div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">
+              <h2 className="text-2xl font-bold dark:text-gray-100 mb-4">
                 Votre panier est vide
               </h2>
-              <p className="text-gray-600 mb-8">
+              <p className="text-gray-600 dark:text-gray-500 mb-8">
                 Découvrez nos produits et équipez-vous pour votre pratique du Vo Dao !
               </p>
               <Link href="/shop">
@@ -54,15 +54,15 @@ export default function CartPage() {
   return (
     <>
       {/* Hero */}
-      <section className="bg-gray-50 py-12 border-b border-gray-200">
+      <section className="bg-gray-50 dark:bg-gray-900 py-12 border-b dark:border-gray-800">
         <Container>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Panier</h1>
-          <p className="text-gray-600">{itemsCount} article{itemsCount > 1 ? 's' : ''}</p>
+          <h1 className="text-3xl font-bold dark:text-gray-100 mb-2">Panier</h1>
+          <p className="text-gray-600 dark:text-gray-500">{itemsCount} article{itemsCount > 1 ? 's' : ''}</p>
         </Container>
       </section>
 
       {/* Cart Content */}
-      <section className="py-12 bg-white">
+      <section className="py-12 bg-white dark:bg-gray-900">
         <Container>
           <div className="grid lg:grid-cols-3 gap-8">
             {/* Cart Items */}
@@ -73,7 +73,7 @@ export default function CartPage() {
                     <div className="flex gap-4">
                       {/* Image */}
                       <div className="flex-shrink-0">
-                        <div className="w-24 h-24 bg-gray-100 rounded-lg overflow-hidden">
+                        <div className="w-24 h-24 bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden">
                           {item.image ? (
                             <img
                               src={item.image}
@@ -92,14 +92,14 @@ export default function CartPage() {
                       <div className="flex-1 min-w-0">
                         <Link 
                           href={`/shop/${item.slug}`}
-                          className="font-semibold text-gray-900 hover:text-primary transition-colors"
+                          className="font-semibold text-gray-900 dark:text-gray-100 hover:text-primary transition-colors"
                         >
                           {item.name}
                         </Link>
                         {item.size && (
-                          <p className="text-sm text-gray-500 mt-1">Taille : {item.size}</p>
+                          <p className="text-sm dark:text-gray-500 mt-1">Taille : {item.size}</p>
                         )}
-                        <p className="text-lg font-bold text-primary mt-2">
+                        <p className="text-lg font-bold mt-2">
                           {item.price.toFixed(2)} €
                         </p>
                       </div>
@@ -117,7 +117,7 @@ export default function CartPage() {
                         <div className="flex items-center gap-2">
                           <button
                             onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                            className="w-8 h-8 flex items-center justify-center border border-gray-300 rounded hover:bg-gray-100 transition-colors"
+                            className="w-8 h-8 flex items-center justify-center border dark:border-gray-700 rounded hover:bg-gray-100 dark:bg-gray-800 transition-colors"
                             disabled={item.quantity <= 1}
                           >
                             <MinusIcon className="w-4 h-4" />
@@ -125,13 +125,13 @@ export default function CartPage() {
                           <span className="w-12 text-center font-medium">{item.quantity}</span>
                           <button
                             onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                            className="w-8 h-8 flex items-center justify-center border border-gray-300 rounded hover:bg-gray-100 transition-colors"
+                            className="w-8 h-8 flex items-center justify-center border dark:border-gray-700 rounded hover:bg-gray-100 dark:bg-gray-800 transition-colors"
                           >
                             <PlusIcon className="w-4 h-4" />
                           </button>
                         </div>
 
-                        <p className="text-sm font-semibold text-gray-900">
+                        <p className="text-sm font-semibold dark:text-gray-100">
                           {(item.price * item.quantity).toFixed(2)} €
                         </p>
                       </div>
@@ -150,12 +150,12 @@ export default function CartPage() {
                 <CardContent>
                   <div className="space-y-3 mb-6">
                     <div className="flex justify-between text-sm">
-                      <span className="text-gray-600">Sous-total</span>
-                      <span className="font-medium text-gray-900">{total.toFixed(2)} €</span>
+                      <span className="text-gray-600 dark:text-gray-500">Sous-total</span>
+                      <span className="font-medium text-gray-900 dark:text-gray-100">{total.toFixed(2)} €</span>
                     </div>
                     <div className="flex justify-between text-sm">
-                      <span className="text-gray-600">Livraison</span>
-                      <span className="font-medium text-gray-900">
+                      <span className="text-gray-600 dark:text-gray-500">Livraison</span>
+                      <span className="font-medium text-gray-900 dark:text-gray-100">
                         {total >= 50 ? (
                           <span className="text-green-600">Gratuite ✅</span>
                         ) : (
@@ -163,7 +163,7 @@ export default function CartPage() {
                         )}
                       </span>
                     </div>
-                    <div className="border-t border-gray-200 pt-3">
+                    <div className="border-t dark:border-gray-800 pt-3">
                       <div className="flex justify-between text-lg font-bold">
                         <span>Total</span>
                         <span className="text-primary">
@@ -174,7 +174,7 @@ export default function CartPage() {
                   </div>
 
                   {total < 50 && (
-                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4 text-sm text-blue-700">
+                    <div className="bg-blue-50 border rounded-lg p-3 mb-4 text-sm">
                       💡 Plus que {(50 - total).toFixed(2)} € pour la livraison gratuite !
                     </div>
                   )}

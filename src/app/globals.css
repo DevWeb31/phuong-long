@@ -4,28 +4,53 @@
 
 @layer base {
   :root {
-    /* Colors - Thème Arts Martiaux (Rouge/Or/Noir) */
-    /* Rouge Principal - Force & Passion */
-    --color-primary: 0 84% 48%;        /* Rouge vif martial #DC2626 */
-    --color-primary-dark: 0 84% 38%;   /* Rouge profond #B91C1C */
-    --color-primary-light: 0 84% 58%;  /* Rouge clair #EF4444 */
+    /* Colors - Thème Moderne Premium - LIGHT MODE */
+    /* Bleu Océan - Élégant & Professionnel */
+    --color-primary: 217 91% 60%;      /* Bleu océan #3B82F6 */
+    --color-primary-dark: 217 91% 50%; /* Bleu profond #2563EB */
+    --color-primary-light: 217 91% 70%; /* Bleu clair #60A5FA */
     
-    /* Or/Doré - Excellence & Tradition */
-    --color-secondary: 43 96% 56%;     /* Or vif #F59E0B */
-    --color-secondary-dark: 43 96% 46%; /* Or profond #D97706 */
-    --color-secondary-light: 43 96% 66%; /* Or clair #FBBF24 */
+    /* Indigo - Moderne & Sophistiqué */
+    --color-secondary: 239 84% 67%;    /* Indigo #6366F1 */
+    --color-secondary-dark: 239 84% 57%; /* Indigo profond #4F46E5 */
+    --color-secondary-light: 239 84% 77%; /* Indigo clair #818CF8 */
     
-    /* Jade - Culture Asiatique */
-    --color-accent: 158 64% 52%;       /* Vert jade #34D399 */
+    /* Or Subtil - Premium & Élégance */
+    --color-accent: 43 96% 56%;        /* Or discret #F59E0B */
     
-    /* Noir - Discipline & Puissance */
-    --color-dark: 0 0% 10%;            /* Noir doux #1A1A1A */
-    --color-dark-muted: 0 0% 20%;      /* Gris très foncé #333333 */
+    /* Gris Premium */
+    --color-dark: 222 47% 11%;         /* Bleu-gris foncé #0F172A */
+    --color-dark-muted: 215 28% 17%;   /* Bleu-gris #1E293B */
     
-    /* Or (alias secondary pour cohérence) */
+    /* Or (alias secondary pour compatibilité) */
     --color-gold: 43 96% 56%;
     --color-gold-dark: 43 96% 46%;
     --color-gold-light: 43 96% 66%;
+  }
+
+  /* DARK MODE - Palette harmonisée moderne */
+  .dark {
+    /* Bleu lumineux en dark mode */
+    --color-primary: 217 91% 65%;      /* Bleu lumineux #60A5FA */
+    --color-primary-dark: 217 91% 55%; /* Bleu moyen #3B82F6 */
+    --color-primary-light: 217 91% 75%; /* Bleu très clair #93C5FD */
+    
+    /* Indigo brillant sur fond sombre */
+    --color-secondary: 239 84% 72%;    /* Indigo lumineux #818CF8 */
+    --color-secondary-dark: 239 84% 62%; /* Indigo moyen #6366F1 */
+    --color-secondary-light: 239 84% 82%; /* Indigo très clair #A5B4FC */
+    
+    /* Or lumineux */
+    --color-accent: 43 96% 60%;        /* Or lumineux #FBBF24 */
+    
+    /* Backgrounds sombres */
+    --color-dark: 0 0% 90%;            /* Pour texte sur fond noir */
+    --color-dark-muted: 0 0% 70%;      /* Texte muted sur fond noir */
+    
+    /* Or (alias) */
+    --color-gold: 43 96% 60%;
+    --color-gold-dark: 43 96% 50%;
+    --color-gold-light: 43 96% 70%;
     
     /* Spacing (si besoin customs supplémentaires) */
     --spacing-xs: 0.25rem;
@@ -58,7 +83,7 @@
   }
   
   * {
-    @apply border-gray-200;
+    @apply border-gray-200 dark:border-gray-800;
   }
   
   html {
@@ -66,7 +91,9 @@
   }
   
   body {
-    @apply bg-white text-gray-900;
+    @apply bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100;
+    @apply transition-colors duration-300;
+    @apply antialiased;
   }
   
   /* Typography improvements */
@@ -92,7 +119,12 @@
   
   /* Focus styles pour accessibilité */
   *:focus-visible {
-    @apply outline-none ring-2 ring-primary ring-offset-2;
+    @apply outline-none ring-2 ring-primary ring-offset-2 dark:ring-offset-gray-900;
+  }
+  
+  /* Selection color */
+  ::selection {
+    @apply bg-primary/20 text-primary-dark dark:bg-primary/30 dark:text-primary-light;
   }
 }
 

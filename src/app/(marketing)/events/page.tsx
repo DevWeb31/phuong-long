@@ -74,31 +74,31 @@ export default async function EventsPage() {
       </section>
 
       {/* Stats */}
-      <section className="py-12 lg:py-16 bg-gradient-to-b from-white to-gray-50">
+      <section className="py-12 lg:py-16 bg-gradient-to-b from-white dark:from-gray-950 to-gray-50 dark:to-gray-900">
         <Container>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
             <div className="group">
-              <div className="text-4xl lg:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-primary to-primary-dark mb-2 group-hover:scale-110 transition-transform duration-300">{typedEvents?.length || 0}</div>
-              <div className="text-sm font-semibold text-gray-600 uppercase tracking-wide">Événements à venir</div>
+              <div className="text-4xl lg:text-5xl font-bold bg-clip-text from-primary to-primary-dark mb-2 group-hover:scale-110 transition-transform duration-300">{typedEvents?.length || 0}</div>
+              <div className="text-sm font-semibold dark:text-gray-500 uppercase tracking-wide">Événements à venir</div>
             </div>
             <div className="group">
-              <div className="text-4xl lg:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-secondary to-secondary-dark mb-2 group-hover:scale-110 transition-transform duration-300">{eventsByType?.stage?.length || 0}</div>
-              <div className="text-sm font-semibold text-gray-600 uppercase tracking-wide">Stages</div>
+              <div className="text-4xl lg:text-5xl font-bold bg-clip-text from-secondary to-secondary-dark mb-2 group-hover:scale-110 transition-transform duration-300">{eventsByType?.stage?.length || 0}</div>
+              <div className="text-sm font-semibold dark:text-gray-500 uppercase tracking-wide">Stages</div>
             </div>
             <div className="group">
-              <div className="text-4xl lg:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-accent to-green-600 mb-2 group-hover:scale-110 transition-transform duration-300">{eventsByType?.competition?.length || 0}</div>
-              <div className="text-sm font-semibold text-gray-600 uppercase tracking-wide">Compétitions</div>
+              <div className="text-4xl lg:text-5xl font-bold bg-clip-text from-accent to-green-600 mb-2 group-hover:scale-110 transition-transform duration-300">{eventsByType?.competition?.length || 0}</div>
+              <div className="text-sm font-semibold dark:text-gray-500 uppercase tracking-wide">Compétitions</div>
             </div>
             <div className="group">
-              <div className="text-4xl lg:text-5xl font-bold text-gray-700 mb-2 group-hover:scale-110 transition-transform duration-300">{eventsByType?.demonstration?.length || 0}</div>
-              <div className="text-sm font-semibold text-gray-600 uppercase tracking-wide">Démonstrations</div>
+              <div className="text-4xl lg:text-5xl font-bold dark:text-gray-300 mb-2 group-hover:scale-110 transition-transform duration-300">{eventsByType?.demonstration?.length || 0}</div>
+              <div className="text-sm font-semibold dark:text-gray-500 uppercase tracking-wide">Démonstrations</div>
             </div>
           </div>
         </Container>
       </section>
 
       {/* Events par type */}
-      <section className="py-24 lg:py-32 bg-gradient-to-b from-gray-50 to-white relative overflow-hidden">
+      <section className="py-24 lg:py-32 bg-gradient-to-b from-gray-50 dark:from-gray-900 to-white dark:to-gray-950 relative overflow-hidden">
         {/* Subtle background decoration */}
         <div className="absolute top-0 right-0 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
         <div className="absolute bottom-0 left-0 w-96 h-96 bg-secondary/5 rounded-full blur-3xl" />
@@ -109,7 +109,7 @@ export default async function EventsPage() {
               <div key={type} className="mb-20 last:mb-0">
                 <div className="flex items-center gap-4 mb-10">
                   <span className="w-2 h-12 bg-gradient-to-b from-primary to-primary-dark rounded-full shadow-lg shadow-primary/20" />
-                  <h2 className="text-3xl lg:text-4xl font-bold text-gray-900">
+                  <h2 className="text-3xl lg:text-4xl font-bold dark:text-gray-100">
                     {eventTypeLabels[type] || type}
                   </h2>
                 </div>
@@ -140,24 +140,24 @@ export default async function EventsPage() {
                             {event.title}
                           </CardTitle>
                           
-                          <div className="space-y-2 text-sm text-gray-600">
+                          <div className="space-y-2 text-sm dark:text-gray-500">
                             {event.club && (
                               <div className="flex items-center gap-2">
-                                <MapPinIcon className="w-4 h-4 text-gray-400" />
+                                <MapPinIcon className="w-4 h-4 text-gray-400 dark:text-gray-500" />
                                 <span>{event.club.city}</span>
                               </div>
                             )}
                             
                             {event.location && (
                               <div className="flex items-start gap-2">
-                                <CalendarIcon className="w-4 h-4 text-gray-400 flex-shrink-0 mt-0.5" />
+                                <CalendarIcon className="w-4 h-4 text-gray-400 dark:text-gray-400 flex-shrink-0 mt-0.5" />
                                 <span className="line-clamp-1">{event.location}</span>
                               </div>
                             )}
                             
                             {event.max_attendees && (
                               <div className="flex items-center gap-2">
-                                <UsersIcon className="w-4 h-4 text-gray-400" />
+                                <UsersIcon className="w-4 h-4 text-gray-400 dark:text-gray-500" />
                                 <span>Max {event.max_attendees} places</span>
                               </div>
                             )}
@@ -175,8 +175,8 @@ export default async function EventsPage() {
           {(!typedEvents || typedEvents.length === 0) && (
             <div className="text-center py-12">
               <CalendarIcon className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-              <p className="text-lg text-gray-600">Aucun événement à venir pour le moment.</p>
-              <p className="text-sm text-gray-500 mt-2">Revenez bientôt pour découvrir nos prochains stages et compétitions !</p>
+              <p className="text-lg dark:text-gray-500">Aucun événement à venir pour le moment.</p>
+              <p className="text-sm dark:text-gray-500 mt-2">Revenez bientôt pour découvrir nos prochains stages et compétitions !</p>
             </div>
           )}
         </Container>
@@ -193,15 +193,15 @@ export default async function EventsPage() {
         
         <Container className="relative z-10">
           <div className="max-w-4xl mx-auto text-center">
-            <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6 animate-fade-in tracking-tight">
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-secondary via-secondary-light to-secondary">Organisez</span> un Événement
+            <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 animate-fade-in tracking-tight">
+              <span className="text-transparent bg-clip-text from-secondary via-secondary-light to-secondary">Organisez</span> un Événement
             </h2>
-            <p className="text-xl md:text-2xl text-white/80 mb-12 max-w-3xl mx-auto leading-relaxed animate-slide-up">
+            <p className="text-xl md:text-2xl mb-12 max-w-3xl mx-auto leading-relaxed animate-slide-up">
               Vous êtes coach ou responsable de club ? Proposez votre événement.
             </p>
             <div className="animate-scale-in">
               <Link href="/contact">
-                <Button size="lg" className="bg-white text-primary hover:bg-gray-50 shadow-2xl shadow-black/20 hover:shadow-white/40 min-w-[240px] text-lg py-4 px-8">
+                <Button size="lg" className="bg-white dark:bg-gray-900 text-primary hover:bg-gray-50 shadow-2xl shadow-black/20 hover:shadow-white/40 min-w-[240px] py-4 px-8">
                   ✉️ Nous Contacter
                 </Button>
               </Link>

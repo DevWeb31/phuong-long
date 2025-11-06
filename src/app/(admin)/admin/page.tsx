@@ -27,8 +27,8 @@ export default function AdminDashboardPage() {
     <div className="space-y-8">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Dashboard Admin</h1>
-        <p className="text-gray-600">
+        <h1 className="text-3xl font-bold dark:text-gray-100 mb-2">Dashboard Admin</h1>
+        <p className="text-gray-600 dark:text-gray-500">
           Vue d'ensemble de votre plateforme Phuong Long Vo Dao
         </p>
       </div>
@@ -99,7 +99,7 @@ export default function AdminDashboardPage() {
             <div className="grid grid-cols-2 gap-3">
               <Link
                 href="/admin/clubs/new"
-                className="p-4 border border-gray-200 rounded-lg hover:border-primary hover:bg-primary/5 transition-colors text-center"
+                className="p-4 border dark:border-gray-800 rounded-lg hover:border-primary hover:bg-primary/5 transition-colors text-center"
               >
                 <BuildingOfficeIcon className="w-8 h-8 mx-auto mb-2 text-primary" />
                 <div className="text-sm font-medium">Nouveau Club</div>
@@ -107,7 +107,7 @@ export default function AdminDashboardPage() {
 
               <Link
                 href="/admin/events/new"
-                className="p-4 border border-gray-200 rounded-lg hover:border-secondary hover:bg-secondary/5 transition-colors text-center"
+                className="p-4 border dark:border-gray-800 rounded-lg hover:border-secondary hover:bg-secondary/5 transition-colors text-center"
               >
                 <CalendarIcon className="w-8 h-8 mx-auto mb-2 text-secondary" />
                 <div className="text-sm font-medium">Nouvel Événement</div>
@@ -115,7 +115,7 @@ export default function AdminDashboardPage() {
 
               <Link
                 href="/admin/blog/new"
-                className="p-4 border border-gray-200 rounded-lg hover:border-accent hover:bg-accent/5 transition-colors text-center"
+                className="p-4 border dark:border-gray-800 rounded-lg hover:border-accent hover:bg-accent/5 transition-colors text-center"
               >
                 <NewspaperIcon className="w-8 h-8 mx-auto mb-2 text-accent" />
                 <div className="text-sm font-medium">Nouvel Article</div>
@@ -123,7 +123,7 @@ export default function AdminDashboardPage() {
 
               <Link
                 href="/admin/users"
-                className="p-4 border border-gray-200 rounded-lg hover:border-primary hover:bg-primary/5 transition-colors text-center"
+                className="p-4 border dark:border-gray-800 rounded-lg hover:border-primary hover:bg-primary/5 transition-colors text-center"
               >
                 <UsersIcon className="w-8 h-8 mx-auto mb-2 text-primary" />
                 <div className="text-sm font-medium">Gérer Utilisateurs</div>
@@ -141,41 +141,41 @@ export default function AdminDashboardPage() {
             <div className="space-y-4">
               <div className="flex items-start gap-3">
                 <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
-                  <span className="text-green-600 text-sm">✓</span>
+                  <span className="text-green-600">✓</span>
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-gray-900">Nouvel utilisateur inscrit</p>
-                  <p className="text-xs text-gray-500">Il y a 5 minutes</p>
+                  <p className="text-sm font-medium dark:text-gray-100">Nouvel utilisateur inscrit</p>
+                  <p className="text-xs dark:text-gray-500">Il y a 5 minutes</p>
                 </div>
               </div>
 
               <div className="flex items-start gap-3">
                 <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
-                  <span className="text-blue-600 text-sm">📝</span>
+                  <span className="text-blue-600">📝</span>
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-gray-900">Article publié</p>
-                  <p className="text-xs text-gray-500">Il y a 2 heures</p>
+                  <p className="text-sm font-medium dark:text-gray-100">Article publié</p>
+                  <p className="text-xs dark:text-gray-500">Il y a 2 heures</p>
                 </div>
               </div>
 
               <div className="flex items-start gap-3">
                 <div className="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center flex-shrink-0">
-                  <span className="text-yellow-600 text-sm">📅</span>
+                  <span className="text-yellow-600">📅</span>
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-gray-900">Événement créé</p>
-                  <p className="text-xs text-gray-500">Il y a 5 heures</p>
+                  <p className="text-sm font-medium dark:text-gray-100">Événement créé</p>
+                  <p className="text-xs dark:text-gray-500">Il y a 5 heures</p>
                 </div>
               </div>
 
               <div className="flex items-start gap-3">
                 <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center flex-shrink-0">
-                  <span className="text-purple-600 text-sm">🛒</span>
+                  <span className="text-purple-600">🛒</span>
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-gray-900">Nouvelle commande</p>
-                  <p className="text-xs text-gray-500">Hier</p>
+                  <p className="text-sm font-medium dark:text-gray-100">Nouvelle commande</p>
+                  <p className="text-xs dark:text-gray-500">Hier</p>
                 </div>
               </div>
             </div>
@@ -190,9 +190,9 @@ export default function AdminDashboardPage() {
           <CardDescription>Statistiques des 30 derniers jours</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="h-64 bg-gray-100 rounded-lg flex items-center justify-center">
-            <div className="text-center text-gray-500">
-              <ChartBarIcon className="w-16 h-16 mx-auto mb-4 text-gray-400" />
+          <div className="h-64 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center">
+            <div className="text-center dark:text-gray-500">
+              <ChartBarIcon className="w-16 h-16 mx-auto mb-4 text-gray-400 dark:text-gray-500" />
               <p className="text-sm">Graphiques à venir</p>
               <p className="text-xs mt-1">(Recharts ou Chart.js)</p>
             </div>

@@ -68,15 +68,15 @@ export function Modal({ isOpen, onClose, title, children, size = 'md', footer }:
       {/* Modal Container */}
       <div className="flex min-h-full items-center justify-center p-4">
         <div
-          className={`relative bg-white rounded-2xl shadow-2xl w-full ${sizeClasses[size]} transform transition-all animate-scale-in`}
+          className={`relative bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full ${sizeClasses[size]} transform transition-all animate-scale-in`}
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
-          <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
-            <h2 className="text-xl font-bold text-gray-900">{title}</h2>
+          <div className="flex items-center justify-between px-6 py-4 border-b dark:border-gray-800">
+            <h2 className="text-xl font-bold dark:text-gray-100">{title}</h2>
             <button
               onClick={onClose}
-              className="text-gray-400 hover:text-gray-600 transition-colors rounded-lg p-1 hover:bg-gray-100"
+              className="text-gray-400 dark:text-gray-400 hover:text-gray-600 transition-colors rounded-lg p-1 hover:bg-gray-100 dark:bg-gray-800"
             >
               <XMarkIcon className="w-6 h-6" />
             </button>
@@ -89,7 +89,7 @@ export function Modal({ isOpen, onClose, title, children, size = 'md', footer }:
 
           {/* Footer */}
           {footer && (
-            <div className="px-6 py-4 border-t border-gray-200 bg-gray-50 rounded-b-2xl">
+            <div className="px-6 py-4 border-t dark:border-gray-800 bg-gray-50 dark:bg-gray-900 rounded-b-2xl">
               {footer}
             </div>
           )}
@@ -147,7 +147,7 @@ export function ConfirmModal({
         </div>
       }
     >
-      <p className="text-gray-700 leading-relaxed">{message}</p>
+      <p className="text-gray-700 dark:text-gray-300 leading-relaxed">{message}</p>
     </Modal>
   );
 }

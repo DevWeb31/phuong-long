@@ -13,13 +13,9 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { Container, Card, CardHeader, CardTitle, CardDescription, CardContent, Button, ParallaxBackground } from '@/components/common';
 import { EnvelopeIcon, PhoneIcon, MapPinIcon, ClockIcon } from '@heroicons/react/24/outline';
-import { useParallax, getParallaxOffset } from '@/lib/hooks/useParallax';
+import { ContactHeroContent } from '@/components/marketing/ContactHeroContent';
 
 export default function ContactPage() {
-  const scrollY = useParallax();
-  const badgeOffset = getParallaxOffset(scrollY, 0.12);
-  const contentOffset = getParallaxOffset(scrollY, 0.08);
-  
   const [formState, setFormState] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [formData, setFormData] = useState({
     name: '',
@@ -70,47 +66,23 @@ export default function ContactPage() {
     <>
       {/* Hero Section with Parallax */}
       <section className="relative bg-gradient-to-br from-primary via-primary-dark to-[#B91C1C] py-20 lg:py-24 overflow-hidden">
+        {/* Parallax Background */}
         <ParallaxBackground>
           <div className="absolute inset-0" style={{
             backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
           }} />
         </ParallaxBackground>
-
-        <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-transparent to-black/20" />
+        
+        {/* Gradient Overlay pour profondeur */}
+        <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-transparent to-black/30" />
 
         <Container className="relative z-10">
-          <div className="max-w-4xl mx-auto text-center">
-            <div 
-              className="inline-flex items-center px-5 py-2.5 mb-8 bg-white/10 backdrop-blur-md text-white border border-white/20 rounded-full shadow-lg shadow-black/10 animate-fade-in"
-              style={{
-                transform: `translateY(${badgeOffset}px)`,
-                willChange: 'transform',
-              }}
-            >
-              <span className="text-secondary mr-2 text-xl">✉️</span>
-              <span className="font-semibold text-sm">Contactez-nous - Réponse sous 24h</span>
-            </div>
-
-            <div
-              style={{
-                transform: `translateY(${contentOffset}px)`,
-                willChange: 'transform',
-              }}
-            >
-              <h1 className="text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold text-white mb-8 animate-slide-up tracking-tight">
-                Nous <span className="text-transparent bg-clip-text bg-gradient-to-r from-secondary via-secondary-light to-secondary">Contacter</span>
-              </h1>
-
-              <p className="text-xl md:text-2xl text-white/90 leading-relaxed animate-fade-in max-w-3xl mx-auto">
-                Une question ? Un projet ? Notre équipe est à votre écoute pour vous accompagner dans votre pratique du Vo Dao.
-              </p>
-            </div>
-          </div>
+          <ContactHeroContent />
         </Container>
       </section>
 
       {/* Contact Content */}
-      <section className="py-16 lg:py-20 bg-gray-50">
+      <section className="py-16 lg:py-20 bg-gray-50 dark:bg-gray-900">
         <Container>
           <div className="grid lg:grid-cols-3 gap-8">
             {/* Contact Info */}
@@ -176,11 +148,11 @@ export default function ContactPage() {
               </Card>
 
               {/* CTA Clubs */}
-              <div className="bg-gradient-to-br from-primary/10 to-secondary/10 rounded-lg p-6 border border-primary/20">
-                <h3 className="font-semibold text-gray-900 mb-2">
+              <div className="bg-gradient-to-br from-primary/10 to-secondary/10 rounded-lg p-6 border">
+                <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-2">
                   Contacter un club directement
                 </h3>
-                <p className="text-sm text-gray-600 mb-4">
+                <p className="text-sm dark:text-gray-500 mb-4">
                   Pour des questions spécifiques à un club (horaires, essai gratuit), contactez-le directement.
                 </p>
                 <Link href="/clubs">
@@ -203,9 +175,9 @@ export default function ContactPage() {
 
                 <CardContent>
                   {formState === 'success' ? (
-                    <div className="bg-green-50 border border-green-200 rounded-lg p-6 text-center">
+                    <div className="bg-green-50 border rounded-lg p-6 text-center">
                       <div className="text-4xl mb-4">✅</div>
-                      <h3 className="text-xl font-semibold text-green-900 mb-2">
+                      <h3 className="text-xl font-semibold mb-2">
                         Message envoyé avec succès !
                       </h3>
                       <p className="text-green-700 mb-4">
@@ -219,7 +191,7 @@ export default function ContactPage() {
                     <form onSubmit={handleSubmit} className="space-y-6">
                       {/* Name */}
                       <div>
-                        <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
+                        <label htmlFor="name" className="block text-sm font-medium dark:text-gray-300 mb-2">
                           Nom complet <span className="text-red-500">*</span>
                         </label>
                         <input
@@ -229,14 +201,14 @@ export default function ContactPage() {
                           value={formData.name}
                           onChange={handleChange}
                           required
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                          className="w-full px-4 py-2 border dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
                           placeholder="Jean Dupont"
                         />
                       </div>
 
                       {/* Email */}
                       <div>
-                        <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+                        <label htmlFor="email" className="block text-sm font-medium dark:text-gray-300 mb-2">
                           Email <span className="text-red-500">*</span>
                         </label>
                         <input
@@ -246,14 +218,14 @@ export default function ContactPage() {
                           value={formData.email}
                           onChange={handleChange}
                           required
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                          className="w-full px-4 py-2 border dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
                           placeholder="jean.dupont@example.com"
                         />
                       </div>
 
                       {/* Phone */}
                       <div>
-                        <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-2">
+                        <label htmlFor="phone" className="block text-sm font-medium dark:text-gray-300 mb-2">
                           Téléphone
                         </label>
                         <input
@@ -262,14 +234,14 @@ export default function ContactPage() {
                           name="phone"
                           value={formData.phone}
                           onChange={handleChange}
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                          className="w-full px-4 py-2 border dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
                           placeholder="06 12 34 56 78"
                         />
                       </div>
 
                       {/* Club */}
                       <div>
-                        <label htmlFor="club" className="block text-sm font-medium text-gray-700 mb-2">
+                        <label htmlFor="club" className="block text-sm font-medium dark:text-gray-300 mb-2">
                           Club concerné
                         </label>
                         <select
@@ -277,7 +249,7 @@ export default function ContactPage() {
                           name="club"
                           value={formData.club}
                           onChange={handleChange}
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                          className="w-full px-4 py-2 border dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
                         >
                           <option value="">-- Sélectionnez un club --</option>
                           <option value="marseille">Marseille Centre</option>
@@ -291,7 +263,7 @@ export default function ContactPage() {
 
                       {/* Subject */}
                       <div>
-                        <label htmlFor="subject" className="block text-sm font-medium text-gray-700 mb-2">
+                        <label htmlFor="subject" className="block text-sm font-medium dark:text-gray-300 mb-2">
                           Sujet <span className="text-red-500">*</span>
                         </label>
                         <input
@@ -301,14 +273,14 @@ export default function ContactPage() {
                           value={formData.subject}
                           onChange={handleChange}
                           required
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                          className="w-full px-4 py-2 border dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
                           placeholder="Demande d'informations"
                         />
                       </div>
 
                       {/* Message */}
                       <div>
-                        <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-2">
+                        <label htmlFor="message" className="block text-sm font-medium dark:text-gray-300 mb-2">
                           Message <span className="text-red-500">*</span>
                         </label>
                         <textarea
@@ -318,14 +290,14 @@ export default function ContactPage() {
                           onChange={handleChange}
                           required
                           rows={6}
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent resize-none"
+                          className="w-full px-4 py-2 border dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent resize-none"
                           placeholder="Votre message..."
                         />
                       </div>
 
                       {/* Error Message */}
                       {formState === 'error' && (
-                        <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700">
+                        <div className="bg-red-50 border rounded-lg p-4 text-red-700">
                           ❌ Une erreur est survenue. Veuillez réessayer ou nous contacter directement par email.
                         </div>
                       )}
@@ -350,13 +322,13 @@ export default function ContactPage() {
       </section>
 
       {/* FAQ CTA */}
-      <section className="py-16 bg-white">
+      <section className="py-16 bg-white dark:bg-gray-900">
         <Container>
           <div className="max-w-3xl mx-auto text-center">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">
+            <h2 className="text-3xl font-bold dark:text-gray-100 mb-4">
               Consultez notre FAQ
             </h2>
-            <p className="text-lg text-gray-600 mb-8">
+            <p className="text-lg dark:text-gray-500 mb-8">
               La réponse à votre question s'y trouve peut-être déjà !
             </p>
             <Link href="/faq">

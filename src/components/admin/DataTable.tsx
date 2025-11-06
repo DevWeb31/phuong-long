@@ -160,7 +160,7 @@ export function DataTable<T extends { id: string | number }>({
         {searchable && (
           <div className="relative flex-1 max-w-sm">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <MagnifyingGlassIcon className="h-5 w-5 text-gray-400" />
+              <MagnifyingGlassIcon className="h-5 w-5 text-gray-400 dark:text-gray-500" />
             </div>
             <input
               type="text"
@@ -169,7 +169,7 @@ export function DataTable<T extends { id: string | number }>({
                 setSearchTerm(e.target.value);
                 setCurrentPage(1);
               }}
-              className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+              className="block w-full pl-10 pr-3 py-2 border dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
               placeholder={searchPlaceholder}
             />
           </div>
@@ -187,14 +187,14 @@ export function DataTable<T extends { id: string | number }>({
       </div>
 
       {/* Table */}
-      <div className="overflow-x-auto border border-gray-200 rounded-lg">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
+      <div className="overflow-x-auto border dark:border-gray-800 rounded-lg">
+        <table className="min-w-full divide-y dark:divide-gray-800">
+          <thead className="bg-gray-50 dark:bg-gray-900">
             <tr>
               {columns.map((column) => (
                 <th
                   key={String(column.key)}
-                  className={`px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider ${
+                  className={`px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-500 uppercase tracking-wider ${
                     column.sortable ? 'cursor-pointer select-none hover:bg-gray-100' : ''
                   } ${column.width || ''}`}
                   onClick={() => column.sortable && handleSort(column)}
@@ -223,25 +223,25 @@ export function DataTable<T extends { id: string | number }>({
                 </th>
               ))}
               {allActions.length > 0 && (
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-right font-medium dark:text-gray-500 uppercase tracking-wider">
                   Actions
                 </th>
               )}
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
+          <tbody className="bg-white dark:bg-gray-900 divide-y dark:divide-gray-800">
             {paginatedData.length === 0 ? (
               <tr>
                 <td
                   colSpan={columns.length + (allActions.length > 0 ? 1 : 0)}
-                  className="px-6 py-12 text-center text-gray-500"
+                  className="px-6 py-12 text-center dark:text-gray-500"
                 >
                   {emptyMessage}
                 </td>
               </tr>
             ) : (
               paginatedData.map((row) => (
-                <tr key={row.id} className="hover:bg-gray-50 transition-colors">
+                <tr key={row.id} className="hover:bg-gray-50 dark:bg-gray-900 transition-colors">
                   {columns.map((column) => {
                     const value = row[column.key as keyof T];
                     return (
@@ -251,7 +251,7 @@ export function DataTable<T extends { id: string | number }>({
                     );
                   })}
                   {allActions.length > 0 && (
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                    <td className="px-6 py-4 whitespace-nowrap text-right font-medium">
                       <div className="flex items-center justify-end gap-2">
                         {allActions.map((action, actionIndex) => {
                           if (action.show && !action.show(row)) return null;
@@ -264,7 +264,7 @@ export function DataTable<T extends { id: string | number }>({
                                 action.variant === 'danger'
                                   ? 'text-red-600 hover:bg-red-50'
                                   : action.variant === 'secondary'
-                                  ? 'text-gray-600 hover:bg-gray-100'
+                                  ? 'text-gray-600 dark:text-gray-500 hover:bg-gray-100'
                                   : 'text-primary hover:bg-primary/5'
                               }`}
                               title={action.label}
@@ -287,7 +287,7 @@ export function DataTable<T extends { id: string | number }>({
       {/* Pagination */}
       {totalPages > 1 && (
         <div className="flex items-center justify-between">
-          <div className="text-sm text-gray-700">
+          <div className="text-sm dark:text-gray-300">
             Affichage de <span className="font-medium">{startIndex + 1}</span> à{' '}
             <span className="font-medium">{Math.min(endIndex, sortedData.length)}</span> sur{' '}
             <span className="font-medium">{sortedData.length}</span> résultats

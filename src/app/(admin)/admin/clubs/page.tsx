@@ -82,7 +82,7 @@ export default function AdminClubsPage() {
       key: 'name',
       label: 'Nom du club',
       sortable: true,
-      render: (value) => <span className="font-medium text-gray-900">{value}</span>,
+      render: (value) => <span className="font-medium text-gray-900 dark:text-gray-100">{value}</span>,
     },
     {
       key: 'city',
@@ -103,7 +103,7 @@ export default function AdminClubsPage() {
           {value} membres
         </Badge>
       ) : (
-        <span className="text-gray-400 text-sm">-</span>
+        <span className="text-gray-400 dark:text-gray-400">-</span>
       ),
     },
     {
@@ -206,8 +206,8 @@ export default function AdminClubsPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Gestion des Clubs</h1>
-          <p className="text-gray-600">
+          <h1 className="text-3xl font-bold dark:text-gray-100 mb-2">Gestion des Clubs</h1>
+          <p className="text-gray-600 dark:text-gray-500">
             Gérez les clubs, leurs informations et leurs membres
           </p>
         </div>
@@ -219,8 +219,8 @@ export default function AdminClubsPage() {
       {/* DataTable */}
       {isLoading ? (
         <div className="text-center py-12">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-gray-200 border-t-primary"></div>
-          <p className="mt-4 text-gray-600">Chargement...</p>
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 dark:border-gray-800"></div>
+          <p className="mt-4 text-gray-600 dark:text-gray-500">Chargement...</p>
         </div>
       ) : (
         <DataTable

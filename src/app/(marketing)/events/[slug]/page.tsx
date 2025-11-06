@@ -115,7 +115,7 @@ export default async function EventDetailPage({ params }: Props) {
             </h1>
             
             {typedEvent.description && (
-              <p className="text-xl text-white/90 leading-relaxed">
+              <p className="text-xl leading-relaxed">
                 {typedEvent.description}
               </p>
             )}
@@ -138,8 +138,8 @@ export default async function EventDetailPage({ params }: Props) {
                   <div className="flex items-start gap-3">
                     <CalendarIcon className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
                     <div>
-                      <p className="font-medium text-gray-900">Date</p>
-                      <p className="text-gray-600">
+                      <p className="font-medium text-gray-900 dark:text-gray-100">Date</p>
+                      <p className="text-gray-600 dark:text-gray-500">
                         {new Date(typedEvent.start_date).toLocaleDateString('fr-FR', {
                           weekday: 'long',
                           day: 'numeric',
@@ -148,7 +148,7 @@ export default async function EventDetailPage({ params }: Props) {
                         })}
                       </p>
                       {typedEvent.end_date && typedEvent.end_date !== typedEvent.start_date && (
-                        <p className="text-sm text-gray-500">
+                        <p className="text-sm dark:text-gray-500">
                           au {new Date(typedEvent.end_date).toLocaleDateString('fr-FR', {
                             day: 'numeric',
                             month: 'long',
@@ -163,8 +163,8 @@ export default async function EventDetailPage({ params }: Props) {
                   <div className="flex items-start gap-3">
                     <ClockIcon className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
                     <div>
-                      <p className="font-medium text-gray-900">Horaire</p>
-                      <p className="text-gray-600">
+                      <p className="font-medium text-gray-900 dark:text-gray-100">Horaire</p>
+                      <p className="text-gray-600 dark:text-gray-500">
                         {new Date(typedEvent.start_date).toLocaleTimeString('fr-FR', {
                           hour: '2-digit',
                           minute: '2-digit'
@@ -184,12 +184,12 @@ export default async function EventDetailPage({ params }: Props) {
                     <div className="flex items-start gap-3">
                       <MapPinIcon className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
                       <div>
-                        <p className="font-medium text-gray-900">Lieu</p>
-                        <p className="text-gray-600">{typedEvent.location}</p>
+                        <p className="font-medium text-gray-900 dark:text-gray-100">Lieu</p>
+                        <p className="text-gray-600 dark:text-gray-500">{typedEvent.location}</p>
                         {typedEvent.club && (
                           <Link 
                             href={`/clubs/${typedEvent.club.slug}`}
-                            className="text-sm text-primary hover:underline mt-1 inline-block"
+                            className="text-sm hover:underline mt-1 inline-block"
                           >
                             {typedEvent.club.name} - {typedEvent.club.city}
                           </Link>
@@ -203,8 +203,8 @@ export default async function EventDetailPage({ params }: Props) {
                     <div className="flex items-start gap-3">
                       <UsersIcon className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
                       <div>
-                        <p className="font-medium text-gray-900">Capacité</p>
-                        <p className="text-gray-600">
+                        <p className="font-medium text-gray-900 dark:text-gray-100">Capacité</p>
+                        <p className="text-gray-600 dark:text-gray-500">
                           {typedEvent.max_attendees} places maximum
                         </p>
                         {placesLeft !== null && (
@@ -224,8 +224,8 @@ export default async function EventDetailPage({ params }: Props) {
                   <div className="flex items-start gap-3">
                     <CurrencyEuroIcon className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
                     <div>
-                      <p className="font-medium text-gray-900">Tarif</p>
-                      <p className="text-2xl font-bold text-primary">
+                      <p className="font-medium text-gray-900 dark:text-gray-100">Tarif</p>
+                      <p className="text-2xl font-bold">
                         {typedEvent.price_cents === 0 ? (
                           <span className="text-accent">Gratuit</span>
                         ) : (
@@ -271,7 +271,7 @@ export default async function EventDetailPage({ params }: Props) {
                   ) : isFull ? (
                     <div className="bg-red-500/20 rounded-lg p-4 mb-4">
                       <p className="text-white/90">Événement complet</p>
-                      <p className="text-sm text-white/70 mt-2">
+                      <p className="text-sm mt-2">
                         Contactez-nous pour liste d'attente
                       </p>
                     </div>
@@ -284,7 +284,7 @@ export default async function EventDetailPage({ params }: Props) {
                         </span>
                       </div>
                       {placesLeft !== null && (
-                        <p className="text-sm text-white/70">
+                        <p className="text-sm">
                           {placesLeft} places disponibles
                         </p>
                       )}
@@ -295,7 +295,7 @@ export default async function EventDetailPage({ params }: Props) {
                     {!isPast && !isFull && (
                       <Button 
                         fullWidth 
-                        className="bg-secondary text-gray-900 hover:bg-secondary-light font-bold"
+                        className="bg-secondary text-gray-900 dark:text-gray-100 hover:bg-secondary-light font-bold"
                       >
                         S'inscrire Maintenant
                       </Button>

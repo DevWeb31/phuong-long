@@ -29,7 +29,7 @@ function DashboardContent() {
       <div className="flex items-center justify-center py-20">
         <div className="text-center">
           <div className="text-4xl mb-4">⏳</div>
-          <p className="text-gray-600">Chargement...</p>
+          <p className="text-gray-600 dark:text-gray-500">Chargement...</p>
         </div>
       </div>
     );
@@ -38,7 +38,7 @@ function DashboardContent() {
   if (!user) {
     return (
       <div className="text-center py-20">
-        <p className="text-gray-600">Vous devez être connecté pour accéder à cette page.</p>
+        <p className="text-gray-600 dark:text-gray-500">Vous devez être connecté pour accéder à cette page.</p>
       </div>
     );
   }
@@ -52,10 +52,10 @@ function DashboardContent() {
 
       {/* Welcome Section */}
       <div>
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">
+        <h1 className="text-3xl font-bold dark:text-gray-100 mb-2">
           Bienvenue, {user.user_metadata?.full_name || user.email?.split('@')[0]} ! 👋
         </h1>
-        <p className="text-gray-600">
+        <p className="text-gray-600 dark:text-gray-500">
           Gérez votre compte, vos inscriptions et votre progression.
         </p>
       </div>
@@ -74,7 +74,7 @@ function DashboardContent() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Link href="/dashboard/profile" className="text-sm text-primary hover:underline font-medium">
+            <Link href="/dashboard/profile" className="text-sm hover:underline font-medium">
               Voir le profil →
             </Link>
           </CardContent>
@@ -92,7 +92,7 @@ function DashboardContent() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Link href="/events" className="text-sm text-primary hover:underline font-medium">
+            <Link href="/events" className="text-sm hover:underline font-medium">
               Voir les événements →
             </Link>
           </CardContent>
@@ -110,7 +110,7 @@ function DashboardContent() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Link href="/shop" className="text-sm text-primary hover:underline font-medium">
+            <Link href="/shop" className="text-sm hover:underline font-medium">
               Voir la boutique →
             </Link>
           </CardContent>
@@ -128,7 +128,7 @@ function DashboardContent() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Link href="/blog" className="text-sm text-primary hover:underline font-medium">
+            <Link href="/blog" className="text-sm hover:underline font-medium">
               Lire les articles →
             </Link>
           </CardContent>
@@ -144,7 +144,7 @@ function DashboardContent() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="text-center py-12 text-gray-500">
+          <div className="text-center py-12 dark:text-gray-500">
             <p>Aucune activité pour le moment</p>
             <p className="text-sm mt-2">Inscrivez-vous à un événement ou passez une commande pour commencer !</p>
           </div>
@@ -160,7 +160,7 @@ export default function DashboardPage() {
       <div className="flex items-center justify-center py-20">
         <div className="text-center">
           <div className="text-4xl mb-4">⏳</div>
-          <p className="text-gray-600">Chargement...</p>
+          <p className="text-gray-600 dark:text-gray-500">Chargement...</p>
         </div>
       </div>
     }>

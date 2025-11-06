@@ -2,9 +2,10 @@
  * User Menu Component
  * 
  * Menu utilisateur avec dropdown (avatar, profil, déconnexion)
+ * Design amélioré avec animations fluides
  * 
- * @version 1.0
- * @date 2025-11-05 00:30
+ * @version 2.0
+ * @date 2025-11-05 (Enhanced UX)
  */
 
 'use client';
@@ -13,13 +14,15 @@ import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/lib/hooks/useAuth';
 import { 
-  UserIcon, 
-  Cog6ToothIcon, 
-  ArrowRightOnRectangleIcon,
-  ChevronDownIcon,
-  ShieldCheckIcon
-} from '@heroicons/react/24/outline';
+  User, 
+  Settings, 
+  LogOut,
+  ChevronDown,
+  ShieldCheck,
+  LayoutDashboard
+} from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
+import { cn } from '@/lib/utils/cn';
 
 export function UserMenu() {
   const { user, signOut } = useAuth();
@@ -68,13 +71,19 @@ export function UserMenu() {
       <div className="flex items-center gap-3">
         <Link
           href="/signin"
-          className="text-sm font-medium text-gray-700 hover:text-primary transition-colors"
+          className="text-sm font-medium dark:text-gray-300 hover:text-primary transition-colors"
         >
           Connexion
         </Link>
         <Link
           href="/signup"
-          className="inline-flex items-center gap-1.5 px-4 py-2 bg-gradient-to-r from-primary to-primary-dark text-white rounded-lg text-sm font-semibold hover:shadow-md hover:shadow-primary/20 transition-all"
+          className={cn(
+            'inline-flex items-center gap-1.5 px-4 py-2',
+            'bg-gradient-to-r from-primary to-primary-dark text-white',
+            'rounded-lg text-sm font-semibold',
+            'hover:shadow-lg hover:shadow-primary/30 hover:scale-105',
+            'transition-all duration-200'
+          )}
         >
           <span className="text-base">🥋</span>
           <span>Essai Gratuit</span>
@@ -90,94 +99,149 @@ export function UserMenu() {
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 hover:opacity-80 transition-opacity"
+        className={cn(
+          'flex items-center gap-2 p-1.5 rounded-lg transition-all duration-200',
+          isOpen ? 'bg-gray-50 dark:bg-gray-900' : 'hover:bg-gray-50'
+        )}
+        aria-label="Menu utilisateur"
+        aria-expanded={isOpen}
       >
         {/* Avatar */}
-        <div className="w-10 h-10 bg-gradient-to-br from-primary to-primary-dark rounded-full flex items-center justify-center text-white font-semibold text-sm">
+        <div className={cn(
+          'w-10 h-10 bg-gradient-to-br from-primary to-primary-dark',
+          'rounded-full flex items-center justify-center',
+          'text-white font-semibold text-sm',
+          'ring-2 ring-white shadow-md',
+          'transition-transform duration-200',
+          isOpen && 'scale-110'
+        )}>
           {userInitials}
         </div>
 
         {/* User Info */}
-        <div className="hidden md:block text-left">
-          <div className="text-sm font-medium text-gray-900">{userName}</div>
-          <div className="text-xs text-gray-500">Mon compte</div>
+        <div className="hidden md:block text-left pr-1">
+          <div className="text-sm font-medium dark:text-gray-100">{userName}</div>
+          <div className="text-xs dark:text-gray-500">Mon compte</div>
         </div>
 
         {/* Chevron */}
-        <ChevronDownIcon 
-          className={`w-4 h-4 text-gray-500 transition-transform ${isOpen ? 'rotate-180' : ''}`}
+        <ChevronDown 
+          className={cn(
+            'hidden md:block w-4 h-4 text-gray-500 dark:text-gray-500 transition-transform duration-200',
+            isOpen && 'rotate-180'
+          )}
         />
       </button>
 
-      {/* Dropdown */}
+      {/* Dropdown - Animation fluide */}
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
-          {/* User Info in Dropdown */}
-          <div className="px-4 py-3 border-b border-gray-200">
-            <div className="text-sm font-medium text-gray-900">{userName}</div>
-            <div className="text-xs text-gray-500 truncate">{user.email}</div>
+        <>
+          <div className={cn(
+            'absolute right-0 mt-2 w-64 bg-white dark:bg-gray-900 rounded-xl shadow-xl border dark:border-gray-800 z-50',
+            'animate-in fade-in slide-in-from-top-2 duration-200',
+            'overflow-hidden'
+          )}>
+            {/* User Info in Dropdown */}
+            <div className="px-4 py-3 bg-gradient-to-br from-gray-50 to-white border-b dark:border-gray-800">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 bg-gradient-to-br from-primary to-primary-dark rounded-full flex items-center justify-center text-white font-semibold">
+                  {userInitials}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="text-sm font-semibold dark:text-gray-100 truncate">{userName}</div>
+                  <div className="text-xs dark:text-gray-500 truncate">{user.email}</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Menu Items */}
+            <div className="py-2">
+              <Link
+                href="/dashboard"
+                className={cn(
+                  'flex items-center gap-3 px-4 py-2.5 text-sm',
+                  'hover:bg-primary/5 hover:text-primary transition-all duration-200',
+                  'group'
+                )}
+                onClick={() => setIsOpen(false)}
+              >
+                <LayoutDashboard className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                <span className="font-medium">Tableau de bord</span>
+              </Link>
+
+              <Link
+                href="/dashboard/profile"
+                className={cn(
+                  'flex items-center gap-3 px-4 py-2.5 text-sm',
+                  'hover:bg-primary/5 hover:text-primary transition-all duration-200',
+                  'group'
+                )}
+                onClick={() => setIsOpen(false)}
+              >
+                <User className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                <span className="font-medium">Mon profil</span>
+              </Link>
+
+              <Link
+                href="/dashboard/account"
+                className={cn(
+                  'flex items-center gap-3 px-4 py-2.5 text-sm',
+                  'hover:bg-primary/5 hover:text-primary transition-all duration-200',
+                  'group'
+                )}
+                onClick={() => setIsOpen(false)}
+              >
+                <Settings className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                <span className="font-medium">Paramètres</span>
+              </Link>
+
+              {/* Admin Panel - Conditionnel */}
+              {isAdmin && (
+                <>
+                  <div className="border-t dark:border-gray-800 my-2" />
+                  <Link
+                    href="/admin"
+                    className={cn(
+                      'flex items-center gap-3 px-4 py-2.5 text-sm font-semibold',
+                      'text-primary hover:bg-gradient-to-r hover:from-primary/10 hover:to-primary/5',
+                      'transition-all duration-200 group'
+                    )}
+                    onClick={() => setIsOpen(false)}
+                  >
+                    <ShieldCheck className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                    <span>Panel Administrateur</span>
+                  </Link>
+                </>
+              )}
+            </div>
+
+            {/* Separator */}
+            <div className="border-t dark:border-gray-800" />
+
+            {/* Logout */}
+            <button
+              onClick={() => {
+                signOut();
+                setIsOpen(false);
+              }}
+              className={cn(
+                'flex items-center gap-3 px-4 py-3 text-sm font-medium w-full',
+                'text-red-600 hover:bg-red-50 transition-all duration-200',
+                'group'
+              )}
+            >
+              <LogOut className="w-5 h-5 group-hover:scale-110 transition-transform" />
+              <span>Déconnexion</span>
+            </button>
           </div>
 
-          {/* Menu Items */}
-          <div className="py-2">
-            <Link
-              href="/dashboard"
-              className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
-              onClick={() => setIsOpen(false)}
-            >
-              <UserIcon className="w-5 h-5" />
-              Tableau de bord
-            </Link>
-
-            <Link
-              href="/dashboard/profile"
-              className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
-              onClick={() => setIsOpen(false)}
-            >
-              <UserIcon className="w-5 h-5" />
-              Mon profil
-            </Link>
-
-            <Link
-              href="/dashboard/account"
-              className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
-              onClick={() => setIsOpen(false)}
-            >
-              <Cog6ToothIcon className="w-5 h-5" />
-              Paramètres
-            </Link>
-
-            {/* Admin Panel - Conditionnel */}
-            {isAdmin && (
-              <>
-                <div className="border-t border-gray-200 my-2" />
-                <Link
-                  href="/admin"
-                  className="flex items-center gap-3 px-4 py-2 text-sm font-semibold text-primary hover:bg-primary/5 transition-colors group"
-                  onClick={() => setIsOpen(false)}
-                >
-                  <ShieldCheckIcon className="w-5 h-5 group-hover:scale-110 transition-transform" />
-                  Panel Administrateur
-                </Link>
-              </>
-            )}
-          </div>
-
-          {/* Separator */}
-          <div className="border-t border-gray-200 my-2" />
-
-          {/* Logout */}
-          <button
-            onClick={() => {
-              signOut();
-              setIsOpen(false);
-            }}
-            className="flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors w-full"
-          >
-            <ArrowRightOnRectangleIcon className="w-5 h-5" />
-            Déconnexion
-          </button>
-        </div>
+          {/* Backdrop pour fermer au clic */}
+          <div 
+            className="fixed inset-0 z-40"
+            onClick={() => setIsOpen(false)}
+            aria-hidden="true"
+          />
+        </>
       )}
     </div>
   );

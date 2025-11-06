@@ -98,10 +98,10 @@ export default async function BlogPage({ searchParams }: Props) {
 
       {/* Filtres par Tags */}
       {allTags.length > 0 && (
-        <section className="bg-white border-b border-gray-200 py-6">
+        <section className="bg-white dark:bg-gray-900 border-b dark:border-gray-800 py-6">
           <Container>
             <div className="flex flex-wrap gap-2 items-center">
-              <span className="text-sm font-medium text-gray-700 mr-2">Filtrer par tag :</span>
+              <span className="text-sm font-medium dark:text-gray-300 mr-2">Filtrer par tag :</span>
               <Link href="/blog">
                 <Badge 
                   variant={!selectedTag ? 'primary' : 'default'} 
@@ -128,11 +128,11 @@ export default async function BlogPage({ searchParams }: Props) {
       )}
 
       {/* Articles Grid */}
-      <section className="py-16 lg:py-20 bg-gray-50">
+      <section className="py-16 lg:py-20 bg-gray-50 dark:bg-gray-900">
         <Container>
           {typedPosts.length === 0 ? (
             <div className="text-center py-20">
-              <p className="text-xl text-gray-600">
+              <p className="text-xl dark:text-gray-500">
                 {selectedTag 
                   ? `Aucun article trouvé pour le tag "${selectedTag}"`
                   : 'Aucun article publié pour le moment'}
@@ -183,8 +183,8 @@ export default async function BlogPage({ searchParams }: Props) {
                         </CardDescription>
                       </CardHeader>
 
-                      <CardContent className="border-t border-gray-100 pt-4">
-                        <div className="flex items-center justify-between text-sm text-gray-500">
+                      <CardContent className="border-t pt-4">
+                        <div className="flex items-center justify-between text-sm dark:text-gray-500">
                           <span>
                             {new Date(post.published_at || post.created_at).toLocaleDateString('fr-FR', {
                               day: 'numeric',
@@ -208,7 +208,7 @@ export default async function BlogPage({ searchParams }: Props) {
                   {currentPage > 1 && (
                     <Link 
                       href={`/blog?page=${currentPage - 1}${selectedTag ? `&tag=${selectedTag}` : ''}`}
-                      className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                      className="px-4 py-2 border dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:bg-gray-900 transition-colors"
                     >
                       ← Précédent
                     </Link>
@@ -221,7 +221,7 @@ export default async function BlogPage({ searchParams }: Props) {
                       className={`px-4 py-2 border rounded-lg transition-colors ${
                         page === currentPage
                           ? 'bg-primary text-white border-primary'
-                          : 'border-gray-300 hover:bg-gray-50'
+                          : 'border-gray-300 dark:border-gray-700 border-gray-700 hover:bg-gray-50'
                       }`}
                     >
                       {page}
@@ -231,7 +231,7 @@ export default async function BlogPage({ searchParams }: Props) {
                   {currentPage < totalPages && (
                     <Link 
                       href={`/blog?page=${currentPage + 1}${selectedTag ? `&tag=${selectedTag}` : ''}`}
-                      className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                      className="px-4 py-2 border dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:bg-gray-900 transition-colors"
                     >
                       Suivant →
                     </Link>

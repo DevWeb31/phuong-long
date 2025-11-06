@@ -56,14 +56,14 @@ export function Accordion({
         return (
           <div 
             key={item.id}
-            className="border border-gray-200 rounded-lg overflow-hidden transition-all hover:border-primary/30"
+            className="border dark:border-gray-800 rounded-lg overflow-hidden transition-all hover:border-primary/30"
           >
             <button
               onClick={() => toggleItem(item.id)}
-              className="w-full px-6 py-4 flex items-center justify-between bg-white hover:bg-gray-50 transition-colors text-left"
+              className="w-full px-6 py-4 flex items-center justify-between bg-white dark:bg-gray-900 hover:bg-gray-50 transition-colors text-left"
               aria-expanded={isOpen}
             >
-              <span className="font-semibold text-gray-900 pr-4">
+              <span className="font-semibold text-gray-900 dark:text-gray-100 pr-4">
                 {item.question}
               </span>
               <ChevronDownIcon 
@@ -80,7 +80,7 @@ export function Accordion({
                 isOpen ? 'max-h-96' : 'max-h-0'
               )}
             >
-              <div className="px-6 py-4 bg-gray-50 text-gray-700 leading-relaxed border-t border-gray-200">
+              <div className="px-6 py-4 bg-gray-50 dark:bg-gray-900 text-gray-700 dark:text-gray-300 leading-relaxed border-t dark:border-gray-800">
                 {item.answer}
               </div>
             </div>

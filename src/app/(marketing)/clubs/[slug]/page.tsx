@@ -101,7 +101,7 @@ export default async function ClubDetailPage({ params }: Props) {
               {typedClub.name}
             </h1>
             {typedClub.description && (
-              <p className="text-xl text-white/90 leading-relaxed">
+              <p className="text-xl leading-relaxed">
                 {typedClub.description}
               </p>
             )}
@@ -110,7 +110,7 @@ export default async function ClubDetailPage({ params }: Props) {
       </section>
 
       {/* Informations Principales */}
-      <section className="py-12 lg:py-16 bg-white">
+      <section className="py-12 lg:py-16 bg-white dark:bg-gray-900">
         <Container>
           <div className="grid lg:grid-cols-3 gap-8">
             {/* Coordonnées */}
@@ -124,9 +124,9 @@ export default async function ClubDetailPage({ params }: Props) {
                     <div className="flex items-start gap-3">
                       <MapPinIcon className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
                       <div>
-                        <p className="font-medium text-gray-900">Adresse</p>
-                        <p className="text-gray-600">{typedClub.address}</p>
-                        <p className="text-gray-600">{typedClub.postal_code} {typedClub.city}</p>
+                        <p className="font-medium text-gray-900 dark:text-gray-100">Adresse</p>
+                        <p className="text-gray-600 dark:text-gray-500">{typedClub.address}</p>
+                        <p className="text-gray-600 dark:text-gray-500">{typedClub.postal_code} {typedClub.city}</p>
                       </div>
                     </div>
                   )}
@@ -135,7 +135,7 @@ export default async function ClubDetailPage({ params }: Props) {
                     <div className="flex items-start gap-3">
                       <PhoneIcon className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
                       <div>
-                        <p className="font-medium text-gray-900">Téléphone</p>
+                        <p className="font-medium text-gray-900 dark:text-gray-100">Téléphone</p>
                         <a href={`tel:${typedClub.phone}`} className="text-primary hover:underline">
                           {typedClub.phone}
                         </a>
@@ -147,7 +147,7 @@ export default async function ClubDetailPage({ params }: Props) {
                     <div className="flex items-start gap-3">
                       <EnvelopeIcon className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
                       <div>
-                        <p className="font-medium text-gray-900">Email</p>
+                        <p className="font-medium text-gray-900 dark:text-gray-100">Email</p>
                         <a href={`mailto:${typedClub.email}`} className="text-primary hover:underline">
                           {typedClub.email}
                         </a>
@@ -169,11 +169,11 @@ export default async function ClubDetailPage({ params }: Props) {
                   <CardContent>
                     <div className="grid sm:grid-cols-2 gap-4">
                       {Object.entries(typedClub.schedule as Record<string, string[]>).map(([day, hours]) => (
-                        <div key={day} className="flex justify-between items-start p-3 bg-gray-50 rounded-lg">
-                          <span className="font-medium text-gray-900 capitalize">{day}</span>
+                        <div key={day} className="flex justify-between items-start p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                          <span className="font-medium text-gray-900 dark:text-gray-100 capitalize">{day}</span>
                           <div className="text-right">
                             {hours.map((hour, idx) => (
-                              <div key={idx} className="text-sm text-gray-600">{hour}</div>
+                              <div key={idx} className="text-sm dark:text-gray-500">{hour}</div>
                             ))}
                           </div>
                         </div>
@@ -195,13 +195,13 @@ export default async function ClubDetailPage({ params }: Props) {
                   <CardContent>
                     <div className="grid sm:grid-cols-2 gap-4">
                       {Object.entries(typedClub.pricing as Record<string, number>).map(([category, price]) => (
-                        <div key={category} className="flex justify-between items-center p-4 bg-gray-50 rounded-lg">
-                          <span className="font-medium text-gray-900 capitalize">{category}</span>
-                          <span className="text-2xl font-bold text-primary">{price}€</span>
+                        <div key={category} className="flex justify-between items-center p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                          <span className="font-medium text-gray-900 dark:text-gray-100 capitalize">{category}</span>
+                          <span className="text-2xl font-bold">{price}€</span>
                         </div>
                       ))}
                     </div>
-                    <p className="mt-4 text-sm text-gray-500">
+                    <p className="mt-4 text-sm dark:text-gray-500">
                       💡 Cours d'essai gratuit - Sans engagement
                     </p>
                   </CardContent>
@@ -219,7 +219,7 @@ export default async function ClubDetailPage({ params }: Props) {
                   </p>
                   <div className="space-y-3">
                     <Link href={`/contact?club=${typedClub.slug}`}>
-                      <Button fullWidth className="bg-white text-primary hover:bg-gray-100">
+                      <Button fullWidth className="bg-white dark:bg-gray-900 text-primary hover:bg-gray-100">
                         Réserver un Essai
                       </Button>
                     </Link>
@@ -234,8 +234,8 @@ export default async function ClubDetailPage({ params }: Props) {
 
               <Card variant="bordered">
                 <CardContent className="p-6">
-                  <h4 className="font-semibold text-gray-900 mb-3">Cours pour tous</h4>
-                  <ul className="space-y-2 text-sm text-gray-600">
+                  <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-3">Cours pour tous</h4>
+                  <ul className="space-y-2 text-sm dark:text-gray-500">
                     <li className="flex items-center gap-2">
                       <span className="text-accent">✓</span> Enfants dès 6 ans
                     </li>
@@ -258,9 +258,9 @@ export default async function ClubDetailPage({ params }: Props) {
 
       {/* Coaches */}
       {typedCoaches && typedCoaches.length > 0 && (
-        <section className="py-16 lg:py-20 bg-gray-50">
+        <section className="py-16 lg:py-20 bg-gray-50 dark:bg-gray-900">
           <Container>
-            <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">
+            <h2 className="text-3xl font-bold dark:text-gray-100 mb-8">
               Nos Enseignants
             </h2>
             
@@ -270,21 +270,21 @@ export default async function ClubDetailPage({ params }: Props) {
                   <CardContent className="p-6">
                     <div className="flex items-start gap-4">
                       <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0">
-                        <span className="text-2xl font-bold text-primary">
+                        <span className="text-2xl font-bold">
                           {coach.name.charAt(0)}
                         </span>
                       </div>
                       <div className="flex-1">
-                        <h3 className="text-lg font-semibold text-gray-900 mb-1">
+                        <h3 className="text-lg font-semibold dark:text-gray-100 mb-1">
                           {coach.name}
                         </h3>
                         {coach.years_experience > 0 && (
-                          <p className="text-sm text-gray-500 mb-2">
+                          <p className="text-sm dark:text-gray-500 mb-2">
                             {coach.years_experience} ans d'expérience
                           </p>
                         )}
                         {coach.bio && (
-                          <p className="text-sm text-gray-600 line-clamp-3">
+                          <p className="text-sm dark:text-gray-500 line-clamp-3">
                             {coach.bio}
                           </p>
                         )}
@@ -309,10 +309,10 @@ export default async function ClubDetailPage({ params }: Props) {
 
       {/* Événements à venir */}
       {typedEvents && typedEvents.length > 0 && (
-        <section className="py-16 lg:py-20 bg-white">
+        <section className="py-16 lg:py-20 bg-white dark:bg-gray-900">
           <Container>
             <div className="flex items-center justify-between mb-8">
-              <h2 className="text-3xl font-bold text-gray-900">
+              <h2 className="text-3xl font-bold dark:text-gray-100">
                 Prochains Événements
               </h2>
               <Link href="/events">
@@ -353,13 +353,13 @@ export default async function ClubDetailPage({ params }: Props) {
       )}
 
       {/* CTA */}
-      <section className="py-16 bg-gray-50">
+      <section className="py-16 bg-gray-50 dark:bg-gray-900">
         <Container>
           <div className="max-w-2xl mx-auto text-center">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">
+            <h2 className="text-3xl font-bold dark:text-gray-100 mb-4">
               Prêt à Commencer ?
             </h2>
-            <p className="text-lg text-gray-600 mb-8">
+            <p className="text-lg dark:text-gray-500 mb-8">
               Venez découvrir le Vo Dao lors d'un cours d'essai gratuit au {typedClub.name}
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">

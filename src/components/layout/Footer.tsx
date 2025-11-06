@@ -50,13 +50,13 @@ export function Footer() {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="bg-gradient-to-b from-gray-50 to-gray-100 border-t border-gray-200/60">
+    <footer className="bg-gradient-to-b from-slate-50 to-white dark:from-slate-900 dark:to-slate-950 border-t border-slate-200 dark:border-slate-800">
       <Container>
         <div className="py-16 lg:py-20">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 lg:gap-12">
             {/* Clubs */}
             <div>
-              <h3 className="text-sm font-semibold text-gray-900 uppercase tracking-wider">
+              <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 uppercase tracking-wider mb-1">
                 Nos Clubs
               </h3>
               <ul className="mt-4 space-y-3">
@@ -64,7 +64,7 @@ export function Footer() {
                   <li key={item.name}>
                     <Link
                       href={item.href}
-                      className="text-base text-gray-600 hover:text-gray-900"
+                      className="text-slate-600 dark:text-slate-400 hover:text-primary dark:hover:text-primary-light transition-colors text-sm"
                     >
                       {item.name}
                     </Link>
@@ -75,7 +75,7 @@ export function Footer() {
 
             {/* Ressources */}
             <div>
-              <h3 className="text-sm font-semibold text-gray-900 uppercase tracking-wider">
+              <h3 className="text-sm font-semibold dark:text-gray-100 uppercase tracking-wider">
                 Ressources
               </h3>
               <ul className="mt-4 space-y-3">
@@ -83,7 +83,7 @@ export function Footer() {
                   <li key={item.name}>
                     <Link
                       href={item.href}
-                      className="text-base text-gray-600 hover:text-gray-900"
+                      className="text-base dark:text-gray-500 hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
                     >
                       {item.name}
                     </Link>
@@ -94,7 +94,7 @@ export function Footer() {
 
             {/* Boutique */}
             <div>
-              <h3 className="text-sm font-semibold text-gray-900 uppercase tracking-wider">
+              <h3 className="text-sm font-semibold dark:text-gray-100 uppercase tracking-wider">
                 Boutique
               </h3>
               <ul className="mt-4 space-y-3">
@@ -102,7 +102,7 @@ export function Footer() {
                   <li key={item.name}>
                     <Link
                       href={item.href}
-                      className="text-base text-gray-600 hover:text-gray-900"
+                      className="text-base dark:text-gray-500 hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
                     >
                       {item.name}
                     </Link>
@@ -113,7 +113,7 @@ export function Footer() {
 
             {/* Légal */}
             <div>
-              <h3 className="text-sm font-semibold text-gray-900 uppercase tracking-wider">
+              <h3 className="text-sm font-semibold dark:text-gray-100 uppercase tracking-wider">
                 Légal
               </h3>
               <ul className="mt-4 space-y-3">
@@ -121,7 +121,7 @@ export function Footer() {
                   <li key={item.name}>
                     <Link
                       href={item.href}
-                      className="text-base text-gray-600 hover:text-gray-900"
+                      className="text-base dark:text-gray-500 hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
                     >
                       {item.name}
                     </Link>
@@ -132,12 +132,12 @@ export function Footer() {
           </div>
 
           {/* Newsletter */}
-          <div className="mt-16 border-t border-gray-200/60 pt-12">
+          <div className="mt-16 border-t dark:border-gray-800/60 pt-12">
             <div className="max-w-md">
-              <h3 className="text-lg font-bold text-gray-900 mb-2">
+              <h3 className="text-lg font-bold dark:text-gray-100 mb-2">
                 📧 Newsletter
               </h3>
-              <p className="mt-2 text-base text-gray-600 mb-6">
+              <p className="mt-2 text-base dark:text-gray-500 mb-6">
                 Recevez nos actualités, événements et promotions.
               </p>
             </div>
@@ -151,13 +151,13 @@ export function Footer() {
                 id="email-address"
                 autoComplete="email"
                 required
-                className="w-full min-w-0 px-4 py-2 text-base text-gray-900 placeholder-gray-500 bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                className="w-full min-w-0 px-4 py-2 text-base dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-600 bg-white dark:bg-gray-900 border dark:border-gray-700 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                 placeholder="Votre email"
               />
               <div className="mt-3 sm:mt-0 sm:ml-3 sm:flex-shrink-0">
                 <button
                   type="submit"
-                  className="w-full px-4 py-2 text-base font-medium text-white bg-primary border border-transparent rounded-lg shadow-sm hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
+                  className="w-full px-4 py-2 text-base font-medium bg-primary border rounded-lg shadow-sm hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-gray-900 focus:ring-primary transition-colors"
                 >
                   S'inscrire
                 </button>
@@ -166,16 +166,16 @@ export function Footer() {
           </div>
 
           {/* Bottom */}
-          <div className="mt-12 border-t border-gray-200 pt-8 md:flex md:items-center md:justify-between">
+          <div className="mt-12 border-t dark:border-gray-800 pt-8 md:flex md:items-center md:justify-between">
             <div className="flex items-center gap-4 md:order-2">
-              <span className="text-xs text-gray-500">Suivez-nous</span>
+              <span className="text-xs dark:text-gray-500">Suivez-nous</span>
               {socialLinks.map((item) => {
                 const Icon = item.icon;
                 return (
                   <a
                     key={item.name}
                     href={item.href}
-                    className="text-gray-400 hover:text-primary transition-colors"
+                    className="text-gray-400 dark:text-gray-400 hover:text-primary dark:hover:text-primary transition-colors"
                     target="_blank"
                     rel="noopener noreferrer"
                     title={item.name}
@@ -185,7 +185,7 @@ export function Footer() {
                 );
               })}
             </div>
-            <p className="mt-8 text-sm text-gray-500 md:mt-0 md:order-1">
+            <p className="mt-8 text-sm dark:text-gray-500 md:mt-0 md:order-1">
               &copy; {currentYear} Phuong Long Vo Dao. Tous droits réservés.
             </p>
           </div>

@@ -24,9 +24,9 @@ export default function AuthLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col">
       {/* Simple Header */}
-      <header className="bg-white border-b border-gray-200 py-4">
+      <header className="bg-white dark:bg-gray-900 border-b dark:border-gray-800 py-4">
         <Container>
           <Link href="/" className="flex items-center group w-fit">
             <picture>
@@ -47,9 +47,9 @@ export default function AuthLayout({
       </main>
 
       {/* Simple Footer */}
-      <footer className="bg-white border-t border-gray-200 py-6">
+      <footer className="bg-white dark:bg-gray-900 border-t dark:border-gray-800 py-6">
         <Container>
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-gray-600">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-sm dark:text-gray-500">
             <p>&copy; {new Date().getFullYear()} Phuong Long Vo Dao. Tous droits réservés.</p>
             <div className="flex gap-6">
               <Link href="/faq" className="hover:text-primary transition-colors">

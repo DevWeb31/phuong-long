@@ -130,13 +130,13 @@ export default function AdminUsersPage() {
       key: 'full_name',
       label: 'Nom',
       sortable: true,
-      render: (value) => <span className="font-medium text-gray-900">{value}</span>,
+      render: (value) => <span className="font-medium text-gray-900 dark:text-gray-100">{value}</span>,
     },
     {
       key: 'email',
       label: 'Email',
       sortable: true,
-      render: (value) => <span className="text-gray-600">{value}</span>,
+      render: (value) => <span className="text-gray-600 dark:text-gray-500">{value}</span>,
     },
     {
       key: 'role',
@@ -152,7 +152,7 @@ export default function AdminUsersPage() {
       key: 'club',
       label: 'Club',
       sortable: true,
-      render: (value) => value || <span className="text-gray-400 italic">Aucun</span>,
+      render: (value) => value || <span className="text-gray-400 dark:text-gray-400 italic">Aucun</span>,
     },
     {
       key: 'status',
@@ -169,7 +169,7 @@ export default function AdminUsersPage() {
       label: 'Dernière connexion',
       sortable: true,
       render: (value) => {
-        if (!value) return <span className="text-gray-400 italic">Jamais</span>;
+        if (!value) return <span className="text-gray-400 dark:text-gray-400 italic">Jamais</span>;
         
         const date = new Date(value);
         const now = new Date();
@@ -209,8 +209,8 @@ export default function AdminUsersPage() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Gestion des Utilisateurs</h1>
-        <p className="text-gray-600">
+        <h1 className="text-3xl font-bold dark:text-gray-100 mb-2">Gestion des Utilisateurs</h1>
+        <p className="text-gray-600 dark:text-gray-500">
           Gérez les utilisateurs, rôles et permissions de la plateforme
         </p>
       </div>

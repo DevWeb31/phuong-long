@@ -117,7 +117,7 @@ export function ClubFormModal({ isOpen, onClose, onSubmit, club, isLoading = fal
         <div className="grid md:grid-cols-2 gap-6">
           {/* Nom */}
           <div>
-            <label htmlFor="name" className="block text-sm font-semibold text-gray-700 mb-2">
+            <label htmlFor="name" className="block text-sm font-semibold dark:text-gray-300 mb-2">
               Nom du club <span className="text-red-500">*</span>
             </label>
             <input
@@ -127,14 +127,14 @@ export function ClubFormModal({ isOpen, onClose, onSubmit, club, isLoading = fal
               value={formData.name}
               onChange={handleNameChange}
               required
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+              className="w-full px-4 py-2.5 border dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
               placeholder="Ex: Marseille Centre"
             />
           </div>
 
           {/* Slug */}
           <div>
-            <label htmlFor="slug" className="block text-sm font-semibold text-gray-700 mb-2">
+            <label htmlFor="slug" className="block text-sm font-semibold dark:text-gray-300 mb-2">
               Slug (URL) <span className="text-red-500">*</span>
             </label>
             <input
@@ -144,14 +144,14 @@ export function ClubFormModal({ isOpen, onClose, onSubmit, club, isLoading = fal
               value={formData.slug}
               onChange={handleChange}
               required
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+              className="w-full px-4 py-2.5 border dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
               placeholder="marseille-centre"
             />
           </div>
 
           {/* Ville */}
           <div>
-            <label htmlFor="city" className="block text-sm font-semibold text-gray-700 mb-2">
+            <label htmlFor="city" className="block text-sm font-semibold dark:text-gray-300 mb-2">
               Ville <span className="text-red-500">*</span>
             </label>
             <input
@@ -161,14 +161,14 @@ export function ClubFormModal({ isOpen, onClose, onSubmit, club, isLoading = fal
               value={formData.city}
               onChange={handleChange}
               required
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+              className="w-full px-4 py-2.5 border dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
               placeholder="Marseille"
             />
           </div>
 
           {/* Code postal */}
           <div>
-            <label htmlFor="postal_code" className="block text-sm font-semibold text-gray-700 mb-2">
+            <label htmlFor="postal_code" className="block text-sm font-semibold dark:text-gray-300 mb-2">
               Code postal <span className="text-red-500">*</span>
             </label>
             <input
@@ -178,14 +178,14 @@ export function ClubFormModal({ isOpen, onClose, onSubmit, club, isLoading = fal
               value={formData.postal_code}
               onChange={handleChange}
               required
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+              className="w-full px-4 py-2.5 border dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
               placeholder="13001"
             />
           </div>
 
           {/* Téléphone */}
           <div>
-            <label htmlFor="phone" className="block text-sm font-semibold text-gray-700 mb-2">
+            <label htmlFor="phone" className="block text-sm font-semibold dark:text-gray-300 mb-2">
               Téléphone
             </label>
             <input
@@ -194,14 +194,14 @@ export function ClubFormModal({ isOpen, onClose, onSubmit, club, isLoading = fal
               name="phone"
               value={formData.phone || ''}
               onChange={handleChange}
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+              className="w-full px-4 py-2.5 border dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
               placeholder="06 12 34 56 78"
             />
           </div>
 
           {/* Email */}
           <div>
-            <label htmlFor="email" className="block text-sm font-semibold text-gray-700 mb-2">
+            <label htmlFor="email" className="block text-sm font-semibold dark:text-gray-300 mb-2">
               Email
             </label>
             <input
@@ -210,14 +210,14 @@ export function ClubFormModal({ isOpen, onClose, onSubmit, club, isLoading = fal
               name="email"
               value={formData.email || ''}
               onChange={handleChange}
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+              className="w-full px-4 py-2.5 border dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
               placeholder="club@phuonglong.fr"
             />
           </div>
 
           {/* Image de couverture */}
           <div className="md:col-span-2">
-            <label htmlFor="cover_image_url" className="block text-sm font-semibold text-gray-700 mb-2">
+            <label htmlFor="cover_image_url" className="block text-sm font-semibold dark:text-gray-300 mb-2">
               Image de couverture (URL) 🖼️
             </label>
             <input
@@ -226,18 +226,18 @@ export function ClubFormModal({ isOpen, onClose, onSubmit, club, isLoading = fal
               name="cover_image_url"
               value={formData.cover_image_url || ''}
               onChange={handleChange}
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+              className="w-full px-4 py-2.5 border dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
               placeholder="https://example.com/club-image.jpg"
             />
-            <p className="mt-1.5 text-xs text-gray-500">
+            <p className="mt-1.5 text-xs dark:text-gray-500">
               💡 Conseil : Utilisez une image 16:9 (ex: 1200x675px) pour un meilleur rendu
             </p>
             
             {/* Preview */}
             {formData.cover_image_url && (
               <div className="mt-4">
-                <p className="text-xs font-semibold text-gray-700 mb-2">Aperçu :</p>
-                <div className="relative aspect-video w-full max-w-md rounded-xl overflow-hidden border-2 border-gray-200">
+                <p className="text-xs font-semibold dark:text-gray-300 mb-2">Aperçu :</p>
+                <div className="relative aspect-video w-full max-w-md rounded-xl overflow-hidden border-2 dark:border-gray-800">
                   <img
                     src={formData.cover_image_url}
                     alt="Aperçu"
@@ -254,7 +254,7 @@ export function ClubFormModal({ isOpen, onClose, onSubmit, club, isLoading = fal
 
         {/* Adresse */}
         <div>
-          <label htmlFor="address" className="block text-sm font-semibold text-gray-700 mb-2">
+          <label htmlFor="address" className="block text-sm font-semibold dark:text-gray-300 mb-2">
             Adresse complète <span className="text-red-500">*</span>
           </label>
           <input
@@ -264,14 +264,14 @@ export function ClubFormModal({ isOpen, onClose, onSubmit, club, isLoading = fal
             value={formData.address}
             onChange={handleChange}
             required
-            className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+            className="w-full px-4 py-2.5 border dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
             placeholder="12 Rue de la République"
           />
         </div>
 
         {/* Description */}
         <div>
-          <label htmlFor="description" className="block text-sm font-semibold text-gray-700 mb-2">
+          <label htmlFor="description" className="block text-sm font-semibold dark:text-gray-300 mb-2">
             Description
           </label>
           <textarea
@@ -280,7 +280,7 @@ export function ClubFormModal({ isOpen, onClose, onSubmit, club, isLoading = fal
             value={formData.description || ''}
             onChange={handleChange}
             rows={4}
-            className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all resize-none"
+            className="w-full px-4 py-2.5 border dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all resize-none"
             placeholder="Décrivez le club..."
           />
         </div>
@@ -293,9 +293,9 @@ export function ClubFormModal({ isOpen, onClose, onSubmit, club, isLoading = fal
             name="active"
             checked={formData.active}
             onChange={handleChange}
-            className="w-5 h-5 text-primary border-gray-300 rounded focus:ring-2 focus:ring-primary"
+            className="w-5 h-5 text-primary border-gray-300 dark:border-gray-700 rounded focus:ring-2 focus:ring-primary"
           />
-          <label htmlFor="active" className="text-sm font-semibold text-gray-700">
+          <label htmlFor="active" className="text-sm font-semibold dark:text-gray-300">
             Club actif
           </label>
         </div>

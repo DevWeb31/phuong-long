@@ -78,10 +78,10 @@ export default async function ShopPage({ searchParams }: Props) {
       </section>
 
       {/* Categories Filter */}
-      <section className="bg-white border-b border-gray-200 py-6">
+      <section className="bg-white dark:bg-gray-900 border-b dark:border-gray-800 py-6">
         <Container>
           <div className="flex flex-wrap gap-3 items-center">
-            <span className="text-sm font-medium text-gray-700 mr-2">Catégories :</span>
+            <span className="text-sm font-medium dark:text-gray-300 mr-2">Catégories :</span>
             <Link href="/shop">
               <Badge 
                 variant={!selectedCategory ? 'primary' : 'default'} 
@@ -107,12 +107,12 @@ export default async function ShopPage({ searchParams }: Props) {
       </section>
 
       {/* Products Grid */}
-      <section className="py-16 lg:py-20 bg-gray-50">
+      <section className="py-16 lg:py-20 bg-gray-50 dark:bg-gray-900">
         <Container>
           {typedProducts.length === 0 ? (
             <div className="text-center py-20">
               <div className="text-6xl mb-4">🛍️</div>
-              <p className="text-xl text-gray-600 mb-4">
+              <p className="text-xl dark:text-gray-500 mb-4">
                 {selectedCategory 
                   ? `Aucun produit dans cette catégorie pour le moment`
                   : 'La boutique sera bientôt disponible'}
@@ -130,7 +130,7 @@ export default async function ShopPage({ searchParams }: Props) {
                   <Card variant="bordered" hoverable className="h-full flex flex-col">
                     {/* Product Image */}
                     {product.images && product.images.length > 0 ? (
-                      <div className="relative w-full h-64 overflow-hidden rounded-t-lg bg-gray-100">
+                      <div className="relative w-full h-64 overflow-hidden rounded-t-lg bg-gray-100 dark:bg-gray-800">
                         <img
                           src={product.images[0]}
                           alt={product.name}
@@ -152,7 +152,7 @@ export default async function ShopPage({ searchParams }: Props) {
                         )}
                       </div>
                     ) : (
-                      <div className="w-full h-64 bg-gray-200 rounded-t-lg flex items-center justify-center">
+                      <div className="w-full h-64 bg-gray-200 dark:bg-gray-700 rounded-t-lg flex items-center justify-center">
                         <span className="text-6xl">🛍️</span>
                       </div>
                     )}
@@ -176,9 +176,9 @@ export default async function ShopPage({ searchParams }: Props) {
                       )}
                     </CardHeader>
 
-                    <CardContent className="border-t border-gray-100 pt-4">
+                    <CardContent className="border-t pt-4">
                       <div className="flex items-center justify-between">
-                        <div className="text-2xl font-bold text-primary">
+                        <div className="text-2xl font-bold">
                           {(product.price_cents / 100).toFixed(2)} €
                         </div>
                         <Button 
@@ -199,13 +199,13 @@ export default async function ShopPage({ searchParams }: Props) {
       </section>
 
       {/* CTA Section */}
-      <section className="py-16 bg-white">
+      <section className="py-16 bg-white dark:bg-gray-900">
         <Container>
           <div className="max-w-3xl mx-auto text-center">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">
+            <h2 className="text-3xl font-bold dark:text-gray-100 mb-4">
               Besoin d'aide pour choisir ?
             </h2>
-            <p className="text-lg text-gray-600 mb-8">
+            <p className="text-lg dark:text-gray-500 mb-8">
               Nos experts sont là pour vous conseiller sur le meilleur équipement selon votre niveau et pratique.
             </p>
             <Link href="/contact">

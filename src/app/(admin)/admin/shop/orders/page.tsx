@@ -119,7 +119,7 @@ export default function AdminShopOrdersPage() {
       key: 'order_number',
       label: 'N° Commande',
       sortable: true,
-      render: (value) => <span className="font-mono text-sm font-medium text-gray-900">{value}</span>,
+      render: (value) => <span className="font-mono text-sm font-medium dark:text-gray-100">{value}</span>,
     },
     {
       key: 'customer_name',
@@ -127,8 +127,8 @@ export default function AdminShopOrdersPage() {
       sortable: true,
       render: (value, row) => (
         <div>
-          <div className="font-medium text-gray-900">{value}</div>
-          <div className="text-sm text-gray-500">{row.customer_email}</div>
+          <div className="font-medium text-gray-900 dark:text-gray-100">{value}</div>
+          <div className="text-sm dark:text-gray-500">{row.customer_email}</div>
         </div>
       ),
       width: 'min-w-[200px]',
@@ -149,11 +149,11 @@ export default function AdminShopOrdersPage() {
       sortable: true,
       render: (value, row) => (
         <div>
-          <div className="font-semibold text-gray-900">
+          <div className="font-semibold text-gray-900 dark:text-gray-100">
             {((value + row.shipping_cents) / 100).toFixed(2)} €
           </div>
           {row.shipping_cents > 0 && (
-            <div className="text-xs text-gray-500">
+            <div className="text-xs dark:text-gray-500">
               dont {(row.shipping_cents / 100).toFixed(2)} € livraison
             </div>
           )}
@@ -178,14 +178,14 @@ export default function AdminShopOrdersPage() {
         const date = new Date(value);
         return (
           <div>
-            <div className="text-sm text-gray-900">
+            <div className="text-sm dark:text-gray-100">
               {date.toLocaleDateString('fr-FR', {
                 day: 'numeric',
                 month: 'short',
                 year: 'numeric',
               })}
             </div>
-            <div className="text-xs text-gray-500">
+            <div className="text-xs dark:text-gray-500">
               {date.toLocaleTimeString('fr-FR', {
                 hour: '2-digit',
                 minute: '2-digit',
@@ -211,8 +211,8 @@ export default function AdminShopOrdersPage() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Gestion des Commandes</h1>
-        <p className="text-gray-600">
+        <h1 className="text-3xl font-bold dark:text-gray-100 mb-2">Gestion des Commandes</h1>
+        <p className="text-gray-600 dark:text-gray-500">
           Suivez et gérez toutes les commandes de la boutique
         </p>
       </div>

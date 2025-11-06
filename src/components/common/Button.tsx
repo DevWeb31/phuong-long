@@ -19,8 +19,8 @@ interface ButtonProps extends ComponentProps<'button'> {
 
 const variantStyles = {
   primary: 'bg-gradient-to-r from-primary via-primary-dark to-primary text-white hover:shadow-xl hover:shadow-primary/30 hover:scale-105 focus:ring-primary/50 bg-[length:200%] hover:bg-[position:100%] transition-all duration-500',
-  secondary: 'bg-gradient-to-r from-secondary via-secondary-dark to-secondary text-gray-900 hover:shadow-xl hover:shadow-secondary/30 hover:scale-105 focus:ring-secondary/50 bg-[length:200%] hover:bg-[position:100%] transition-all duration-500',
-  ghost: 'bg-white/60 backdrop-blur-sm border border-gray-200/60 text-gray-700 hover:bg-white hover:shadow-lg hover:border-gray-300 hover:scale-105 focus:ring-gray-300 transition-all duration-300',
+  secondary: 'bg-gradient-to-r from-secondary via-secondary-dark to-secondary text-gray-900 dark:text-gray-100 text-gray-100 hover:shadow-xl hover:shadow-secondary/30 hover:scale-105 focus:ring-secondary/50 bg-[length:200%] hover:bg-[position:100%] transition-all duration-500',
+  ghost: 'bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm border border-gray-200/60 dark:border-gray-700/60 text-gray-700 dark:text-gray-300 text-gray-300 hover:bg-white dark:hover:bg-gray-800 hover:shadow-lg hover:border-gray-300 dark:hover:border-gray-600 hover:scale-105 focus:ring-gray-300 dark:focus:ring-gray-600 transition-all duration-300',
   danger: 'bg-gradient-to-r from-red-600 to-red-700 text-white hover:shadow-xl hover:shadow-red-500/30 hover:scale-105 focus:ring-red-500/50 transition-all duration-500',
 };
 
@@ -49,7 +49,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         ref={ref}
         className={cn(
           'inline-flex items-center justify-center rounded-xl font-semibold',
-          'focus:outline-none focus:ring-4 focus:ring-offset-2',
+          'focus:outline-none focus:ring-4 focus:ring-offset-2 dark:focus:ring-offset-gray-900',
           'disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100',
           'active:scale-95',
           variantStyles[variant],

@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { Roboto } from 'next/font/google';
+import { ThemeProvider } from '@/lib/contexts/ThemeContext';
 import { CartProvider } from '@/lib/contexts/CartContext';
 import './globals.css';
 
@@ -80,11 +81,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="fr" className={`${roboto.variable} ${heading.variable}`}>
+    <html lang="fr" className={`${roboto.variable} ${heading.variable}`} suppressHydrationWarning>
       <body className="font-sans antialiased flex flex-col min-h-screen">
-        <CartProvider>
-          {children}
-        </CartProvider>
+        <ThemeProvider>
+          <CartProvider>
+            {children}
+          </CartProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

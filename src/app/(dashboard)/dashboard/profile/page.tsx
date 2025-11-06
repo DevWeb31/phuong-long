@@ -84,7 +84,7 @@ export default function ProfilePage() {
       <div className="flex items-center justify-center py-20">
         <div className="text-center">
           <div className="text-4xl mb-4">⏳</div>
-          <p className="text-gray-600">Chargement...</p>
+          <p className="text-gray-600 dark:text-gray-500">Chargement...</p>
         </div>
       </div>
     );
@@ -93,7 +93,7 @@ export default function ProfilePage() {
   if (!user) {
     return (
       <div className="text-center py-20">
-        <p className="text-gray-600">Vous devez être connecté pour accéder à cette page.</p>
+        <p className="text-gray-600 dark:text-gray-500">Vous devez être connecté pour accéder à cette page.</p>
       </div>
     );
   }
@@ -102,8 +102,8 @@ export default function ProfilePage() {
     <div className="space-y-8">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Mon Profil</h1>
-        <p className="text-gray-600">
+        <h1 className="text-3xl font-bold dark:text-gray-100 mb-2">Mon Profil</h1>
+        <p className="text-gray-600 dark:text-gray-500">
           Gérez vos informations personnelles et votre présence sur la plateforme.
         </p>
       </div>
@@ -158,7 +158,7 @@ export default function ProfilePage() {
           <div className="grid md:grid-cols-2 gap-6">
             {/* Full Name */}
             <div>
-              <label htmlFor="fullName" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="fullName" className="block text-sm font-medium dark:text-gray-300 mb-2">
                 Nom complet
               </label>
               <input
@@ -168,14 +168,14 @@ export default function ProfilePage() {
                 value={profileData.fullName}
                 onChange={handleChange}
                 disabled={!isEditing}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent disabled:bg-gray-50 disabled:text-gray-500"
+                className="w-full px-4 py-2 border dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent disabled:bg-gray-50 dark:bg-gray-900 disabled:text-gray-500 dark:text-gray-500"
                 placeholder="Jean Dupont"
               />
             </div>
 
             {/* Username */}
             <div>
-              <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="username" className="block text-sm font-medium dark:text-gray-300 mb-2">
                 Nom d'utilisateur
               </label>
               <input
@@ -185,14 +185,14 @@ export default function ProfilePage() {
                 value={profileData.username}
                 onChange={handleChange}
                 disabled={!isEditing}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent disabled:bg-gray-50 disabled:text-gray-500"
+                className="w-full px-4 py-2 border dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent disabled:bg-gray-50 dark:bg-gray-900 disabled:text-gray-500 dark:text-gray-500"
                 placeholder="jeandupont"
               />
             </div>
 
             {/* Phone */}
             <div>
-              <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="phone" className="block text-sm font-medium dark:text-gray-300 mb-2">
                 Téléphone
               </label>
               <input
@@ -202,14 +202,14 @@ export default function ProfilePage() {
                 value={profileData.phone}
                 onChange={handleChange}
                 disabled={!isEditing}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent disabled:bg-gray-50 disabled:text-gray-500"
+                className="w-full px-4 py-2 border dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent disabled:bg-gray-50 dark:bg-gray-900 disabled:text-gray-500 dark:text-gray-500"
                 placeholder="06 12 34 56 78"
               />
             </div>
 
             {/* Birthdate */}
             <div>
-              <label htmlFor="birthdate" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="birthdate" className="block text-sm font-medium dark:text-gray-300 mb-2">
                 Date de naissance
               </label>
               <input
@@ -219,13 +219,13 @@ export default function ProfilePage() {
                 value={profileData.birthdate}
                 onChange={handleChange}
                 disabled={!isEditing}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent disabled:bg-gray-50 disabled:text-gray-500"
+                className="w-full px-4 py-2 border dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent disabled:bg-gray-50 dark:bg-gray-900 disabled:text-gray-500 dark:text-gray-500"
               />
             </div>
 
             {/* Club */}
             <div className="md:col-span-2">
-              <label htmlFor="club" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="club" className="block text-sm font-medium dark:text-gray-300 mb-2">
                 Club
               </label>
               <select
@@ -234,7 +234,7 @@ export default function ProfilePage() {
                 value={profileData.club}
                 onChange={handleChange}
                 disabled={!isEditing}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent disabled:bg-gray-50 disabled:text-gray-500"
+                className="w-full px-4 py-2 border dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent disabled:bg-gray-50 dark:bg-gray-900 disabled:text-gray-500 dark:text-gray-500"
               >
                 <option value="">-- Sélectionnez un club --</option>
                 <option value="marseille-centre">Marseille Centre</option>
@@ -247,7 +247,7 @@ export default function ProfilePage() {
 
             {/* Bio */}
             <div className="md:col-span-2">
-              <label htmlFor="bio" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="bio" className="block text-sm font-medium dark:text-gray-300 mb-2">
                 Bio / Présentation
               </label>
               <textarea
@@ -257,7 +257,7 @@ export default function ProfilePage() {
                 onChange={handleChange}
                 disabled={!isEditing}
                 rows={4}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent disabled:bg-gray-50 disabled:text-gray-500 resize-none"
+                className="w-full px-4 py-2 border dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent disabled:bg-gray-50 dark:bg-gray-900 disabled:text-gray-500 dark:text-gray-500 resize-none"
                 placeholder="Parlez-nous de vous..."
               />
             </div>
@@ -287,16 +287,16 @@ export default function ProfilePage() {
         <CardContent>
           <dl className="grid md:grid-cols-2 gap-6">
             <div>
-              <dt className="text-sm font-medium text-gray-500 mb-1">Email</dt>
-              <dd className="text-base text-gray-900">{user.email}</dd>
+              <dt className="text-sm font-medium dark:text-gray-500 mb-1">Email</dt>
+              <dd className="text-base dark:text-gray-100">{user.email}</dd>
             </div>
             <div>
-              <dt className="text-sm font-medium text-gray-500 mb-1">ID Utilisateur</dt>
-              <dd className="text-base text-gray-900 font-mono text-sm">{user.id.substring(0, 16)}...</dd>
+              <dt className="text-sm font-medium dark:text-gray-500 mb-1">ID Utilisateur</dt>
+              <dd className="text-base dark:text-gray-100 font-mono">{user.id.substring(0, 16)}...</dd>
             </div>
             <div>
-              <dt className="text-sm font-medium text-gray-500 mb-1">Date d'inscription</dt>
-              <dd className="text-base text-gray-900">
+              <dt className="text-sm font-medium dark:text-gray-500 mb-1">Date d'inscription</dt>
+              <dd className="text-base dark:text-gray-100">
                 {new Date(user.created_at).toLocaleDateString('fr-FR', {
                   day: 'numeric',
                   month: 'long',
@@ -305,8 +305,8 @@ export default function ProfilePage() {
               </dd>
             </div>
             <div>
-              <dt className="text-sm font-medium text-gray-500 mb-1">Dernière connexion</dt>
-              <dd className="text-base text-gray-900">
+              <dt className="text-sm font-medium dark:text-gray-500 mb-1">Dernière connexion</dt>
+              <dd className="text-base dark:text-gray-100">
                 {user.last_sign_in_at ? new Date(user.last_sign_in_at).toLocaleDateString('fr-FR', {
                   day: 'numeric',
                   month: 'long',

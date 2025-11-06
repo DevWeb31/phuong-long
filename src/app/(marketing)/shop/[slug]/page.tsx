@@ -74,9 +74,9 @@ export default async function ProductPage({ params }: Props) {
   return (
     <>
       {/* Breadcrumb */}
-      <section className="bg-gray-50 py-4 border-b border-gray-200">
+      <section className="bg-gray-50 dark:bg-gray-900 py-4 border-b dark:border-gray-800">
         <Container>
-          <div className="flex items-center gap-2 text-sm text-gray-600">
+          <div className="flex items-center gap-2 text-sm dark:text-gray-500">
             <Link href="/" className="hover:text-primary transition-colors">
               Accueil
             </Link>
@@ -85,18 +85,18 @@ export default async function ProductPage({ params }: Props) {
               Boutique
             </Link>
             <span>/</span>
-            <span className="text-gray-900">{typedProduct.name}</span>
+            <span className="text-gray-900 dark:text-gray-100">{typedProduct.name}</span>
           </div>
         </Container>
       </section>
 
       {/* Product Detail */}
-      <section className="py-16 bg-white">
+      <section className="py-16 bg-white dark:bg-gray-900">
         <Container>
           <div className="grid lg:grid-cols-2 gap-12">
             {/* Images */}
             <div>
-              <div className="relative aspect-square rounded-lg overflow-hidden bg-gray-100 mb-4">
+              <div className="relative aspect-square rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800 mb-4">
                 {typedProduct.images && typedProduct.images.length > 0 ? (
                   <img
                     src={typedProduct.images[0]}
@@ -122,7 +122,7 @@ export default async function ProductPage({ params }: Props) {
               {typedProduct.images && typedProduct.images.length > 1 && (
                 <div className="grid grid-cols-4 gap-2">
                   {typedProduct.images.slice(1, 5).map((image, index) => (
-                    <div key={index} className="aspect-square rounded-lg overflow-hidden bg-gray-100 cursor-pointer hover:opacity-80 transition-opacity">
+                    <div key={index} className="aspect-square rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800 cursor-pointer hover:opacity-80 transition-opacity">
                       <img
                         src={image}
                         alt={`${typedProduct.name} ${index + 2}`}
@@ -143,14 +143,14 @@ export default async function ProductPage({ params }: Props) {
                 </Badge>
               )}
 
-              <h1 className="text-4xl font-bold text-gray-900 mb-4">
+              <h1 className="text-4xl font-bold dark:text-gray-100 mb-4">
                 {typedProduct.name}
               </h1>
 
               {/* Price */}
               <div className="flex items-baseline gap-3 mb-6">
-                <span className="text-4xl font-bold text-primary">{price} €</span>
-                <span className="text-sm text-gray-500">TTC</span>
+                <span className="text-4xl font-bold">{price} €</span>
+                <span className="text-sm dark:text-gray-500">TTC</span>
               </div>
 
               {/* Stock Status */}
@@ -173,8 +173,8 @@ export default async function ProductPage({ params }: Props) {
               {/* Description */}
               {typedProduct.description && (
                 <div className="mb-8">
-                  <h2 className="text-lg font-semibold text-gray-900 mb-3">Description</h2>
-                  <p className="text-gray-700 leading-relaxed whitespace-pre-line">
+                  <h2 className="text-lg font-semibold dark:text-gray-100 mb-3">Description</h2>
+                  <p className="text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-line">
                     {typedProduct.description}
                   </p>
                 </div>
@@ -183,12 +183,12 @@ export default async function ProductPage({ params }: Props) {
               {/* Sizes */}
               {typedProduct.sizes && typedProduct.sizes.length > 0 && (
                 <div className="mb-8">
-                  <h3 className="text-sm font-semibold text-gray-900 mb-3">Taille</h3>
+                  <h3 className="text-sm font-semibold dark:text-gray-100 mb-3">Taille</h3>
                   <div className="flex flex-wrap gap-2">
                     {typedProduct.sizes.map((size) => (
                       <button
                         key={size}
-                        className="px-4 py-2 border-2 border-gray-300 rounded-lg hover:border-primary hover:bg-primary/5 transition-colors font-medium"
+                        className="px-4 py-2 border-2 dark:border-gray-700 rounded-lg hover:border-primary hover:bg-primary/5 transition-colors font-medium"
                       >
                         {size}
                       </button>
@@ -211,12 +211,12 @@ export default async function ProductPage({ params }: Props) {
               </div>
 
               {/* Features */}
-              <div className="space-y-3 border-t border-gray-200 pt-6">
-                <div className="flex items-center gap-3 text-sm text-gray-600">
+              <div className="space-y-3 border-t dark:border-gray-800 pt-6">
+                <div className="flex items-center gap-3 text-sm dark:text-gray-500">
                   <TruckIcon className="w-5 h-5 text-primary" />
                   <span>Livraison gratuite dès 50€</span>
                 </div>
-                <div className="flex items-center gap-3 text-sm text-gray-600">
+                <div className="flex items-center gap-3 text-sm dark:text-gray-500">
                   <ShieldCheckIcon className="w-5 h-5 text-primary" />
                   <span>Garantie satisfait ou remboursé 30 jours</span>
                 </div>
@@ -227,12 +227,12 @@ export default async function ProductPage({ params }: Props) {
       </section>
 
       {/* Related Products */}
-      <section className="py-16 bg-gray-50">
+      <section className="py-16 bg-gray-50 dark:bg-gray-900">
         <Container>
-          <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">
+          <h2 className="text-3xl font-bold dark:text-gray-100 mb-8">
             Produits similaires
           </h2>
-          <div className="text-center py-12 text-gray-500">
+          <div className="text-center py-12 dark:text-gray-500">
             <p>Recommandations à venir</p>
           </div>
         </Container>

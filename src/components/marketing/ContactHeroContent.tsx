@@ -1,9 +1,9 @@
 /**
- * ShopHeroContent Component
+ * ContactHeroContent Component
  * 
- * Client component for shop page hero with parallax
+ * Client component for contact page hero with parallax
  * 
- * @version 2.0 - Modern Design
+ * @version 1.0
  * @date 2025-11-06
  */
 
@@ -11,11 +11,7 @@
 
 import { useParallax, getParallaxOffset } from '@/lib/hooks/useParallax';
 
-interface ShopHeroContentProps {
-  totalProducts: number;
-}
-
-export function ShopHeroContent({ totalProducts }: ShopHeroContentProps) {
+export function ContactHeroContent() {
   const scrollY = useParallax();
   
   const badgeOffset = getParallaxOffset(scrollY, 0.12);
@@ -30,8 +26,8 @@ export function ShopHeroContent({ totalProducts }: ShopHeroContentProps) {
           willChange: 'transform',
         }}
       >
-        <span className="text-accent mr-2.5">🛒</span>
-        <span className="font-semibold text-sm tracking-wide">Boutique officielle - {totalProducts} produits</span>
+        <span className="text-accent mr-2.5">✉️</span>
+        <span className="font-semibold text-sm tracking-wide">Réponse sous 24h</span>
       </div>
 
       <div
@@ -41,14 +37,15 @@ export function ShopHeroContent({ totalProducts }: ShopHeroContentProps) {
         }}
       >
         <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 animate-slide-up tracking-tight leading-[1.1]">
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-accent via-amber-400 to-accent">Boutique</span>
-          <span className="text-white"> Vo Dao</span>
+          <span className="text-white">Nous </span>
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-accent via-amber-400 to-accent">Contacter</span>
         </h1>
 
         <p className="text-lg md:text-xl text-white/80 leading-relaxed animate-fade-in max-w-2xl mx-auto">
-          Équipez-vous pour votre pratique du Vo Dao avec nos produits de qualité professionnelle.
+          Une question ? Un projet ? Notre équipe est à votre écoute pour vous accompagner dans votre pratique du Vo Dao.
         </p>
       </div>
     </div>
   );
 }
+

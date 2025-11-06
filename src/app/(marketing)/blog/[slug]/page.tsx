@@ -106,7 +106,7 @@ export default async function BlogPostPage({ params }: Props) {
         {typedPost.cover_image_url && (
           <>
             <div 
-              className="absolute inset-0 bg-cover bg-center"
+              className="absolute inset-0 bg-cover"
               style={{ backgroundImage: `url(${typedPost.cover_image_url})` }}
             />
             <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/60 to-black/80" />
@@ -116,7 +116,7 @@ export default async function BlogPostPage({ params }: Props) {
         <Container className="relative z-10">
           <div className="max-w-4xl mx-auto">
             {/* Breadcrumb */}
-            <div className="mb-6 flex items-center gap-2 text-sm text-white/80">
+            <div className="mb-6 flex items-center gap-2 text-sm">
               <Link href="/" className="hover:text-white transition-colors">
                 Accueil
               </Link>
@@ -142,19 +142,19 @@ export default async function BlogPostPage({ params }: Props) {
             )}
 
             {/* Title */}
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6 leading-tight">
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
               {typedPost.title}
             </h1>
 
             {/* Excerpt */}
             {typedPost.excerpt && (
-              <p className="text-xl text-white/90 mb-8 leading-relaxed">
+              <p className="text-xl mb-8 leading-relaxed">
                 {typedPost.excerpt}
               </p>
             )}
 
             {/* Meta Info */}
-            <div className="flex flex-wrap items-center gap-6 text-white/80 text-sm">
+            <div className="flex flex-wrap items-center gap-6 text-white/80">
               <div className="flex items-center gap-2">
                 <CalendarIcon className="w-5 h-5" />
                 <span>{formattedDate}</span>
@@ -171,29 +171,18 @@ export default async function BlogPostPage({ params }: Props) {
       </section>
 
       {/* Content */}
-      <section className="py-16 lg:py-20 bg-white">
+      <section className="py-16 lg:py-20 bg-white dark:bg-gray-900">
         <Container>
           <div className="max-w-4xl mx-auto">
             {/* Article Content */}
             <div 
-              className="prose prose-lg max-w-none
-                prose-headings:text-gray-900 prose-headings:font-bold
-                prose-h2:text-3xl prose-h2:mt-12 prose-h2:mb-6
-                prose-h3:text-2xl prose-h3:mt-8 prose-h3:mb-4
-                prose-p:text-gray-700 prose-p:leading-relaxed prose-p:mb-6
-                prose-a:text-primary prose-a:no-underline hover:prose-a:underline
-                prose-strong:text-gray-900 prose-strong:font-semibold
-                prose-ul:my-6 prose-li:text-gray-700
-                prose-img:rounded-lg prose-img:shadow-lg
-                prose-blockquote:border-l-4 prose-blockquote:border-primary 
-                prose-blockquote:bg-gray-50 prose-blockquote:py-4 prose-blockquote:px-6
-                prose-blockquote:italic prose-blockquote:text-gray-700"
+              className="prose prose-lg max-w-none prose-headings:text-gray-900 dark:text-gray-100 prose-headings:font-bold prose-h2:text-3xl prose-h2:mt-12 prose-h2:mb-6 prose-h3:text-2xl prose-h3:mt-8 prose-h3:mb-4 prose-p:text-gray-700 prose-p:leading-relaxed prose-p:mb-6 prose-a:text-primary prose-a:no-underline hover:prose-a:underline prose-strong:text-gray-900 prose-strong:font-semibold prose-ul:my-6 prose-li:text-gray-700 prose-img:rounded-lg prose-img:shadow-lg prose-blockquote:border-l-4 prose-blockquote:border-primary prose-blockquote:bg-gray-50 dark:bg-gray-900 prose-blockquote:py-4 prose-blockquote:px-6 prose-blockquote:italic prose-blockquote:text-gray-700"
               dangerouslySetInnerHTML={{ __html: typedPost.content }}
             />
 
             {/* Share Section */}
-            <div className="mt-12 pt-8 border-t border-gray-200">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">
+            <div className="mt-12 pt-8 border-t dark:border-gray-800">
+              <h3 className="text-lg font-semibold dark:text-gray-100 mb-4">
                 Partager cet article
               </h3>
               <div className="flex gap-4">
@@ -229,9 +218,9 @@ export default async function BlogPostPage({ params }: Props) {
 
       {/* Articles Similaires */}
       {typedSimilarPosts.length > 0 && (
-        <section className="py-16 bg-gray-50">
+        <section className="py-16 bg-gray-50 dark:bg-gray-900">
           <Container>
-            <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">
+            <h2 className="text-3xl font-bold dark:text-gray-100 mb-8">
               Articles similaires
             </h2>
 

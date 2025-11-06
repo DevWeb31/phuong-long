@@ -114,7 +114,7 @@ export function BlogFormModal({ isOpen, onClose, onSubmit, post, isLoading = fal
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="grid md:grid-cols-2 gap-6">
           <div className="md:col-span-2">
-            <label htmlFor="title" className="block text-sm font-semibold text-gray-700 mb-2">
+            <label htmlFor="title" className="block text-sm font-semibold dark:text-gray-300 mb-2">
               Titre <span className="text-red-500">*</span>
             </label>
             <input
@@ -124,12 +124,12 @@ export function BlogFormModal({ isOpen, onClose, onSubmit, post, isLoading = fal
               value={formData.title}
               onChange={handleTitleChange}
               required
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+              className="w-full px-4 py-2.5 border dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
             />
           </div>
 
           <div>
-            <label htmlFor="status" className="block text-sm font-semibold text-gray-700 mb-2">
+            <label htmlFor="status" className="block text-sm font-semibold dark:text-gray-300 mb-2">
               Statut <span className="text-red-500">*</span>
             </label>
             <select
@@ -138,7 +138,7 @@ export function BlogFormModal({ isOpen, onClose, onSubmit, post, isLoading = fal
               value={formData.status}
               onChange={handleChange}
               required
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+              className="w-full px-4 py-2.5 border dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
             >
               <option value="draft">Brouillon</option>
               <option value="published">Publié</option>
@@ -146,7 +146,7 @@ export function BlogFormModal({ isOpen, onClose, onSubmit, post, isLoading = fal
           </div>
 
           <div>
-            <label htmlFor="cover_image_url" className="block text-sm font-semibold text-gray-700 mb-2">
+            <label htmlFor="cover_image_url" className="block text-sm font-semibold dark:text-gray-300 mb-2">
               Image de couverture (URL)
             </label>
             <input
@@ -155,12 +155,12 @@ export function BlogFormModal({ isOpen, onClose, onSubmit, post, isLoading = fal
               name="cover_image_url"
               value={formData.cover_image_url || ''}
               onChange={handleChange}
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+              className="w-full px-4 py-2.5 border dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
             />
           </div>
 
           <div className="md:col-span-2">
-            <label htmlFor="excerpt" className="block text-sm font-semibold text-gray-700 mb-2">
+            <label htmlFor="excerpt" className="block text-sm font-semibold dark:text-gray-300 mb-2">
               Extrait
             </label>
             <textarea
@@ -169,12 +169,12 @@ export function BlogFormModal({ isOpen, onClose, onSubmit, post, isLoading = fal
               value={formData.excerpt || ''}
               onChange={handleChange}
               rows={2}
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all resize-none"
+              className="w-full px-4 py-2.5 border dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all resize-none"
             />
           </div>
 
           <div className="md:col-span-2">
-            <label htmlFor="tags" className="block text-sm font-semibold text-gray-700 mb-2">
+            <label htmlFor="tags" className="block text-sm font-semibold dark:text-gray-300 mb-2">
               Tags (séparés par des virgules)
             </label>
             <input
@@ -183,13 +183,13 @@ export function BlogFormModal({ isOpen, onClose, onSubmit, post, isLoading = fal
               value={tagsInput}
               onChange={(e) => setTagsInput(e.target.value)}
               placeholder="technique, débutant, compétition"
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+              className="w-full px-4 py-2.5 border dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
             />
           </div>
         </div>
 
         <div>
-          <label htmlFor="content" className="block text-sm font-semibold text-gray-700 mb-2">
+          <label htmlFor="content" className="block text-sm font-semibold dark:text-gray-300 mb-2">
             Contenu (Markdown) <span className="text-red-500">*</span>
           </label>
           <textarea
@@ -199,7 +199,7 @@ export function BlogFormModal({ isOpen, onClose, onSubmit, post, isLoading = fal
             onChange={handleChange}
             required
             rows={12}
-            className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all resize-none font-mono text-sm"
+            className="w-full px-4 py-2.5 border dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all resize-none font-mono text-sm"
             placeholder="# Titre de l'article&#10;&#10;Contenu en markdown..."
           />
         </div>

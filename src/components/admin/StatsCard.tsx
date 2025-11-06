@@ -47,7 +47,7 @@ export function StatsCard({
             <CardDescription className="mb-1">{title}</CardDescription>
             <CardTitle className="text-3xl font-bold">{value}</CardTitle>
             {description && (
-              <p className="text-sm text-gray-600 mt-2">{description}</p>
+              <p className="text-sm dark:text-gray-500 mt-2">{description}</p>
             )}
           </div>
           {icon && (
@@ -63,7 +63,7 @@ export function StatsCard({
             <span className={`text-sm font-medium ${trend.isPositive ? 'text-green-600' : 'text-red-600'}`}>
               {trend.isPositive ? '↗' : '↘'} {Math.abs(trend.value)}%
             </span>
-            <span className="text-sm text-gray-500">vs mois dernier</span>
+            <span className="text-sm dark:text-gray-500">vs mois dernier</span>
           </div>
         </CardContent>
       )}

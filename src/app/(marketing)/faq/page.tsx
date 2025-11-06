@@ -9,8 +9,9 @@
 
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { Container, Accordion, Button } from '@/components/common';
+import { Container, Accordion, Button, ParallaxBackground } from '@/components/common';
 import type { AccordionItem } from '@/components/common';
+import { FAQHeroContent } from '@/components/marketing/FAQHeroContent';
 
 export const metadata: Metadata = {
   title: 'FAQ - Questions Fréquentes | Phuong Long Vo Dao',
@@ -130,48 +131,39 @@ export default function FAQPage() {
   return (
     <>
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-br from-primary via-primary-dark to-[#B91C1C] py-16 lg:py-20">
-        <div className="absolute inset-0 opacity-10">
+      <section className="relative bg-gradient-to-br from-primary via-primary-dark to-[#B91C1C] py-20 lg:py-24 overflow-hidden">
+        {/* Parallax Background */}
+        <ParallaxBackground>
           <div className="absolute inset-0" style={{
             backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
           }} />
-        </div>
+        </ParallaxBackground>
+        
+        {/* Gradient Overlay pour profondeur */}
+        <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-transparent to-black/30" />
 
         <Container className="relative z-10">
-          <div className="max-w-3xl mx-auto text-center">
-            <div className="inline-flex items-center px-4 py-2 mb-6 bg-secondary/20 text-white border border-secondary/40 rounded-full backdrop-blur-sm">
-              <span className="text-secondary mr-2">❓</span>
-              <span className="font-medium">Questions Fréquentes</span>
-            </div>
-
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6">
-              FAQ
-            </h1>
-
-            <p className="text-lg md:text-xl text-white/90 leading-relaxed">
-              Toutes les réponses à vos questions sur le Vo Dao, nos clubs, les cours et les inscriptions.
-            </p>
-          </div>
+          <FAQHeroContent />
         </Container>
       </section>
 
       {/* Table of Contents */}
-      <section className="bg-white border-b border-gray-200 py-6">
+      <section className="bg-white dark:bg-gray-900 border-b dark:border-gray-800 py-6">
         <Container>
           <div className="flex flex-wrap gap-3 justify-center">
-            <a href="#general" className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-primary hover:text-white transition-colors text-sm font-medium">
+            <a href="#general" className="px-4 py-2 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-primary hover:text-white transition-colors font-medium">
               Généralités
             </a>
-            <a href="#courses" className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-primary hover:text-white transition-colors text-sm font-medium">
+            <a href="#courses" className="px-4 py-2 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-primary hover:text-white transition-colors font-medium">
               Cours
             </a>
-            <a href="#equipment" className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-primary hover:text-white transition-colors text-sm font-medium">
+            <a href="#equipment" className="px-4 py-2 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-primary hover:text-white transition-colors font-medium">
               Équipement
             </a>
-            <a href="#subscription" className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-primary hover:text-white transition-colors text-sm font-medium">
+            <a href="#subscription" className="px-4 py-2 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-primary hover:text-white transition-colors font-medium">
               Inscription
             </a>
-            <a href="#progress" className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-primary hover:text-white transition-colors text-sm font-medium">
+            <a href="#progress" className="px-4 py-2 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-primary hover:text-white transition-colors font-medium">
               Progression
             </a>
           </div>
@@ -179,12 +171,12 @@ export default function FAQPage() {
       </section>
 
       {/* FAQ Sections */}
-      <section className="py-16 lg:py-20 bg-gray-50">
+      <section className="py-16 lg:py-20 bg-gray-50 dark:bg-gray-900">
         <Container>
           <div className="max-w-4xl mx-auto space-y-12">
             {/* Généralités */}
             <div id="general">
-              <h2 className="text-3xl font-bold text-gray-900 mb-6">
+              <h2 className="text-3xl font-bold dark:text-gray-100 mb-6">
                 🥋 Généralités sur le Vo Dao
               </h2>
               <Accordion items={generalQuestions} />
@@ -192,7 +184,7 @@ export default function FAQPage() {
 
             {/* Cours */}
             <div id="courses">
-              <h2 className="text-3xl font-bold text-gray-900 mb-6">
+              <h2 className="text-3xl font-bold dark:text-gray-100 mb-6">
                 📅 Les Cours
               </h2>
               <Accordion items={courseQuestions} />
@@ -200,7 +192,7 @@ export default function FAQPage() {
 
             {/* Équipement */}
             <div id="equipment">
-              <h2 className="text-3xl font-bold text-gray-900 mb-6">
+              <h2 className="text-3xl font-bold dark:text-gray-100 mb-6">
                 👕 Équipement
               </h2>
               <Accordion items={equipmentQuestions} />
@@ -208,7 +200,7 @@ export default function FAQPage() {
 
             {/* Inscription */}
             <div id="subscription">
-              <h2 className="text-3xl font-bold text-gray-900 mb-6">
+              <h2 className="text-3xl font-bold dark:text-gray-100 mb-6">
                 💳 Inscription & Tarifs
               </h2>
               <Accordion items={subscriptionQuestions} />
@@ -216,7 +208,7 @@ export default function FAQPage() {
 
             {/* Progression */}
             <div id="progress">
-              <h2 className="text-3xl font-bold text-gray-900 mb-6">
+              <h2 className="text-3xl font-bold dark:text-gray-100 mb-6">
                 🏆 Progression & Compétitions
               </h2>
               <Accordion items={progressQuestions} />
@@ -226,13 +218,13 @@ export default function FAQPage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-16 bg-white">
+      <section className="py-16 bg-white dark:bg-gray-900">
         <Container>
           <div className="max-w-3xl mx-auto text-center">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">
+            <h2 className="text-3xl font-bold dark:text-gray-100 mb-4">
               Vous n'avez pas trouvé votre réponse ?
             </h2>
-            <p className="text-lg text-gray-600 mb-8">
+            <p className="text-lg dark:text-gray-500 mb-8">
               N'hésitez pas à nous contacter directement, nous vous répondrons avec plaisir !
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">

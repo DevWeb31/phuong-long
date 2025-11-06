@@ -94,8 +94,8 @@ export default function SignUpPage() {
           </CardHeader>
 
           <CardContent>
-            <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
-              <p className="text-sm text-green-700 text-center">
+            <div className="bg-green-50 border rounded-lg p-4 mb-6">
+              <p className="text-sm">
                 Un email de confirmation a été envoyé à <strong>{formData.email}</strong>. 
                 Cliquez sur le lien dans l'email pour activer votre compte.
               </p>
@@ -110,7 +110,7 @@ export default function SignUpPage() {
             <div className="mt-6 text-center">
               <Link
                 href="/"
-                className="text-sm text-gray-600 hover:text-gray-900 transition-colors"
+                className="text-sm dark:text-gray-500 hover:text-gray-900 transition-colors"
               >
                 ← Retour à l'accueil
               </Link>
@@ -135,12 +135,12 @@ export default function SignUpPage() {
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Full Name */}
             <div>
-              <label htmlFor="fullName" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="fullName" className="block text-sm font-medium dark:text-gray-300 mb-2">
                 Nom complet
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <UserIcon className="h-5 w-5 text-gray-400" />
+                  <UserIcon className="h-5 w-5 text-gray-400 dark:text-gray-500" />
                 </div>
                 <input
                   type="text"
@@ -149,7 +149,7 @@ export default function SignUpPage() {
                   value={formData.fullName}
                   onChange={handleChange}
                   required
-                  className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                  className="block w-full pl-10 pr-3 py-2 border dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
                   placeholder="Jean Dupont"
                 />
               </div>
@@ -157,12 +157,12 @@ export default function SignUpPage() {
 
             {/* Email */}
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="email" className="block text-sm font-medium dark:text-gray-300 mb-2">
                 Email
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <EnvelopeIcon className="h-5 w-5 text-gray-400" />
+                  <EnvelopeIcon className="h-5 w-5 text-gray-400 dark:text-gray-500" />
                 </div>
                 <input
                   type="email"
@@ -171,7 +171,7 @@ export default function SignUpPage() {
                   value={formData.email}
                   onChange={handleChange}
                   required
-                  className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                  className="block w-full pl-10 pr-3 py-2 border dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
                   placeholder="votre@email.com"
                 />
               </div>
@@ -179,12 +179,12 @@ export default function SignUpPage() {
 
             {/* Password */}
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="password" className="block text-sm font-medium dark:text-gray-300 mb-2">
                 Mot de passe
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <LockClosedIcon className="h-5 w-5 text-gray-400" />
+                  <LockClosedIcon className="h-5 w-5 text-gray-400 dark:text-gray-500" />
                 </div>
                 <input
                   type="password"
@@ -194,23 +194,23 @@ export default function SignUpPage() {
                   onChange={handleChange}
                   required
                   minLength={8}
-                  className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                  className="block w-full pl-10 pr-3 py-2 border dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
                   placeholder="••••••••"
                 />
               </div>
-              <p className="mt-1 text-xs text-gray-500">
+              <p className="mt-1 text-xs dark:text-gray-500">
                 Minimum 8 caractères
               </p>
             </div>
 
             {/* Confirm Password */}
             <div>
-              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="confirmPassword" className="block text-sm font-medium dark:text-gray-300 mb-2">
                 Confirmer le mot de passe
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <LockClosedIcon className="h-5 w-5 text-gray-400" />
+                  <LockClosedIcon className="h-5 w-5 text-gray-400 dark:text-gray-500" />
                 </div>
                 <input
                   type="password"
@@ -219,7 +219,7 @@ export default function SignUpPage() {
                   value={formData.confirmPassword}
                   onChange={handleChange}
                   required
-                  className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                  className="block w-full pl-10 pr-3 py-2 border dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
                   placeholder="••••••••"
                 />
               </div>
@@ -227,7 +227,7 @@ export default function SignUpPage() {
 
             {/* Error Message */}
             {error && (
-              <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-sm text-red-700">
+              <div className="bg-red-50 border rounded-lg p-4 text-sm">
                 ❌ {error}
               </div>
             )}
@@ -244,7 +244,7 @@ export default function SignUpPage() {
             </Button>
 
             {/* Terms */}
-            <p className="text-xs text-gray-500 text-center">
+            <p className="text-xs dark:text-gray-500">
               En créant un compte, vous acceptez nos{' '}
               <Link href="/legal/terms" className="text-primary hover:underline">
                 Conditions d'utilisation
@@ -259,10 +259,10 @@ export default function SignUpPage() {
           {/* Divider */}
           <div className="relative my-6">
             <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-300" />
+              <div className="w-full border-t dark:border-gray-700" />
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-white text-gray-500">Déjà un compte ?</span>
+              <span className="px-2 bg-white dark:bg-gray-900 text-gray-500 dark:text-gray-500">Déjà un compte ?</span>
             </div>
           </div>
 
@@ -277,7 +277,7 @@ export default function SignUpPage() {
           <div className="mt-6 text-center">
             <Link
               href="/"
-              className="text-sm text-gray-600 hover:text-gray-900 transition-colors"
+              className="text-sm dark:text-gray-500 hover:text-gray-900 transition-colors"
             >
               ← Retour à l'accueil
             </Link>

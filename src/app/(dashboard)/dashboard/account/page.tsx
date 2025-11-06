@@ -64,7 +64,7 @@ export default function AccountPage() {
       <div className="flex items-center justify-center py-20">
         <div className="text-center">
           <div className="text-4xl mb-4">⏳</div>
-          <p className="text-gray-600">Chargement...</p>
+          <p className="text-gray-600 dark:text-gray-500">Chargement...</p>
         </div>
       </div>
     );
@@ -73,7 +73,7 @@ export default function AccountPage() {
   if (!user) {
     return (
       <div className="text-center py-20">
-        <p className="text-gray-600">Vous devez être connecté pour accéder à cette page.</p>
+        <p className="text-gray-600 dark:text-gray-500">Vous devez être connecté pour accéder à cette page.</p>
       </div>
     );
   }
@@ -82,8 +82,8 @@ export default function AccountPage() {
     <div className="space-y-8">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Paramètres du compte</h1>
-        <p className="text-gray-600">
+        <h1 className="text-3xl font-bold dark:text-gray-100 mb-2">Paramètres du compte</h1>
+        <p className="text-gray-600 dark:text-gray-500">
           Gérez votre email, mot de passe, notifications et options de compte.
         </p>
       </div>
@@ -104,8 +104,8 @@ export default function AccountPage() {
         <CardContent>
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-base font-medium text-gray-900">{user.email}</p>
-              <p className="text-sm text-gray-500 mt-1">
+              <p className="text-base font-medium dark:text-gray-100">{user.email}</p>
+              <p className="text-sm dark:text-gray-500 mt-1">
                 {user.email_confirmed_at 
                   ? '✅ Email vérifié' 
                   : '⚠️ Email non vérifié - Consultez vos emails'}
@@ -144,7 +144,7 @@ export default function AccountPage() {
 
           <div className="space-y-4">
             <div>
-              <label htmlFor="newPassword" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="newPassword" className="block text-sm font-medium dark:text-gray-300 mb-2">
                 Nouveau mot de passe
               </label>
               <input
@@ -152,15 +152,15 @@ export default function AccountPage() {
                 id="newPassword"
                 value={passwordData.newPassword}
                 onChange={(e) => setPasswordData(prev => ({ ...prev, newPassword: e.target.value }))}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                className="w-full px-4 py-2 border dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
                 placeholder="••••••••"
                 minLength={8}
               />
-              <p className="mt-1 text-xs text-gray-500">Minimum 8 caractères</p>
+              <p className="mt-1 text-xs dark:text-gray-500">Minimum 8 caractères</p>
             </div>
 
             <div>
-              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="confirmPassword" className="block text-sm font-medium dark:text-gray-300 mb-2">
                 Confirmer le mot de passe
               </label>
               <input
@@ -168,7 +168,7 @@ export default function AccountPage() {
                 id="confirmPassword"
                 value={passwordData.confirmPassword}
                 onChange={(e) => setPasswordData(prev => ({ ...prev, confirmPassword: e.target.value }))}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                className="w-full px-4 py-2 border dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
                 placeholder="••••••••"
               />
             </div>
@@ -201,8 +201,8 @@ export default function AccountPage() {
           <div className="space-y-4">
             <label className="flex items-center justify-between cursor-pointer">
               <div>
-                <p className="font-medium text-gray-900">Événements</p>
-                <p className="text-sm text-gray-500">Recevoir des emails sur les nouveaux événements</p>
+                <p className="font-medium text-gray-900 dark:text-gray-100">Événements</p>
+                <p className="text-sm dark:text-gray-500">Recevoir des emails sur les nouveaux événements</p>
               </div>
               <input
                 type="checkbox"
@@ -213,8 +213,8 @@ export default function AccountPage() {
 
             <label className="flex items-center justify-between cursor-pointer">
               <div>
-                <p className="font-medium text-gray-900">Blog</p>
-                <p className="text-sm text-gray-500">Recevoir les nouveaux articles du blog</p>
+                <p className="font-medium text-gray-900 dark:text-gray-100">Blog</p>
+                <p className="text-sm dark:text-gray-500">Recevoir les nouveaux articles du blog</p>
               </div>
               <input
                 type="checkbox"
@@ -225,8 +225,8 @@ export default function AccountPage() {
 
             <label className="flex items-center justify-between cursor-pointer">
               <div>
-                <p className="font-medium text-gray-900">Promotions</p>
-                <p className="text-sm text-gray-500">Recevoir les offres spéciales et promotions</p>
+                <p className="font-medium text-gray-900 dark:text-gray-100">Promotions</p>
+                <p className="text-sm dark:text-gray-500">Recevoir les offres spéciales et promotions</p>
               </div>
               <input
                 type="checkbox"
@@ -255,8 +255,8 @@ export default function AccountPage() {
           </div>
         </CardHeader>
         <CardContent>
-          <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-            <p className="text-sm text-red-700 mb-4">
+          <div className="bg-red-50 border rounded-lg p-4">
+            <p className="text-sm mb-4">
               ⚠️ <strong>Attention :</strong> La suppression de votre compte est définitive et irréversible. 
               Toutes vos données (profil, inscriptions, commandes) seront supprimées.
             </p>

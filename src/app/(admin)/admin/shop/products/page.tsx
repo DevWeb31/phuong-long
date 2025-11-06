@@ -65,7 +65,7 @@ export default function AdminShopProductsPage() {
       key: 'name',
       label: 'Produit',
       sortable: true,
-      render: (value) => <span className="font-medium text-gray-900">{value}</span>,
+      render: (value) => <span className="font-medium text-gray-900 dark:text-gray-100">{value}</span>,
       width: 'min-w-[200px]',
     },
     {
@@ -83,7 +83,7 @@ export default function AdminShopProductsPage() {
       label: 'Prix',
       sortable: true,
       render: (value) => (
-        <span className="font-semibold text-gray-900">
+        <span className="font-semibold text-gray-900 dark:text-gray-100">
           {(value / 100).toFixed(2)} €
         </span>
       ),
@@ -192,8 +192,8 @@ export default function AdminShopProductsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Gestion des Produits</h1>
-          <p className="text-gray-600">
+          <h1 className="text-3xl font-bold dark:text-gray-100 mb-2">Gestion des Produits</h1>
+          <p className="text-gray-600 dark:text-gray-500">
             Gérez le catalogue, les stocks et les prix de la boutique
           </p>
         </div>
@@ -204,8 +204,8 @@ export default function AdminShopProductsPage() {
 
       {isLoading ? (
         <div className="text-center py-12">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-gray-200 border-t-primary"></div>
-          <p className="mt-4 text-gray-600">Chargement...</p>
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 dark:border-gray-800"></div>
+          <p className="mt-4 text-gray-600 dark:text-gray-500">Chargement...</p>
         </div>
       ) : (
         <DataTable

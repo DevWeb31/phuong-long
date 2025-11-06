@@ -58,8 +58,8 @@ export default function ForgotPasswordPage() {
           </CardHeader>
 
           <CardContent>
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-              <p className="text-sm text-blue-700 text-center">
+            <div className="bg-blue-50 border rounded-lg p-4 mb-6">
+              <p className="text-sm">
                 Si un compte existe avec l'email <strong>{email}</strong>, vous recevrez un lien 
                 pour réinitialiser votre mot de passe dans quelques minutes.
               </p>
@@ -74,7 +74,7 @@ export default function ForgotPasswordPage() {
 
               <button
                 onClick={() => setSuccess(false)}
-                className="w-full text-sm text-gray-600 hover:text-gray-900 transition-colors"
+                className="w-full text-sm dark:text-gray-500 hover:text-gray-900 transition-colors"
               >
                 Renvoyer un email
               </button>
@@ -83,7 +83,7 @@ export default function ForgotPasswordPage() {
             <div className="mt-6 text-center">
               <Link
                 href="/"
-                className="text-sm text-gray-600 hover:text-gray-900 transition-colors"
+                className="text-sm dark:text-gray-500 hover:text-gray-900 transition-colors"
               >
                 ← Retour à l'accueil
               </Link>
@@ -108,12 +108,12 @@ export default function ForgotPasswordPage() {
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Email */}
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="email" className="block text-sm font-medium dark:text-gray-300 mb-2">
                 Email
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <EnvelopeIcon className="h-5 w-5 text-gray-400" />
+                  <EnvelopeIcon className="h-5 w-5 text-gray-400 dark:text-gray-500" />
                 </div>
                 <input
                   type="email"
@@ -121,7 +121,7 @@ export default function ForgotPasswordPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                  className="block w-full pl-10 pr-3 py-2 border dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
                   placeholder="votre@email.com"
                 />
               </div>
@@ -129,7 +129,7 @@ export default function ForgotPasswordPage() {
 
             {/* Error Message */}
             {error && (
-              <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-sm text-red-700">
+              <div className="bg-red-50 border rounded-lg p-4 text-sm">
                 ❌ {error}
               </div>
             )}
@@ -149,10 +149,10 @@ export default function ForgotPasswordPage() {
           {/* Divider */}
           <div className="relative my-6">
             <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-300" />
+              <div className="w-full border-t dark:border-gray-700" />
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-white text-gray-500">ou</span>
+              <span className="px-2 bg-white dark:bg-gray-900 text-gray-500 dark:text-gray-500">ou</span>
             </div>
           </div>
 
@@ -167,7 +167,7 @@ export default function ForgotPasswordPage() {
           <div className="mt-6 text-center">
             <Link
               href="/"
-              className="text-sm text-gray-600 hover:text-gray-900 transition-colors"
+              className="text-sm dark:text-gray-500 hover:text-gray-900 transition-colors"
             >
               ← Retour à l'accueil
             </Link>

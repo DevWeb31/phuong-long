@@ -17,9 +17,9 @@ interface CardProps extends ComponentProps<'div'> {
 }
 
 const variantStyles = {
-  default: 'bg-white shadow-lg shadow-gray-200/50',
-  bordered: 'bg-white/95 backdrop-blur-sm border border-gray-200/60 shadow-md',
-  elevated: 'bg-white shadow-2xl shadow-gray-300/20',
+  default: 'bg-white dark:bg-slate-900 shadow-lg shadow-slate-200/50 dark:shadow-slate-950/50',
+  bordered: 'bg-white/95 dark:bg-slate-900/95 backdrop-blur-sm border border-slate-200/60 dark:border-slate-700/60 shadow-md',
+  elevated: 'bg-white dark:bg-slate-900 shadow-2xl shadow-slate-300/20 dark:shadow-slate-950/20',
 };
 
 const paddingStyles = {
@@ -48,7 +48,7 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(
           'rounded-2xl overflow-hidden',
           variantStyles[variant],
           paddingStyles[padding],
-          hoverable && 'transition-all duration-500 hover:shadow-2xl hover:shadow-primary/10 hover:-translate-y-2 hover:scale-[1.03] cursor-pointer group',
+          hoverable && 'transition-all duration-500 hover:shadow-2xl hover:shadow-primary/10 dark:hover:shadow-primary/20 hover:-translate-y-2 hover:scale-[1.03] cursor-pointer group',
           className
         )}
         {...props}
@@ -74,7 +74,7 @@ interface CardTitleProps extends ComponentProps<'h3'> {}
 export function CardTitle({ children, className, ...props }: CardTitleProps) {
   return (
     <h3
-      className={cn('text-xl font-semibold text-gray-900', className)}
+      className={cn('text-xl font-semibold text-slate-900 dark:text-slate-100', className)}
       {...props}
     >
       {children}
@@ -90,7 +90,7 @@ export function CardDescription({
   ...props
 }: CardDescriptionProps) {
   return (
-    <p className={cn('text-sm text-gray-600', className)} {...props}>
+    <p className={cn('text-sm text-slate-600 dark:text-slate-400', className)} {...props}>
       {children}
     </p>
   );
