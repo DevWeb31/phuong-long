@@ -127,11 +127,17 @@ export function MegaMenu({ sections, isOpen, onClose }: MegaMenuProps) {
                             {/* Icon */}
                             {ItemIcon && (
                               <div className={cn(
-                                'mt-0.5 p-1.5 rounded-lg transition-all duration-200',
-                                'bg-gray-100 dark:bg-gray-800 bg-gray-800 group-hover:bg-primary/10',
-                                'group-hover:scale-110'
+                                'mt-0.5 p-1.5 rounded-lg transition-all duration-300',
+                                'bg-gray-100 dark:bg-gray-800',
+                                'group-hover:bg-gradient-to-br group-hover:from-primary/20 group-hover:to-primary/10',
+                                'group-hover:scale-110 group-hover:rotate-6',
+                                'group-hover:shadow-md group-hover:shadow-primary/20'
                               )}>
-                                <ItemIcon className="w-4 h-4 text-gray-600 dark:text-gray-500 group-hover:text-primary transition-colors" />
+                                <ItemIcon className={cn(
+                                  'w-4 h-4 transition-all duration-300',
+                                  'text-slate-600 dark:text-slate-400',
+                                  'group-hover:text-primary group-hover:scale-110'
+                                )} />
                               </div>
                             )}
 
