@@ -91,8 +91,24 @@ export default async function ClubDetailPage({ params }: Props) {
   return (
     <>
       {/* Hero */}
-      <section className="relative bg-gradient-to-r from-primary to-primary-dark py-16 lg:py-20 text-white">
-        <Container>
+      <section className="relative py-16 lg:py-20 text-white overflow-hidden">
+        {/* Background - Image du club ou gradient */}
+        {typedClub.cover_image_url ? (
+          <>
+            {/* Image de fond */}
+            <div 
+              className="absolute inset-0 bg-cover bg-center"
+              style={{ backgroundImage: `url(${typedClub.cover_image_url})` }}
+            />
+            {/* Overlay sombre pour lisibilité */}
+            <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/60 to-black/70" />
+          </>
+        ) : (
+          /* Gradient bleu par défaut si pas d'image */
+          <div className="absolute inset-0 bg-gradient-to-r from-primary to-primary-dark" />
+        )}
+        
+        <Container className="relative z-10">
           <div className="max-w-3xl">
             <Badge className="mb-4 bg-secondary/20 text-white border-secondary/40">
               {typedClub.city}
