@@ -173,7 +173,7 @@ export function Header() {
             },
             {
               name: 'Nos Professeurs',
-              href: '/clubs#coaches',
+              href: '/professeurs',
               description: 'Équipe pédagogique',
               icon: Award,
             },
