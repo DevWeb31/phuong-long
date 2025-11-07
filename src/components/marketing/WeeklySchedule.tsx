@@ -15,9 +15,10 @@ import { Clock, Users, GraduationCap, User } from 'lucide-react';
 
 interface CourseSession {
   time: string;
-  type?: string;        // Ex: "Adultes", "Enfants", "Tous niveaux"
-  level?: string;       // Ex: "Débutant", "Intermédiaire", "Avancé"
-  instructor?: string;  // Nom du professeur
+  type?: string;         // Ex: "Adultes", "Enfants", "Tous niveaux"
+  level?: string;        // Ex: "Débutant", "Intermédiaire", "Avancé"
+  instructor?: string;   // Legacy: single instructor
+  instructors?: string[]; // New: multiple instructors
 }
 
 interface WeeklyScheduleProps {
@@ -162,15 +163,29 @@ export function WeeklySchedule({ club }: WeeklyScheduleProps) {
                             </div>
                           )}
                           
-                          {/* Instructeur */}
-                          {normalizedSession.instructor && (
-                            <div className="flex items-center gap-1.5">
-                              <User className="w-3 h-3 text-slate-500 dark:text-slate-400 flex-shrink-0" />
-                              <span className="text-xs text-slate-600 dark:text-slate-400">
-                                {normalizedSession.instructor}
-                              </span>
-                            </div>
-                          )}
+                          {/* Instructeur(s) */}
+                          {(() => {
+                            // Support legacy (string) et nouveau format (array)
+                            const instructorsList = normalizedSession.instructors || 
+                              (normalizedSession.instructor ? [normalizedSession.instructor] : []);
+                            
+                            return instructorsList.length > 0 && (
+                              <div className="flex items-start gap-1.5">
+                                <User className="w-3 h-3 text-slate-500 dark:text-slate-400 flex-shrink-0 mt-0.5" />
+                                <div className="flex flex-wrap gap-1">
+                                  {instructorsList.map((instructor, idx) => (
+                                    <span
+                                      key={idx}
+                                      className="text-xs text-slate-600 dark:text-slate-400"
+                                    >
+                                      {instructor}
+                                      {idx < instructorsList.length - 1 && <span className="text-slate-400 mx-0.5">•</span>}
+                                    </span>
+                                  ))}
+                                </div>
+                              </div>
+                            );
+                          })()}
                         </div>
                       );
                     })}

@@ -17,7 +17,8 @@ interface CourseSession {
   time: string;
   type?: string;
   level?: string;
-  instructor?: string;
+  instructor?: string;  // Legacy: single instructor (string)
+  instructors?: string[]; // New: multiple instructors (array)
 }
 
 interface Coach {
@@ -75,7 +76,7 @@ export function ScheduleEditor({ value, onChange, clubId }: ScheduleEditorProps)
       time: '',
       type: '',
       level: '',
-      instructor: '',
+      instructors: [],
     });
     onChange(newSchedule);
     setExpandedDay(day);
@@ -96,6 +97,30 @@ export function ScheduleEditor({ value, onChange, clubId }: ScheduleEditorProps)
       ...newSchedule[day][index],
       [field]: value || undefined,
     };
+    onChange(newSchedule);
+  };
+
+  const toggleInstructor = (day: string, index: number, instructorName: string) => {
+    const newSchedule = { ...schedule };
+    const session = newSchedule[day][index];
+    
+    // Migrer de l'ancien format (string) vers le nouveau (array) si nécessaire
+    if (!session.instructors) {
+      session.instructors = session.instructor ? [session.instructor] : [];
+      delete session.instructor;
+    }
+    
+    const currentInstructors = session.instructors || [];
+    const instructorIndex = currentInstructors.indexOf(instructorName);
+    
+    if (instructorIndex > -1) {
+      // Retirer l'instructeur
+      session.instructors = currentInstructors.filter(name => name !== instructorName);
+    } else {
+      // Ajouter l'instructeur
+      session.instructors = [...currentInstructors, instructorName];
+    }
+    
     onChange(newSchedule);
   };
 
@@ -213,26 +238,63 @@ export function ScheduleEditor({ value, onChange, clubId }: ScheduleEditorProps)
                         </select>
                       </div>
 
-                      {/* Instructeur */}
-                      <div>
-                        <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                          Instructeur
+                      {/* Instructeurs (multi-sélection) */}
+                      <div className="md:col-span-2">
+                        <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-2">
+                          Instructeur(s)
                         </label>
-                        <select
-                          value={session.instructor || ''}
-                          onChange={(e) => updateSession(day.key, index, 'instructor', e.target.value)}
-                          className="w-full px-3 py-2 text-sm border dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                        >
-                          <option value="">-- Aucun instructeur --</option>
-                          {coaches.map((coach) => (
-                            <option key={coach.id} value={coach.name}>
-                              {coach.name}
-                            </option>
-                          ))}
-                        </select>
-                        {coaches.length === 0 && (
-                          <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">
-                            ⚠️ Aucun coach disponible. Ajoutez-en dans la table coaches.
+                        
+                        {coaches.length > 0 ? (
+                          <>
+                            {/* Badges des instructeurs sélectionnés */}
+                            {(() => {
+                              // Gérer legacy format (string) et nouveau format (array)
+                              const selectedInstructors = session.instructors || (session.instructor ? [session.instructor] : []);
+                              
+                              return selectedInstructors.length > 0 && (
+                                <div className="flex flex-wrap gap-2 mb-3 p-2 bg-slate-50 dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700">
+                                  {selectedInstructors.map((instructor) => (
+                                    <button
+                                      key={instructor}
+                                      type="button"
+                                      onClick={() => toggleInstructor(day.key, index, instructor)}
+                                      className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-primary text-white rounded-full text-xs font-semibold hover:bg-primary-dark transition-colors"
+                                    >
+                                      <span>{instructor}</span>
+                                      <span className="hover:scale-125 transition-transform">✕</span>
+                                    </button>
+                                  ))}
+                                </div>
+                              );
+                            })()}
+                            
+                            {/* Liste des instructeurs disponibles */}
+                            <div className="flex flex-wrap gap-2">
+                              {coaches.map((coach) => {
+                                const selectedInstructors = session.instructors || (session.instructor ? [session.instructor] : []);
+                                const isSelected = selectedInstructors.includes(coach.name);
+                                
+                                return (
+                                  <button
+                                    key={coach.id}
+                                    type="button"
+                                    onClick={() => toggleInstructor(day.key, index, coach.name)}
+                                    className={`px-3 py-1.5 text-xs font-medium rounded-lg border-2 transition-all ${
+                                      isSelected
+                                        ? 'bg-primary/10 border-primary text-primary'
+                                        : 'bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:border-primary/50 hover:bg-slate-50 dark:hover:bg-slate-700'
+                                    }`}
+                                  >
+                                    {isSelected && <span className="mr-1">✓</span>}
+                                    {coach.name}
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          </>
+                        ) : (
+                          <p className="text-xs text-amber-600 dark:text-amber-400 p-3 bg-amber-50 dark:bg-amber-950/30 rounded-lg border border-amber-200 dark:border-amber-800">
+                            ⚠️ Aucun coach disponible. Ajoutez-en dans la section Coaches de l'admin.
                           </p>
                         )}
                       </div>
