@@ -274,95 +274,78 @@ export default async function EventDetailPage({ params }: Props) {
                 </CardContent>
               </Card>
 
-              {/* Deadline inscription */}
-              {typedEvent.registration_deadline && !isPast && (
-                <Card className="bg-yellow-50 border-yellow-200">
-                  <CardContent className="p-4 flex items-start gap-3">
-                    <InformationCircleIcon className="w-5 h-5 text-yellow-600 flex-shrink-0" />
-                    <div>
-                      <p className="font-medium text-yellow-900">
-                        Inscriptions jusqu'au {new Date(typedEvent.registration_deadline).toLocaleDateString('fr-FR', {
-                          day: 'numeric',
-                          month: 'long',
-                          year: 'numeric'
-                        })}
-                      </p>
+              {/* Boutons d'interaction style Facebook */}
+              {!isPast && (
+                <div className="mt-6">
+                  <EventInteractions
+                    eventId={typedEvent.id}
+                    initialLikesCount={likesCount || 0}
+                    initialAttendeesCount={attendeesCount || 0}
+                    initialUserLiked={userLiked}
+                    initialUserAttending={userAttending}
+                    isAuthenticated={isAuthenticated}
+                  />
+                </div>
+              )}
+
+              {/* Contact club */}
+              {typedEvent.club && (
+                <Card className="mt-6">
+                  <CardContent className="p-6">
+                    <div className="flex items-center gap-2 mb-4">
+                      <BuildingOffice2Icon className="w-5 h-5 text-primary" />
+                      <h3 className="font-bold text-slate-900 dark:text-slate-100">
+                        Club organisateur
+                      </h3>
                     </div>
+                    
+                    <Link
+                      href={`/clubs/${typedEvent.club.slug}`}
+                      className="inline-flex items-center gap-2 px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg hover:border-primary hover:shadow-md transition-all w-full"
+                    >
+                      <span className="font-semibold text-slate-900 dark:text-slate-100">
+                        {typedEvent.club.name}
+                      </span>
+                      <span className="text-slate-600 dark:text-slate-400">
+                        • {typedEvent.club.city}
+                      </span>
+                      <span className="ml-auto text-primary">→</span>
+                    </Link>
+
+                    {(typedEvent.club.phone || typedEvent.club.email) && (
+                      <div className="mt-4 flex flex-wrap gap-3">
+                        {typedEvent.club.phone && (
+                          <a
+                            href={`tel:${typedEvent.club.phone}`}
+                            className="text-sm text-primary hover:underline"
+                          >
+                            📞 {typedEvent.club.phone}
+                          </a>
+                        )}
+                        {typedEvent.club.email && (
+                          <a
+                            href={`mailto:${typedEvent.club.email}`}
+                            className="text-sm text-primary hover:underline"
+                          >
+                            ✉️ {typedEvent.club.email}
+                          </a>
+                        )}
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               )}
             </div>
+          </div>
 
-            {/* Sidebar Inscription */}
-            <div>
-              <Card className="bg-gradient-to-br from-primary to-primary-dark text-white sticky top-20">
-                <CardContent className="p-6">
-                  <h3 className="text-2xl font-bold mb-4">
-                    {typedEvent.price_cents === 0 ? 'Inscription Gratuite' : 'S\'inscrire'}
-                  </h3>
-                  
-                  {isPast ? (
-                    <div className="bg-white/10 rounded-lg p-4 mb-4">
-                      <p className="text-white/90">Cet événement est terminé.</p>
-                    </div>
-                  ) : isFull ? (
-                    <div className="bg-red-500/20 rounded-lg p-4 mb-4">
-                      <p className="text-white/90">Événement complet</p>
-                      <p className="text-sm mt-2">
-                        Contactez-nous pour liste d'attente
-                      </p>
-                    </div>
-                  ) : (
-                    <div className="bg-white/10 rounded-lg p-4 mb-6">
-                      <div className="flex justify-between items-center mb-2">
-                        <span className="text-white/90">Tarif</span>
-                        <span className="text-2xl font-bold">
-                          {typedEvent.price_cents === 0 ? 'Gratuit' : `${(typedEvent.price_cents / 100).toFixed(0)}€`}
-                        </span>
-                      </div>
-                      {placesLeft !== null && (
-                        <p className="text-sm">
-                          {placesLeft} places disponibles
-                        </p>
-                      )}
-                    </div>
-                  )}
-                  
-                  <div className="space-y-3">
-                    {!isPast && !isFull && (
-                      <Button 
-                        fullWidth 
-                        className="bg-secondary text-gray-900 dark:text-gray-100 hover:bg-secondary-light font-bold"
-                      >
-                        S'inscrire Maintenant
-                      </Button>
-                    )}
-                    
-                    <Link href={`/contact?event=${typedEvent.slug}`}>
-                      <Button 
-                        fullWidth 
-                        variant="ghost" 
-                        className="text-white border-white hover:bg-white/10"
-                      >
-                        Poser une Question
-                      </Button>
-                    </Link>
-                    
-                    {typedEvent.club && (
-                      <Link href={`/clubs/${typedEvent.club.slug}`}>
-                        <Button 
-                          fullWidth 
-                          variant="ghost" 
-                          className="text-white border-white hover:bg-white/10"
-                        >
-                          Voir le Club
-                        </Button>
-                      </Link>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
+          {/* Info complémentaire */}
+          <div className="mt-8 text-center">
+            <p className="text-sm text-slate-500 dark:text-slate-400">
+              Des questions sur cet événement ?{' '}
+              <Link href="/contact" className="text-primary hover:underline font-medium">
+                Contactez-nous
+              </Link>
+            </p>
           </div>
         </Container>
       </section>
