@@ -160,7 +160,7 @@ export function Header() {
           items: [
             {
               name: 'Horaires & Tarifs',
-              href: '/clubs#tarifs',
+              href: '/horaires-tarifs',
               description: 'Planning complet',
               icon: Clock,
             },

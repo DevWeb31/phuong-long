@@ -26,6 +26,8 @@ export interface Club {
   cover_image_url?: string;
   latitude?: number | null;
   longitude?: number | null;
+  schedule?: Record<string, string[]> | null;
+  pricing?: Record<string, number> | null;
   active: boolean;
   members_count?: number;
   created_at?: string;
@@ -52,6 +54,8 @@ export function ClubFormModal({ isOpen, onClose, onSubmit, club, isLoading = fal
     cover_image_url: '',
     latitude: null,
     longitude: null,
+    schedule: null,
+    pricing: null,
     active: true,
   });
 
@@ -71,6 +75,8 @@ export function ClubFormModal({ isOpen, onClose, onSubmit, club, isLoading = fal
         cover_image_url: '',
         latitude: null,
         longitude: null,
+        schedule: null,
+        pricing: null,
         active: true,
       });
     }
@@ -345,8 +351,75 @@ export function ClubFormModal({ isOpen, onClose, onSubmit, club, isLoading = fal
           </div>
         </div>
 
+        {/* Horaires (Schedule) - JSON Editor */}
+        <div className="border-t dark:border-gray-700 pt-6">
+          <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-4">
+            🗓️ Horaires des cours
+          </h3>
+          <div className="space-y-3">
+            <label className="block text-sm font-semibold dark:text-gray-300 mb-2">
+              Horaires au format JSON
+            </label>
+            <textarea
+              value={formData.schedule ? JSON.stringify(formData.schedule, null, 2) : ''}
+              onChange={(e) => {
+                try {
+                  const parsed = e.target.value ? JSON.parse(e.target.value) : null;
+                  setFormData(prev => ({ ...prev, schedule: parsed }));
+                } catch {
+                  // Ignore les erreurs de parsing pendant la saisie
+                }
+              }}
+              rows={8}
+              className="w-full px-4 py-2.5 border dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all resize-none font-mono text-sm"
+              placeholder={`{
+  "lundi": ["18:00-19:00", "19:00-20:00"],
+  "mercredi": ["18:00-19:00"],
+  "vendredi": ["18:00-19:00"]
+}`}
+            />
+            <p className="text-xs text-slate-500 dark:text-slate-400">
+              Format : {"{ \"jour\": [\"horaire1\", \"horaire2\"], ... }"}
+            </p>
+          </div>
+        </div>
+
+        {/* Tarifs (Pricing) - JSON Editor */}
+        <div className="border-t dark:border-gray-700 pt-6">
+          <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-4">
+            💰 Tarifs annuels
+          </h3>
+          <div className="space-y-3">
+            <label className="block text-sm font-semibold dark:text-gray-300 mb-2">
+              Tarifs au format JSON
+            </label>
+            <textarea
+              value={formData.pricing ? JSON.stringify(formData.pricing, null, 2) : ''}
+              onChange={(e) => {
+                try {
+                  const parsed = e.target.value ? JSON.parse(e.target.value) : null;
+                  setFormData(prev => ({ ...prev, pricing: parsed }));
+                } catch {
+                  // Ignore les erreurs de parsing pendant la saisie
+                }
+              }}
+              rows={6}
+              className="w-full px-4 py-2.5 border dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all resize-none font-mono text-sm"
+              placeholder={`{
+  "adultes": 250,
+  "enfants": 180,
+  "famille": 400,
+  "etudiant": 200
+}`}
+            />
+            <p className="text-xs text-slate-500 dark:text-slate-400">
+              Format : {"{ \"categorie\": montant_en_euros, ... }"}
+            </p>
+          </div>
+        </div>
+
         {/* Actif */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 border-t dark:border-gray-700 pt-6">
           <input
             type="checkbox"
             id="active"
