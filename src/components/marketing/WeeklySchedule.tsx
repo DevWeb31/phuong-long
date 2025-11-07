@@ -62,6 +62,27 @@ export function WeeklySchedule({ club }: WeeklyScheduleProps) {
     return session;
   };
 
+  // Fonction pour extraire l'heure de début et convertir en minutes
+  const getStartTimeInMinutes = (timeStr: string): number => {
+    // Formats supportés: "18:00-19:00", "18h00-19h00", "18h-19h"
+    const match = timeStr.match(/^(\d{1,2})[h:]?(\d{0,2})/);
+    if (!match) return 0;
+    
+    const hours = parseInt(match[1], 10);
+    const minutes = match[2] ? parseInt(match[2], 10) : 0;
+    return hours * 60 + minutes;
+  };
+
+  // Trier les sessions par horaire pour chaque jour
+  const sortedSchedule: Record<string, (string | CourseSession)[]> = {};
+  Object.keys(schedule).forEach(day => {
+    sortedSchedule[day] = [...schedule[day]].sort((a, b) => {
+      const sessionA = normalizeSession(a);
+      const sessionB = normalizeSession(b);
+      return getStartTimeInMinutes(sessionA.time) - getStartTimeInMinutes(sessionB.time);
+    });
+  });
+
   return (
     <div>
       <div className="flex items-center gap-3 mb-6">
@@ -81,7 +102,7 @@ export function WeeklySchedule({ club }: WeeklyScheduleProps) {
       {/* Calendrier hebdomadaire - Responsive sans scroll */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7 gap-3">
         {DAYS_OF_WEEK.map((day) => {
-          const daySchedule = schedule[day.key] || [];
+          const daySchedule = sortedSchedule[day.key] || [];
           const hasSchedule = daySchedule.length > 0;
 
           return (
