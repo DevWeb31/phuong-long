@@ -3,15 +3,22 @@
  * 
  * Affichage du calendrier hebdomadaire des cours d'un club
  * 
- * @version 1.0
+ * @version 2.0
  * @date 2025-11-06
  */
 
 'use client';
 
 import type { Club } from '@/lib/types';
-import { Card } from '@/components/common';
-import { Clock } from 'lucide-react';
+import { Card, Badge } from '@/components/common';
+import { Clock, Users, GraduationCap, User } from 'lucide-react';
+
+interface CourseSession {
+  time: string;
+  type?: string;        // Ex: "Adultes", "Enfants", "Tous niveaux"
+  level?: string;       // Ex: "Débutant", "Intermédiaire", "Avancé"
+  instructor?: string;  // Nom du professeur
+}
 
 interface WeeklyScheduleProps {
   club: Club;
@@ -28,7 +35,7 @@ const DAYS_OF_WEEK = [
 ];
 
 export function WeeklySchedule({ club }: WeeklyScheduleProps) {
-  const schedule = club.schedule as Record<string, string[]> | null;
+  const schedule = club.schedule as Record<string, (string | CourseSession)[]> | null;
 
   if (!schedule || Object.keys(schedule).length === 0) {
     return (
@@ -45,6 +52,14 @@ export function WeeklySchedule({ club }: WeeklyScheduleProps) {
       </Card>
     );
   }
+
+  // Normaliser les données (support format simple string ou objet)
+  const normalizeSession = (session: string | CourseSession): CourseSession => {
+    if (typeof session === 'string') {
+      return { time: session };
+    }
+    return session;
+  };
 
   return (
     <div>
@@ -89,20 +104,56 @@ export function WeeklySchedule({ club }: WeeklyScheduleProps) {
               </div>
 
               {/* Horaires */}
-              <div className="p-2 min-h-[100px]">
+              <div className="p-2 min-h-[140px]">
                 {hasSchedule ? (
-                  <div className="space-y-1.5">
-                    {daySchedule.map((time, index) => (
-                      <div
-                        key={index}
-                        className="flex items-center gap-2 px-2 py-1.5 bg-gradient-to-r from-primary/10 to-primary/5 rounded-lg border border-primary/20"
-                      >
-                        <Clock className="w-3 h-3 text-primary flex-shrink-0" />
-                        <span className="text-xs font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap">
-                          {time}
-                        </span>
-                      </div>
-                    ))}
+                  <div className="space-y-2">
+                    {daySchedule.map((session, index) => {
+                      const normalizedSession = normalizeSession(session);
+                      
+                      return (
+                        <div
+                          key={index}
+                          className="px-2 py-2 bg-gradient-to-r from-primary/10 to-primary/5 rounded-lg border border-primary/20 hover:border-primary/40 hover:shadow-md transition-all"
+                        >
+                          {/* Horaire */}
+                          <div className="flex items-center gap-1.5 mb-1">
+                            <Clock className="w-3.5 h-3.5 text-primary flex-shrink-0" />
+                            <span className="text-sm font-bold text-slate-900 dark:text-slate-100 whitespace-nowrap">
+                              {normalizedSession.time}
+                            </span>
+                          </div>
+                          
+                          {/* Type de cours */}
+                          {normalizedSession.type && (
+                            <div className="flex items-center gap-1.5 mb-1">
+                              <Users className="w-3 h-3 text-accent flex-shrink-0" />
+                              <span className="text-xs text-slate-700 dark:text-slate-300">
+                                {normalizedSession.type}
+                              </span>
+                            </div>
+                          )}
+                          
+                          {/* Niveau */}
+                          {normalizedSession.level && (
+                            <div className="mb-1">
+                              <Badge className="text-[10px] py-0 px-1.5 bg-secondary/20 text-secondary-dark border-secondary/30">
+                                {normalizedSession.level}
+                              </Badge>
+                            </div>
+                          )}
+                          
+                          {/* Instructeur */}
+                          {normalizedSession.instructor && (
+                            <div className="flex items-center gap-1.5">
+                              <User className="w-3 h-3 text-slate-500 dark:text-slate-400 flex-shrink-0" />
+                              <span className="text-xs text-slate-600 dark:text-slate-400">
+                                {normalizedSession.instructor}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
                   </div>
                 ) : (
                   <div className="flex items-center justify-center h-full">
