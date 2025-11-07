@@ -10,16 +10,18 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { Container, Card, CardContent, CardHeader, CardTitle, Badge, Button } from '@/components/common';
+import { Container, Card, CardContent, CardHeader, CardTitle, Badge } from '@/components/common';
 import { createServerClient } from '@/lib/supabase/server';
 import type { Event } from '@/lib/types';
+import { EventInteractions } from '@/components/marketing/EventInteractions';
 import { 
   CalendarIcon, 
   MapPinIcon, 
   ClockIcon, 
   UsersIcon, 
   CurrencyEuroIcon,
-  InformationCircleIcon 
+  TrophyIcon,
+  BuildingOffice2Icon
 } from '@heroicons/react/24/outline';
 
 interface Props {
@@ -68,15 +70,50 @@ export default async function EventDetailPage({ params }: Props) {
   // Vérifier si événement passé
   const isPast = new Date(typedEvent.start_date) < new Date();
   
-  // Récupérer nombre d'inscrits
-  const { count: registrationsCount } = await supabase
+  // Vérifier si l'utilisateur est authentifié
+  const { data: { user } } = await supabase.auth.getUser();
+  const isAuthenticated = !!user;
+  
+  // Récupérer nombre de likes
+  const { count: likesCount } = await supabase
+    .from('event_likes')
+    .select('*', { count: 'exact', head: true })
+    .eq('event_id', typedEvent.id);
+  
+  // Vérifier si l'utilisateur a liké
+  let userLiked = false;
+  if (user) {
+    const { data: userLike } = await supabase
+      .from('event_likes')
+      .select('id')
+      .eq('event_id', typedEvent.id)
+      .eq('user_id', user.id)
+      .single();
+    userLiked = !!userLike;
+  }
+  
+  // Récupérer nombre de participants
+  const { count: attendeesCount } = await supabase
     .from('event_registrations')
     .select('*', { count: 'exact', head: true })
     .eq('event_id', typedEvent.id)
     .eq('status', 'confirmed');
   
-  const isFull = typedEvent.max_attendees ? (registrationsCount || 0) >= typedEvent.max_attendees : false;
-  const placesLeft = typedEvent.max_attendees ? typedEvent.max_attendees - (registrationsCount || 0) : null;
+  // Vérifier si l'utilisateur participe
+  let userAttending = false;
+  if (user) {
+    const { data: userRegistration } = await supabase
+      .from('event_registrations')
+      .select('id')
+      .eq('event_id', typedEvent.id)
+      .eq('user_id', user.id)
+      .eq('status', 'confirmed')
+      .single();
+    userAttending = !!userRegistration;
+  }
+  
+  const isFull = typedEvent.max_attendees ? (attendeesCount || 0) >= typedEvent.max_attendees : false;
+  const placesLeft = typedEvent.max_attendees ? typedEvent.max_attendees - (attendeesCount || 0) : null;
 
   const eventTypeLabels: Record<string, { label: string; color: string }> = {
     competition: { label: 'Compétition', color: 'primary' },

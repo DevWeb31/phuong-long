@@ -113,6 +113,13 @@ export interface EventRegistration {
   updated_at: string;
 }
 
+export interface EventLike {
+  id: string;
+  event_id: string;
+  user_id: string;
+  created_at: string;
+}
+
 export interface Product {
   id: string;
   name: string;
