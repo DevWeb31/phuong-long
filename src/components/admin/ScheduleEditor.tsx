@@ -3,13 +3,13 @@
  * 
  * Éditeur visuel pour les horaires hebdomadaires
  * 
- * @version 1.0
+ * @version 2.0
  * @date 2025-11-06
  */
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button, Badge } from '@/components/common';
 import { Plus, Trash2, Clock } from 'lucide-react';
 
@@ -20,9 +20,17 @@ interface CourseSession {
   instructor?: string;
 }
 
+interface Coach {
+  id: string;
+  name: string;
+  club_id: string | null;
+  active: boolean;
+}
+
 interface ScheduleEditorProps {
   value: Record<string, CourseSession[]> | null;
   onChange: (schedule: Record<string, CourseSession[]>) => void;
+  clubId?: string;
 }
 
 const DAYS = [
@@ -35,10 +43,28 @@ const DAYS = [
   { key: 'dimanche', label: 'Dimanche' },
 ];
 
-export function ScheduleEditor({ value, onChange }: ScheduleEditorProps) {
+export function ScheduleEditor({ value, onChange, clubId }: ScheduleEditorProps) {
   const [expandedDay, setExpandedDay] = useState<string | null>(null);
+  const [coaches, setCoaches] = useState<Coach[]>([]);
   
   const schedule = value || {};
+
+  // Charger les coaches depuis l'API
+  useEffect(() => {
+    const fetchCoaches = async () => {
+      try {
+        const response = await fetch('/api/coaches');
+        if (response.ok) {
+          const data = await response.json();
+          setCoaches(data);
+        }
+      } catch (error) {
+        console.error('Failed to fetch coaches:', error);
+      }
+    };
+    
+    fetchCoaches();
+  }, []);
 
   const addSession = (day: string) => {
     const newSchedule = { ...schedule };
@@ -192,13 +218,23 @@ export function ScheduleEditor({ value, onChange }: ScheduleEditorProps) {
                         <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
                           Instructeur
                         </label>
-                        <input
-                          type="text"
+                        <select
                           value={session.instructor || ''}
                           onChange={(e) => updateSession(day.key, index, 'instructor', e.target.value)}
-                          placeholder="Nom du professeur"
                           className="w-full px-3 py-2 text-sm border dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                        />
+                        >
+                          <option value="">-- Aucun instructeur --</option>
+                          {coaches.map((coach) => (
+                            <option key={coach.id} value={coach.name}>
+                              {coach.name}
+                            </option>
+                          ))}
+                        </select>
+                        {coaches.length === 0 && (
+                          <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">
+                            ⚠️ Aucun coach disponible. Ajoutez-en dans la table coaches.
+                          </p>
+                        )}
                       </div>
                     </div>
                   </div>

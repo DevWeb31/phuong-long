@@ -361,6 +361,7 @@ export function ClubFormModal({ isOpen, onClose, onSubmit, club, isLoading = fal
           <ScheduleEditor
             value={formData.schedule as Record<string, any[]> | null}
             onChange={(schedule) => setFormData(prev => ({ ...prev, schedule }))}
+            clubId={formData.id}
           />
         </div>
 
