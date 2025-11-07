@@ -184,13 +184,25 @@ export default async function ClubDetailPage({ params }: Props) {
                   </CardHeader>
                   <CardContent>
                     <div className="grid sm:grid-cols-2 gap-4">
-                      {Object.entries(typedClub.schedule as Record<string, string[]>).map(([day, hours]) => (
-                        <div key={day} className="flex justify-between items-start p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
-                          <span className="font-medium text-gray-900 dark:text-gray-100 capitalize">{day}</span>
-                          <div className="text-right">
-                            {hours.map((hour, idx) => (
-                              <div key={idx} className="text-sm dark:text-gray-500">{hour}</div>
-                            ))}
+                      {Object.entries(typedClub.schedule as Record<string, any[]>).map(([day, sessions]) => (
+                        <div key={day} className="p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                          <span className="font-medium text-gray-900 dark:text-gray-100 capitalize block mb-2">{day}</span>
+                          <div className="space-y-2">
+                            {sessions.map((session, idx) => {
+                              // Support format simple (string) et enrichi (object)
+                              const isString = typeof session === 'string';
+                              const time = isString ? session : session.time;
+                              const type = !isString ? session.type : null;
+                              
+                              return (
+                                <div key={idx} className="text-sm">
+                                  <div className="font-semibold text-gray-900 dark:text-gray-100">{time}</div>
+                                  {type && (
+                                    <div className="text-xs text-gray-600 dark:text-gray-500">{type}</div>
+                                  )}
+                                </div>
+                              );
+                            })}
                           </div>
                         </div>
                       ))}
