@@ -11,4 +11,5 @@ export { StatsCard } from './StatsCard';
 export { DataTable } from './DataTable';
 export type { DataTableColumn, DataTableAction } from './DataTable';
 export { Modal, ConfirmModal } from './Modal';
+export { CoachFormModal } from './CoachFormModal';
 
