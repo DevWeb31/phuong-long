@@ -35,12 +35,25 @@ export async function PATCH(request: Request, { params }: RouteParams) {
 
     const body = await request.json();
 
-    // @ts-ignore - Supabase update type incompatibility
-    const { data, error } = await supabase.from('events').update(body).eq('id', id).select().single();
+    // Mettre à jour sans récupérer les relations
+    const { error } = await supabase
+      .from('events')
+      .update(body)
+      .eq('id', id);
 
-    if (error) throw error;
+    if (error) {
+      console.error('Error updating event:', error);
+      throw error;
+    }
 
-    return NextResponse.json(data);
+    // Récupérer l'événement mis à jour (sans relations pour éviter erreurs de cache)
+    const { data: updatedEvent } = await supabase
+      .from('events')
+      .select('*')
+      .eq('id', id)
+      .single();
+
+    return NextResponse.json(updatedEvent || { success: true });
   } catch (error) {
     console.error('Error updating event:', error);
     return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 });

@@ -14,6 +14,6 @@ export { UserMenu } from './UserMenu';
 export { CartButton } from './CartButton';
 export { SearchBar } from './SearchBar';
 export { ThemeToggle } from './ThemeToggle';
-export { MegaMenu, clubsMegaMenu, shopMegaMenu } from './MegaMenu';
+export { MegaMenu, shopMegaMenu } from './MegaMenu';
 export type { MegaMenuSection } from './MegaMenu';
 
