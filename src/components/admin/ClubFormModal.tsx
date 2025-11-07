@@ -12,6 +12,8 @@
 import { useState, useEffect } from 'react';
 import { Modal } from './Modal';
 import { Button } from '@/components/common';
+import { ScheduleEditor } from './ScheduleEditor';
+import { PricingEditor } from './PricingEditor';
 
 export interface Club {
   id?: string;
@@ -351,99 +353,26 @@ export function ClubFormModal({ isOpen, onClose, onSubmit, club, isLoading = fal
           </div>
         </div>
 
-        {/* Horaires (Schedule) - JSON Editor */}
+        {/* Horaires (Schedule) - Visual Editor */}
         <div className="border-t dark:border-gray-700 pt-6">
           <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-4">
             🗓️ Horaires des cours
           </h3>
-          <div className="space-y-3">
-            <label className="block text-sm font-semibold dark:text-gray-300 mb-2">
-              Horaires au format JSON (simple ou enrichi)
-            </label>
-            <textarea
-              value={formData.schedule ? JSON.stringify(formData.schedule, null, 2) : ''}
-              onChange={(e) => {
-                try {
-                  const parsed = e.target.value ? JSON.parse(e.target.value) : null;
-                  setFormData(prev => ({ ...prev, schedule: parsed }));
-                } catch {
-                  // Ignore les erreurs de parsing pendant la saisie
-                }
-              }}
-              rows={16}
-              className="w-full px-4 py-2.5 border dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all resize-none font-mono text-sm"
-              placeholder={`Format enrichi (recommandé):
-{
-  "lundi": [
-    {
-      "time": "18:00-19:00",
-      "type": "Adultes",
-      "level": "Tous niveaux",
-      "instructor": "Maître Nguyen"
-    },
-    {
-      "time": "19:00-20:00",
-      "type": "Enfants 8-12 ans",
-      "level": "Débutant"
-    }
-  ],
-  "mercredi": [
-    { "time": "18:00-19:00", "type": "Adultes" }
-  ]
-}
-
-Format simple (compatible):
-{
-  "lundi": ["18:00-19:00", "19:00-20:00"],
-  "mercredi": ["18:00-19:00"]
-}`}
-            />
-            <div className="bg-blue-50 dark:bg-blue-950/30 rounded-lg p-3 border border-blue-200 dark:border-blue-800">
-              <p className="text-xs text-blue-900 dark:text-blue-100 font-semibold mb-2">
-                💡 Champs disponibles pour chaque cours :
-              </p>
-              <ul className="text-xs text-blue-800 dark:text-blue-200 space-y-1 list-disc list-inside">
-                <li><code className="bg-blue-100 dark:bg-blue-900 px-1 rounded">time</code> : Horaire (ex: "18:00-19:00") - <strong>Obligatoire</strong></li>
-                <li><code className="bg-blue-100 dark:bg-blue-900 px-1 rounded">type</code> : Type de cours (ex: "Adultes", "Enfants 6-10 ans")</li>
-                <li><code className="bg-blue-100 dark:bg-blue-900 px-1 rounded">level</code> : Niveau (ex: "Débutant", "Intermédiaire", "Avancé")</li>
-                <li><code className="bg-blue-100 dark:bg-blue-900 px-1 rounded">instructor</code> : Nom du professeur</li>
-              </ul>
-            </div>
-          </div>
+          <ScheduleEditor
+            value={formData.schedule as Record<string, any[]> | null}
+            onChange={(schedule) => setFormData(prev => ({ ...prev, schedule }))}
+          />
         </div>
 
-        {/* Tarifs (Pricing) - JSON Editor */}
+        {/* Tarifs (Pricing) - Visual Editor */}
         <div className="border-t dark:border-gray-700 pt-6">
           <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-4">
             💰 Tarifs annuels
           </h3>
-          <div className="space-y-3">
-            <label className="block text-sm font-semibold dark:text-gray-300 mb-2">
-              Tarifs au format JSON
-            </label>
-            <textarea
-              value={formData.pricing ? JSON.stringify(formData.pricing, null, 2) : ''}
-              onChange={(e) => {
-                try {
-                  const parsed = e.target.value ? JSON.parse(e.target.value) : null;
-                  setFormData(prev => ({ ...prev, pricing: parsed }));
-                } catch {
-                  // Ignore les erreurs de parsing pendant la saisie
-                }
-              }}
-              rows={6}
-              className="w-full px-4 py-2.5 border dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all resize-none font-mono text-sm"
-              placeholder={`{
-  "adultes": 250,
-  "enfants": 180,
-  "famille": 400,
-  "etudiant": 200
-}`}
-            />
-            <p className="text-xs text-slate-500 dark:text-slate-400">
-              Format : {"{ \"categorie\": montant_en_euros, ... }"}
-            </p>
-          </div>
+          <PricingEditor
+            value={formData.pricing as Record<string, number> | null}
+            onChange={(pricing) => setFormData(prev => ({ ...prev, pricing }))}
+          />
         </div>
 
         {/* Actif */}
