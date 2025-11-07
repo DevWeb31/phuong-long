@@ -9,6 +9,7 @@
 
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Container, Card, CardHeader, CardTitle, Badge, Button, ParallaxBackground } from '@/components/common';
 import { createServerClient } from '@/lib/supabase/server';
 import type { Event } from '@/lib/types';
@@ -117,25 +118,63 @@ export default async function EventsPage() {
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-10 lg:gap-12">
                   {typeEvents.map((event) => (
                     <Link key={event.id} href={`/events/${event.slug}`}>
-                      <Card hoverable className="h-full flex flex-col border-none shadow-xl hover:shadow-2xl">
-                        <CardHeader className="flex-1">
-                          <div className="flex items-start justify-between mb-3">
-                            <Badge variant="warning" size="sm">
-                              {new Date(event.start_date).toLocaleDateString('fr-FR', {
-                                day: 'numeric',
-                                month: 'short',
-                                year: 'numeric'
-                              })}
-                            </Badge>
-                            {event.price_cents === 0 ? (
-                              <Badge variant="success" size="sm">Gratuit</Badge>
-                            ) : (
-                              <Badge variant="primary" size="sm">
-                                {(event.price_cents / 100).toFixed(0)}€
+                      <Card hoverable className="h-full flex flex-col border-none shadow-xl hover:shadow-2xl overflow-hidden group">
+                        {/* Image de couverture */}
+                        {event.cover_image_url ? (
+                          <div className="relative w-full h-52 bg-gray-200 dark:bg-gray-800 overflow-hidden">
+                            <Image
+                              src={event.cover_image_url}
+                              alt={event.title}
+                              fill
+                              className="object-cover group-hover:scale-105 transition-transform duration-500"
+                              unoptimized
+                            />
+                            {/* Overlay gradient pour les badges */}
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20" />
+                            
+                            {/* Badges sur l'image */}
+                            <div className="absolute top-3 left-3 right-3 flex items-start justify-between">
+                              <Badge variant="warning" size="sm" className="backdrop-blur-sm bg-white/90 dark:bg-gray-900/90">
+                                {new Date(event.start_date).toLocaleDateString('fr-FR', {
+                                  day: 'numeric',
+                                  month: 'short',
+                                  year: 'numeric'
+                                })}
                               </Badge>
-                            )}
+                              {event.price_cents === 0 ? (
+                                <Badge variant="success" size="sm" className="backdrop-blur-sm bg-white/90 dark:bg-gray-900/90">Gratuit</Badge>
+                              ) : (
+                                <Badge variant="primary" size="sm" className="backdrop-blur-sm bg-white/90 dark:bg-gray-900/90">
+                                  {(event.price_cents / 100).toFixed(0)}€
+                                </Badge>
+                              )}
+                            </div>
                           </div>
-                          
+                        ) : (
+                          // Fallback si pas d'image
+                          <div className="relative w-full h-52 bg-gradient-to-br from-primary via-primary-dark to-[#B91C1C] flex items-center justify-center">
+                            <CalendarIcon className="w-20 h-20 text-white/20" />
+                            <div className="absolute top-3 left-3 right-3 flex items-start justify-between">
+                              <Badge variant="warning" size="sm" className="backdrop-blur-sm bg-white/90 dark:bg-gray-900/90">
+                                {new Date(event.start_date).toLocaleDateString('fr-FR', {
+                                  day: 'numeric',
+                                  month: 'short',
+                                  year: 'numeric'
+                                })}
+                              </Badge>
+                              {event.price_cents === 0 ? (
+                                <Badge variant="success" size="sm" className="backdrop-blur-sm bg-white/90 dark:bg-gray-900/90">Gratuit</Badge>
+                              ) : (
+                                <Badge variant="primary" size="sm" className="backdrop-blur-sm bg-white/90 dark:bg-gray-900/90">
+                                  {(event.price_cents / 100).toFixed(0)}€
+                                </Badge>
+                              )}
+                            </div>
+                          </div>
+                        )}
+                        
+                        {/* Contenu de la carte */}
+                        <CardHeader className="flex-1">
                           <CardTitle className="line-clamp-2 mb-3">
                             {event.title}
                           </CardTitle>

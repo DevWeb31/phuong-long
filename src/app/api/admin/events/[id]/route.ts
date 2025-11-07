@@ -35,15 +35,21 @@ export async function PATCH(request: Request, { params }: RouteParams) {
 
     const body = await request.json();
 
+    // Nettoyer les données : supprimer les relations et champs non-colonnes
+    const { club, created_at, updated_at, id: _, ...cleanData } = body;
+
     // Mettre à jour sans récupérer les relations
     const { error } = await supabase
       .from('events')
-      .update(body)
+      .update(cleanData)
       .eq('id', id);
 
     if (error) {
       console.error('Error updating event:', error);
-      throw error;
+      return NextResponse.json({ 
+        error: 'Erreur lors de la mise à jour', 
+        details: error.message
+      }, { status: 500 });
     }
 
     // Récupérer l'événement mis à jour (sans relations pour éviter erreurs de cache)
