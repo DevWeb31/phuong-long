@@ -25,6 +25,7 @@ export interface Event {
   club_id?: string;
   max_attendees?: number;
   registration_deadline?: string;
+  cover_image_url?: string;
   price_cents: number;
   active: boolean;
   created_at?: string;
@@ -51,6 +52,7 @@ export function EventFormModal({ isOpen, onClose, onSubmit, event, clubs = [], i
     club_id: '',
     max_attendees: undefined,
     registration_deadline: '',
+    cover_image_url: '',
     price_cents: 0,
     active: true,
   });
@@ -70,6 +72,7 @@ export function EventFormModal({ isOpen, onClose, onSubmit, event, clubs = [], i
         club_id: '',
         max_attendees: undefined,
         registration_deadline: '',
+        cover_image_url: '',
         price_cents: 0,
         active: true,
       });
@@ -276,10 +279,47 @@ export function EventFormModal({ isOpen, onClose, onSubmit, event, clubs = [], i
             onChange={handleChange}
             rows={4}
             className="w-full px-4 py-2.5 border dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all resize-none"
+            placeholder="Décrivez l'événement, le programme, les activités..."
           />
         </div>
 
-        <div className="flex items-center gap-3">
+        {/* Image de couverture (Affiche) */}
+        <div className="border-t dark:border-slate-700 pt-6">
+          <label htmlFor="cover_image_url" className="block text-sm font-semibold dark:text-gray-300 mb-2">
+            Image de couverture / Affiche 🖼️
+          </label>
+          <input
+            type="url"
+            id="cover_image_url"
+            name="cover_image_url"
+            value={formData.cover_image_url || ''}
+            onChange={handleChange}
+            className="w-full px-4 py-2.5 border dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+            placeholder="https://example.com/affiche-evenement.jpg"
+          />
+          <p className="mt-1.5 text-xs text-slate-500 dark:text-slate-400">
+            💡 Ajoutez une affiche pour rendre l'événement plus attractif (comme sur Facebook)
+          </p>
+          
+          {/* Preview */}
+          {formData.cover_image_url && (
+            <div className="mt-4">
+              <p className="text-xs font-semibold text-slate-700 dark:text-slate-300 mb-2">Aperçu :</p>
+              <div className="max-w-md rounded-xl overflow-hidden border-2 border-slate-200 dark:border-slate-700">
+                <img
+                  src={formData.cover_image_url}
+                  alt="Aperçu affiche"
+                  className="w-full object-cover"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="300"%3E%3Crect fill="%23f3f4f6" width="400" height="300"/%3E%3Ctext x="50%25" y="50%25" dominant-baseline="middle" text-anchor="middle" fill="%239ca3af" font-family="sans-serif" font-size="18"%3EImage invalide%3C/text%3E%3C/svg%3E';
+                  }}
+                />
+              </div>
+            </div>
+          )}
+        </div>
+
+        <div className="flex items-center gap-3 border-t dark:border-slate-700 pt-6">
           <input
             type="checkbox"
             id="active"
