@@ -239,21 +239,24 @@ export function CoachFormModal({ isOpen, onClose, onSubmit, coach, isLoading = f
             />
             
             {/* Preview */}
-            {formData.photo_url && (
-              <div className="mt-4">
-                <p className="text-xs font-semibold text-slate-700 dark:text-slate-300 mb-2">Aperçu :</p>
-                <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-slate-200 dark:border-slate-700 mx-auto">
-                  <img
-                    src={formData.photo_url}
-                    alt="Aperçu"
-                    className="w-full h-full object-cover"
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="200" height="200"%3E%3Crect fill="%23f3f4f6" width="200" height="200"/%3E%3Ctext x="50%25" y="50%25" dominant-baseline="middle" text-anchor="middle" fill="%239ca3af" font-family="sans-serif" font-size="60"%3E👨‍🏫%3C/text%3E%3C/svg%3E';
-                    }}
-                  />
-                </div>
+            <div className="mt-4">
+              <p className="text-xs font-semibold text-slate-700 dark:text-slate-300 mb-2">Aperçu :</p>
+              <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-slate-200 dark:border-slate-700 mx-auto">
+                <img
+                  src={formData.photo_url || 'https://us.123rf.com/450wm/glebstock/glebstock1405/glebstock140500249/29946904-noir-et-blanc-silhouette-portrait-de-l-homme-inconnu.jpg?ver=6'}
+                  alt="Aperçu"
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = 'https://us.123rf.com/450wm/glebstock/glebstock1405/glebstock140500249/29946904-noir-et-blanc-silhouette-portrait-de-l-homme-inconnu.jpg?ver=6';
+                  }}
+                />
               </div>
-            )}
+              {!formData.photo_url && (
+                <p className="text-xs text-center text-slate-500 dark:text-slate-400 mt-2">
+                  Image par défaut (silhouette)
+                </p>
+              )}
+            </div>
           </div>
         </div>
 

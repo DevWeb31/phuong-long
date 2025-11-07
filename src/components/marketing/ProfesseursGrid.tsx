@@ -54,17 +54,14 @@ export function ProfesseursGrid({ coaches }: ProfesseursGridProps) {
             <CardContent padding="none">
               {/* Photo du coach */}
               <div className="relative aspect-square bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-900 overflow-hidden">
-                {coach.photo_url ? (
-                  <img
-                    src={coach.photo_url}
-                    alt={coach.name}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center">
-                    <div className="text-8xl">👨‍🏫</div>
-                  </div>
-                )}
+                <img
+                  src={coach.photo_url || 'https://us.123rf.com/450wm/glebstock/glebstock1405/glebstock140500249/29946904-noir-et-blanc-silhouette-portrait-de-l-homme-inconnu.jpg?ver=6'}
+                  alt={coach.name}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = 'https://us.123rf.com/450wm/glebstock/glebstock1405/glebstock140500249/29946904-noir-et-blanc-silhouette-portrait-de-l-homme-inconnu.jpg?ver=6';
+                  }}
+                />
                 
                 {/* Overlay gradient au hover */}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
