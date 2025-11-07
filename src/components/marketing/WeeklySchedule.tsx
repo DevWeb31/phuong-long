@@ -62,94 +62,52 @@ export function WeeklySchedule({ club }: WeeklyScheduleProps) {
         </div>
       </div>
 
-      {/* Calendrier hebdomadaire - Vue Desktop */}
-      <div className="hidden lg:block overflow-x-auto">
-        <div className="grid grid-cols-7 gap-4 min-w-max">
-          {DAYS_OF_WEEK.map((day) => {
-            const daySchedule = schedule[day.key] || [];
-            const hasSchedule = daySchedule.length > 0;
-
-            return (
-              <Card
-                key={day.key}
-                className={`min-h-[200px] transition-all duration-300 ${
-                  hasSchedule
-                    ? 'border-primary/30 hover:shadow-lg hover:shadow-primary/10 hover:scale-105'
-                    : 'opacity-60'
-                }`}
-              >
-                {/* Jour de la semaine */}
-                <div className="p-4 border-b border-slate-200 dark:border-slate-700 bg-gradient-to-r from-slate-50 to-white dark:from-slate-800 dark:to-slate-900">
-                  <div className="flex items-center gap-2">
-                    <span className="text-xl">{day.emoji}</span>
-                    <h3 className="font-bold text-slate-900 dark:text-slate-100">
-                      {day.label}
-                    </h3>
-                  </div>
-                </div>
-
-                {/* Horaires */}
-                <div className="p-4 space-y-2">
-                  {hasSchedule ? (
-                    daySchedule.map((time, index) => (
-                      <div
-                        key={index}
-                        className="flex items-center gap-2 px-3 py-2 bg-gradient-to-r from-primary/10 to-primary/5 rounded-lg border border-primary/20"
-                      >
-                        <Clock className="w-4 h-4 text-primary flex-shrink-0" />
-                        <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">
-                          {time}
-                        </span>
-                      </div>
-                    ))
-                  ) : (
-                    <div className="text-center py-8 text-sm text-slate-500 dark:text-slate-500">
-                      Repos
-                    </div>
-                  )}
-                </div>
-              </Card>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Vue Mobile - Liste */}
-      <div className="lg:hidden space-y-4">
+      {/* Calendrier hebdomadaire - Responsive sans scroll */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7 gap-3">
         {DAYS_OF_WEEK.map((day) => {
           const daySchedule = schedule[day.key] || [];
           const hasSchedule = daySchedule.length > 0;
 
           return (
-            <Card key={day.key} className={!hasSchedule ? 'opacity-60' : ''}>
-              <div className="p-4">
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-2">
-                    <span className="text-xl">{day.emoji}</span>
-                    <h3 className="font-bold text-slate-900 dark:text-slate-100">
-                      {day.label}
-                    </h3>
-                  </div>
-                  {!hasSchedule && (
-                    <span className="text-sm text-slate-500 dark:text-slate-500">
-                      Repos
-                    </span>
-                  )}
+            <Card
+              key={day.key}
+              className={`transition-all duration-300 ${
+                hasSchedule
+                  ? 'border-primary/30 hover:shadow-lg hover:shadow-primary/10'
+                  : 'opacity-60'
+              }`}
+            >
+              {/* Jour de la semaine */}
+              <div className="p-3 border-b border-slate-200 dark:border-slate-700 bg-gradient-to-r from-slate-50 to-white dark:from-slate-800 dark:to-slate-900">
+                <div className="flex items-center gap-2 justify-center xl:justify-start">
+                  <span className="text-lg">{day.emoji}</span>
+                  <h3 className="font-bold text-sm text-slate-900 dark:text-slate-100">
+                    {day.label}
+                  </h3>
                 </div>
+              </div>
 
-                {hasSchedule && (
+              {/* Horaires */}
+              <div className="p-3 min-h-[120px]">
+                {hasSchedule ? (
                   <div className="space-y-2">
                     {daySchedule.map((time, index) => (
                       <div
                         key={index}
-                        className="flex items-center gap-2 px-3 py-2 bg-gradient-to-r from-primary/10 to-primary/5 rounded-lg border border-primary/20"
+                        className="flex items-center gap-2 px-2 py-1.5 bg-gradient-to-r from-primary/10 to-primary/5 rounded-lg border border-primary/20"
                       >
-                        <Clock className="w-4 h-4 text-primary" />
-                        <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                        <Clock className="w-3 h-3 text-primary flex-shrink-0" />
+                        <span className="text-xs font-semibold text-slate-700 dark:text-slate-300 truncate">
                           {time}
                         </span>
                       </div>
                     ))}
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-center h-full">
+                    <span className="text-xs text-slate-500 dark:text-slate-500">
+                      Repos
+                    </span>
                   </div>
                 )}
               </div>
