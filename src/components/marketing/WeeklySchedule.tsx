@@ -71,6 +71,7 @@ export function WeeklySchedule({ club }: WeeklyScheduleProps) {
           return (
             <Card
               key={day.key}
+              padding="none"
               className={`transition-all duration-300 ${
                 hasSchedule
                   ? 'border-primary/30 hover:shadow-lg hover:shadow-primary/10'
@@ -88,16 +89,16 @@ export function WeeklySchedule({ club }: WeeklyScheduleProps) {
               </div>
 
               {/* Horaires */}
-              <div className="p-3 min-h-[120px]">
+              <div className="p-2 min-h-[100px]">
                 {hasSchedule ? (
-                  <div className="space-y-2">
+                  <div className="space-y-1.5">
                     {daySchedule.map((time, index) => (
                       <div
                         key={index}
                         className="flex items-center gap-2 px-2 py-1.5 bg-gradient-to-r from-primary/10 to-primary/5 rounded-lg border border-primary/20"
                       >
                         <Clock className="w-3 h-3 text-primary flex-shrink-0" />
-                        <span className="text-xs font-semibold text-slate-700 dark:text-slate-300 truncate">
+                        <span className="text-xs font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap">
                           {time}
                         </span>
                       </div>

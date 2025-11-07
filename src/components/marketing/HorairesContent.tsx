@@ -48,28 +48,23 @@ export function HorairesContent({ clubs }: HorairesContentProps) {
             Sélectionnez un club
           </h2>
           
-          <div className="flex flex-wrap gap-3">
+          <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-thin">
             {clubs.map((club) => (
               <button
                 key={club.id}
                 onClick={() => setSelectedClubId(club.id)}
                 className={cn(
-                  'px-6 py-3 rounded-xl font-semibold text-sm transition-all duration-200',
-                  'border-2 flex items-center gap-2',
+                  'px-6 py-3 rounded-xl font-bold text-base transition-all duration-200 whitespace-nowrap',
+                  'border-2 flex items-center gap-2 flex-shrink-0',
                   selectedClubId === club.id
                     ? 'bg-gradient-to-r from-primary to-primary-dark text-white border-primary shadow-lg shadow-primary/30 scale-105'
                     : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-primary hover:shadow-md'
                 )}
               >
                 <span className="text-lg">📍</span>
-                <div className="text-left">
-                  <div className="font-bold">{club.city}</div>
-                  <div className="text-xs opacity-80">{club.name}</div>
-                </div>
+                <span>{club.city}</span>
                 {selectedClubId === club.id && (
-                  <Badge className="bg-white/20 text-white border-white/30 ml-2">
-                    ✓
-                  </Badge>
+                  <span className="ml-1">✓</span>
                 )}
               </button>
             ))}
