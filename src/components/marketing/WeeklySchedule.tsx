@@ -61,6 +61,11 @@ export function WeeklySchedule({ club }: WeeklyScheduleProps) {
     return session;
   };
 
+  // Debug en développement
+  if (process.env.NODE_ENV === 'development') {
+    console.log('📊 Schedule data for', club.name, ':', schedule);
+  }
+
   return (
     <div>
       <div className="flex items-center gap-3 mb-6">
@@ -76,6 +81,21 @@ export function WeeklySchedule({ club }: WeeklyScheduleProps) {
           </p>
         </div>
       </div>
+
+      {/* Debug panel - MODE DEV */}
+      {process.env.NODE_ENV === 'development' && (
+        <div className="mb-6 p-4 bg-yellow-50 dark:bg-yellow-950/30 border-2 border-yellow-300 dark:border-yellow-700 rounded-xl">
+          <h3 className="text-sm font-bold text-yellow-900 dark:text-yellow-100 mb-2">
+            🔧 DEBUG - Données brutes (visible en dev uniquement)
+          </h3>
+          <pre className="text-xs text-yellow-800 dark:text-yellow-200 overflow-x-auto p-2 bg-yellow-100 dark:bg-yellow-900/50 rounded">
+            {JSON.stringify(schedule, null, 2)}
+          </pre>
+          <p className="text-xs text-yellow-800 dark:text-yellow-200 mt-2">
+            Si vous voyez des <strong>strings</strong> (ex: "19h00-20h30"), utilisez le format enrichi dans l'admin pour voir plus d'infos.
+          </p>
+        </div>
+      )}
 
       {/* Calendrier hebdomadaire - Responsive sans scroll */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7 gap-3">
