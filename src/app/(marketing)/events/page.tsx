@@ -194,14 +194,14 @@ export default async function EventsPage() {
         <Container className="relative z-10">
           <div className="max-w-4xl mx-auto text-center">
             <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 animate-fade-in tracking-tight">
-              <span className="text-transparent bg-clip-text from-secondary via-secondary-light to-secondary">Organisez</span> un Événement
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-accent via-amber-400 to-accent">Organisez</span> <span className="text-white">un Événement</span>
             </h2>
-            <p className="text-xl md:text-2xl mb-12 max-w-3xl mx-auto leading-relaxed animate-slide-up">
+            <p className="text-xl md:text-2xl text-slate-300 mb-12 max-w-3xl mx-auto leading-relaxed animate-slide-up">
               Vous êtes coach ou responsable de club ? Proposez votre événement.
             </p>
             <div className="animate-scale-in">
               <Link href="/contact">
-                <Button size="lg" className="bg-white dark:bg-gray-900 text-primary hover:bg-gray-50 shadow-2xl shadow-black/20 hover:shadow-white/40 min-w-[240px] py-4 px-8">
+                <Button size="lg" className="bg-white text-slate-900 hover:bg-slate-50 shadow-2xl shadow-black/20 hover:shadow-white/40 min-w-[240px] py-4 px-8 font-semibold">
                   ✉️ Nous Contacter
                 </Button>
               </Link>
