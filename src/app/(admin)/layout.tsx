@@ -20,6 +20,7 @@ import {
   ShoppingBagIcon,
   Cog6ToothIcon,
   ChartBarIcon,
+  AcademicCapIcon,
 } from '@heroicons/react/24/outline';
 
 export const metadata: Metadata = {
@@ -32,6 +33,7 @@ export const metadata: Metadata = {
 const navigation = [
   { name: 'Dashboard', href: '/admin', icon: HomeIcon },
   { name: 'Clubs', href: '/admin/clubs', icon: BuildingOfficeIcon },
+  { name: 'Professeurs', href: '/admin/coaches', icon: AcademicCapIcon },
   { name: 'Événements', href: '/admin/events', icon: CalendarIcon },
   { name: 'Blog', href: '/admin/blog', icon: NewspaperIcon },
   { name: 'Utilisateurs', href: '/admin/users', icon: UsersIcon },
