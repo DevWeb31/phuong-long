@@ -142,7 +142,6 @@ export async function POST(request: Request) {
       console.error('❌ Erreur upload Supabase:', {
         error,
         message: error.message,
-        statusCode: error.statusCode,
         bucket: bucketName,
         fileName,
       });
