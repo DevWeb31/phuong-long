@@ -23,7 +23,6 @@ import {
   CurrencyEuroIcon,
   BuildingOffice2Icon,
   ArrowLeftIcon,
-  ShareIcon,
   ExclamationTriangleIcon
 } from '@heroicons/react/24/outline';
 import { ClipboardList, Building2, Phone, Mail, Zap, Info, XCircle, CheckCircle2 } from 'lucide-react';
