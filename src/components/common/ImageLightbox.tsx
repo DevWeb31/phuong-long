@@ -113,6 +113,7 @@ export function ImageLightbox({ isOpen, images, initialIndex = 0, onClose }: Ima
   const handleTouchStart = (e: React.TouchEvent) => {
     if (!isZoomed || e.touches.length !== 1) return;
     const touch = e.touches[0];
+    if (!touch) return;
     setIsDragging(true);
     setDragStart({ x: touch.clientX - dragPosition.x, y: touch.clientY - dragPosition.y });
   };
@@ -120,6 +121,7 @@ export function ImageLightbox({ isOpen, images, initialIndex = 0, onClose }: Ima
   const handleTouchMove = (e: React.TouchEvent) => {
     if (!isDragging || !isZoomed || e.touches.length !== 1) return;
     const touch = e.touches[0];
+    if (!touch) return;
     setDragPosition({
       x: touch.clientX - dragStart.x,
       y: touch.clientY - dragStart.y,
@@ -133,6 +135,7 @@ export function ImageLightbox({ isOpen, images, initialIndex = 0, onClose }: Ima
   if (!isOpen || images.length === 0) return null;
 
   const currentImage = images[currentIndex];
+  if (!currentImage) return null;
 
   return (
     <div 
