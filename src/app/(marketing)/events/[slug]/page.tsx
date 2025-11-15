@@ -10,7 +10,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { Container, Card, CardContent, CardTitle, Badge, ImageCarousel } from '@/components/common';
+import { Container, Card, CardContent, Badge, ImageCarousel } from '@/components/common';
 import { createServerClient } from '@/lib/supabase/server';
 import type { Event } from '@/lib/types';
 import { EventInteractions } from '@/components/marketing/EventInteractions';
