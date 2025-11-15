@@ -10,6 +10,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@/lib/supabase/server';
 
+export const runtime = 'nodejs';
+
 // POST - S'inscrire à un événement (Je serai là !)
 export async function POST(
   _request: NextRequest,

@@ -10,6 +10,8 @@
 import { NextResponse } from 'next/server';
 import { createServerClient } from '@/lib/supabase/server';
 
+export const runtime = 'nodejs';
+
 // GET - Liste tous les coaches
 export async function GET() {
   try {

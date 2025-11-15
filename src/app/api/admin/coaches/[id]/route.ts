@@ -10,6 +10,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@/lib/supabase/server';
 
+export const runtime = 'nodejs';
+
 // PUT - Mettre à jour un coach
 export async function PUT(
   request: NextRequest,
