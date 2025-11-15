@@ -35,6 +35,10 @@ export function ImageCarousel({ images, className = '' }: ImageCarouselProps) {
   }
 
   const currentImage = images[currentIndex];
+  
+  if (!currentImage) {
+    return null;
+  }
 
   const goToPrevious = () => {
     if (isTransitioning) return;
