@@ -13,6 +13,7 @@ import Link from 'next/link';
 import { useCart } from '@/lib/contexts/CartContext';
 import { Container, Card, CardHeader, CardTitle, CardContent, Button } from '@/components/common';
 import { TrashIcon, MinusIcon, PlusIcon, ShoppingBagIcon } from '@heroicons/react/24/outline';
+import { ShoppingCart, ShoppingBag, CheckCircle2, Lightbulb, Lock } from 'lucide-react';
 
 export default function CartPage() {
   const { items, total, updateQuantity, removeItem, itemsCount } = useCart();
@@ -31,7 +32,9 @@ export default function CartPage() {
         <section className="py-20 bg-white dark:bg-gray-900">
           <Container>
             <div className="max-w-2xl mx-auto text-center">
-              <div className="text-6xl mb-6">🛒</div>
+              <div className="mb-6 flex justify-center">
+                <ShoppingCart className="w-24 h-24 text-gray-300 dark:text-gray-700" />
+              </div>
               <h2 className="text-2xl font-bold dark:text-gray-100 mb-4">
                 Votre panier est vide
               </h2>
@@ -81,8 +84,8 @@ export default function CartPage() {
                               className="w-full h-full object-cover"
                             />
                           ) : (
-                            <div className="w-full h-full flex items-center justify-center text-3xl">
-                              🛍️
+                            <div className="w-full h-full flex items-center justify-center">
+                              <ShoppingBag className="w-12 h-12 text-gray-400 dark:text-gray-600" />
                             </div>
                           )}
                         </div>
@@ -157,7 +160,9 @@ export default function CartPage() {
                       <span className="text-gray-600 dark:text-gray-500">Livraison</span>
                       <span className="font-medium text-gray-900 dark:text-gray-100">
                         {total >= 50 ? (
-                          <span className="text-green-600">Gratuite ✅</span>
+                          <span className="text-green-600 flex items-center gap-1">
+                            Gratuite <CheckCircle2 className="w-4 h-4" />
+                          </span>
                         ) : (
                           '5.00 €'
                         )}
@@ -174,14 +179,16 @@ export default function CartPage() {
                   </div>
 
                   {total < 50 && (
-                    <div className="bg-blue-50 border rounded-lg p-3 mb-4 text-sm">
-                      💡 Plus que {(50 - total).toFixed(2)} € pour la livraison gratuite !
+                    <div className="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-lg p-3 mb-4 text-sm text-amber-700 dark:text-amber-400 flex items-start gap-2">
+                      <Lightbulb className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                      <span>Plus que {(50 - total).toFixed(2)} € pour la livraison gratuite !</span>
                     </div>
                   )}
 
                   <Link href="/checkout">
-                    <Button variant="primary" size="lg" className="w-full mb-3">
-                      🔒 Passer commande
+                    <Button variant="primary" size="lg" className="w-full mb-3 flex items-center justify-center gap-2">
+                      <Lock className="w-4 h-4" />
+                      Passer commande
                     </Button>
                   </Link>
 

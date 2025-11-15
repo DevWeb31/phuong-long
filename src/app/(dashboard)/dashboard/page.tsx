@@ -20,6 +20,7 @@ import {
   ShoppingBagIcon, 
   BookOpenIcon 
 } from '@heroicons/react/24/outline';
+import { Loader2 } from 'lucide-react';
 
 function DashboardContent() {
   const { user, loading } = useAuth();
@@ -28,7 +29,9 @@ function DashboardContent() {
     return (
       <div className="flex items-center justify-center py-20">
         <div className="text-center">
-          <div className="text-4xl mb-4">⏳</div>
+          <div className="mb-4 flex justify-center">
+            <Loader2 className="w-16 h-16 text-primary animate-spin" />
+          </div>
           <p className="text-gray-600 dark:text-gray-500">Chargement...</p>
         </div>
       </div>
@@ -159,7 +162,9 @@ export default function DashboardPage() {
     <Suspense fallback={
       <div className="flex items-center justify-center py-20">
         <div className="text-center">
-          <div className="text-4xl mb-4">⏳</div>
+          <div className="mb-4 flex justify-center">
+            <Loader2 className="w-16 h-16 text-primary animate-spin" />
+          </div>
           <p className="text-gray-600 dark:text-gray-500">Chargement...</p>
         </div>
       </div>

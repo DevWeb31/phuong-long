@@ -9,16 +9,11 @@
 
 import Link from 'next/link';
 import { Container } from '@/components/common';
-import { Facebook, Instagram, Youtube } from 'lucide-react';
+import { Facebook, Instagram, Youtube, Mail } from 'lucide-react';
+import { createServerClient } from '@/lib/supabase/server';
+import type { Club } from '@/lib/types';
 
 const navigation = {
-  clubs: [
-    { name: 'Club Marseille', href: '/clubs/marseille-centre' },
-    { name: 'Club Paris', href: '/clubs/paris-bastille' },
-    { name: 'Club Nice', href: '/clubs/nice-promenade' },
-    { name: 'Club Créteil', href: '/clubs/creteil-universite' },
-    { name: 'Club Strasbourg', href: '/clubs/strasbourg-centre' },
-  ],
   ressources: [
     { name: 'Blog', href: '/blog' },
     { name: 'Événements', href: '/events' },
@@ -46,8 +41,18 @@ const socialLinks = [
   { name: 'YouTube', icon: Youtube, href: '#' },
 ];
 
-export function Footer() {
+export async function Footer() {
   const currentYear = new Date().getFullYear();
+  
+  // Récupérer les clubs actifs depuis la base de données
+  const supabase = await createServerClient();
+  const { data: clubs } = await supabase
+    .from('clubs')
+    .select('id, name, slug, city')
+    .eq('active', true)
+    .order('city');
+  
+  const typedClubs = (clubs || []) as unknown as Pick<Club, 'id' | 'name' | 'slug' | 'city'>[];
 
   return (
     <footer className="bg-gradient-to-b from-slate-50 to-white dark:from-slate-900 dark:to-slate-950 border-t border-slate-200 dark:border-slate-800">
@@ -60,13 +65,13 @@ export function Footer() {
                 Nos Clubs
               </h3>
               <ul className="mt-4 space-y-3">
-                {navigation.clubs.map((item) => (
-                  <li key={item.name}>
+                {typedClubs.map((club) => (
+                  <li key={club.id}>
                     <Link
-                      href={item.href}
+                      href={`/clubs/${club.slug}`}
                       className="text-slate-600 dark:text-slate-400 hover:text-primary dark:hover:text-primary-light transition-colors text-sm"
                     >
-                      {item.name}
+                      {club.name}
                     </Link>
                   </li>
                 ))}
@@ -134,8 +139,9 @@ export function Footer() {
           {/* Newsletter */}
           <div className="mt-16 border-t dark:border-gray-800/60 pt-12">
             <div className="max-w-md">
-              <h3 className="text-lg font-bold dark:text-gray-100 mb-2">
-                📧 Newsletter
+              <h3 className="text-lg font-bold dark:text-gray-100 mb-2 flex items-center gap-2">
+                <Mail className="w-5 h-5" />
+                Newsletter
               </h3>
               <p className="mt-2 text-base dark:text-gray-500 mb-6">
                 Recevez nos actualités, événements et promotions.

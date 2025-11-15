@@ -13,6 +13,7 @@ import { useState, useEffect } from 'react';
 import { DataTable, DataTableColumn, ConfirmModal } from '@/components/admin';
 import { ClubFormModal } from '@/components/admin/ClubFormModal';
 import { Badge, Button } from '@/components/common';
+import { Shield } from 'lucide-react';
 
 interface Club {
   id: string;
@@ -69,11 +70,14 @@ export default function AdminClubsPage() {
               className="w-full h-full object-cover"
               onError={(e) => {
                 (e.target as HTMLImageElement).style.display = 'none';
-                (e.target as HTMLImageElement).parentElement!.innerHTML = '<div class="text-2xl">🥋</div>';
+                const shieldDiv = document.createElement('div');
+                shieldDiv.className = 'w-12 h-12 text-gray-400';
+                (e.target as HTMLImageElement).parentElement!.innerHTML = '';
+                (e.target as HTMLImageElement).parentElement!.appendChild(shieldDiv);
               }}
             />
           ) : (
-            <div className="text-2xl">🥋</div>
+            <Shield className="w-12 h-12 text-gray-400 dark:text-gray-600" />
           )}
         </div>
       ),
@@ -155,7 +159,10 @@ export default function AdminClubsPage() {
           body: JSON.stringify(clubData),
         });
 
-        if (!response.ok) throw new Error('Erreur lors de la mise à jour');
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(errorData.details || errorData.error || 'Erreur lors de la mise à jour');
+        }
       } else {
         // Create
         const response = await fetch('/api/admin/clubs', {
@@ -172,7 +179,8 @@ export default function AdminClubsPage() {
       setSelectedClub(null);
     } catch (error) {
       console.error('Error submitting club:', error);
-      alert('Une erreur est survenue');
+      const errorMessage = error instanceof Error ? error.message : 'Une erreur est survenue';
+      alert(`Erreur : ${errorMessage}`);
     } finally {
       setIsSubmitting(false);
     }

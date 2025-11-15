@@ -13,6 +13,7 @@ import { Container, Card, CardHeader, CardTitle, CardDescription, CardContent, B
 import { createServerClient } from '@/lib/supabase/server';
 import type { Product } from '@/lib/types/database';
 import { ShopHeroContent } from '@/components/marketing/ShopHeroContent';
+import { Shield, Shirt, ShieldCheck, Backpack, Swords, ShoppingBag, Mail } from 'lucide-react';
 
 export const metadata: Metadata = {
   title: 'Boutique - Équipements & Vêtements | Phuong Long Vo Dao',
@@ -33,11 +34,11 @@ interface Props {
 }
 
 const categories = [
-  { id: 'equipement', name: 'Équipement', emoji: '🥋' },
-  { id: 'vetements', name: 'Vêtements', emoji: '👕' },
-  { id: 'protection', name: 'Protections', emoji: '🛡️' },
-  { id: 'accessoires', name: 'Accessoires', emoji: '🎒' },
-  { id: 'armes', name: 'Armes Traditionnelles', emoji: '⚔️' },
+  { id: 'equipement', name: 'Équipement', IconComponent: Shield },
+  { id: 'vetements', name: 'Vêtements', IconComponent: Shirt },
+  { id: 'protection', name: 'Protections', IconComponent: ShieldCheck },
+  { id: 'accessoires', name: 'Accessoires', IconComponent: Backpack },
+  { id: 'armes', name: 'Armes Traditionnelles', IconComponent: Swords },
 ];
 
 export default async function ShopPage({ searchParams }: Props) {
@@ -63,7 +64,7 @@ export default async function ShopPage({ searchParams }: Props) {
   return (
     <>
       {/* Hero Section with Parallax */}
-      <section className="relative bg-gradient-to-br from-primary via-primary-dark to-[#B91C1C] py-20 lg:py-24 overflow-hidden">
+      <section className="relative bg-gradient-to-br from-primary via-primary-dark to-[#B91C1C] py-12 lg:py-16 overflow-hidden">
         <ParallaxBackground>
           <div className="absolute inset-0" style={{
             backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
@@ -96,9 +97,10 @@ export default async function ShopPage({ searchParams }: Props) {
                 <Badge 
                   variant={selectedCategory === category.id ? 'primary' : 'default'} 
                   size="md"
-                  className="cursor-pointer hover:opacity-80 transition-opacity"
+                  className="cursor-pointer hover:opacity-80 transition-opacity flex items-center gap-2"
                 >
-                  {category.emoji} {category.name}
+                  <category.IconComponent className="w-4 h-4" />
+                  {category.name}
                 </Badge>
               </Link>
             ))}
@@ -111,7 +113,9 @@ export default async function ShopPage({ searchParams }: Props) {
         <Container>
           {typedProducts.length === 0 ? (
             <div className="text-center py-20">
-              <div className="text-6xl mb-4">🛍️</div>
+              <div className="mb-4 flex justify-center">
+                <ShoppingBag className="w-24 h-24 text-gray-300 dark:text-gray-700" />
+              </div>
               <p className="text-xl dark:text-gray-500 mb-4">
                 {selectedCategory 
                   ? `Aucun produit dans cette catégorie pour le moment`
@@ -153,7 +157,7 @@ export default async function ShopPage({ searchParams }: Props) {
                       </div>
                     ) : (
                       <div className="w-full h-64 bg-gray-200 dark:bg-gray-700 rounded-t-lg flex items-center justify-center">
-                        <span className="text-6xl">🛍️</span>
+                        <ShoppingBag className="w-24 h-24 text-gray-400 dark:text-gray-600" />
                       </div>
                     )}
 
@@ -209,8 +213,9 @@ export default async function ShopPage({ searchParams }: Props) {
               Nos experts sont là pour vous conseiller sur le meilleur équipement selon votre niveau et pratique.
             </p>
             <Link href="/contact">
-              <Button size="lg" variant="ghost">
-                ✉️ Nous contacter
+              <Button size="lg" variant="ghost" className="flex items-center gap-2">
+                <Mail className="w-4 h-4" />
+                Nous contacter
               </Button>
             </Link>
           </div>

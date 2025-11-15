@@ -14,6 +14,7 @@ import Link from 'next/link';
 import { Container, Card, CardHeader, CardTitle, CardDescription, CardContent, Button, ParallaxBackground } from '@/components/common';
 import { EnvelopeIcon, PhoneIcon, MapPinIcon, ClockIcon } from '@heroicons/react/24/outline';
 import { ContactHeroContent } from '@/components/marketing/ContactHeroContent';
+import { CheckCircle2, XCircle, HelpCircle, Loader2, Send } from 'lucide-react';
 
 export default function ContactPage() {
   const [formState, setFormState] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
@@ -65,7 +66,7 @@ export default function ContactPage() {
   return (
     <>
       {/* Hero Section with Parallax */}
-      <section className="relative bg-gradient-to-br from-primary via-primary-dark to-[#B91C1C] py-20 lg:py-24 overflow-hidden">
+      <section className="relative bg-gradient-to-br from-primary via-primary-dark to-[#B91C1C] py-12 lg:py-16 overflow-hidden">
         {/* Parallax Background */}
         <ParallaxBackground>
           <div className="absolute inset-0" style={{
@@ -176,7 +177,9 @@ export default function ContactPage() {
                 <CardContent>
                   {formState === 'success' ? (
                     <div className="bg-green-50 border rounded-lg p-6 text-center">
-                      <div className="text-4xl mb-4">✅</div>
+                      <div className="mb-4 flex justify-center">
+                        <CheckCircle2 className="w-16 h-16 text-green-600" />
+                      </div>
                       <h3 className="text-xl font-semibold mb-2">
                         Message envoyé avec succès !
                       </h3>
@@ -297,8 +300,9 @@ export default function ContactPage() {
 
                       {/* Error Message */}
                       {formState === 'error' && (
-                        <div className="bg-red-50 border rounded-lg p-4 text-red-700">
-                          ❌ Une erreur est survenue. Veuillez réessayer ou nous contacter directement par email.
+                        <div className="bg-red-50 border rounded-lg p-4 text-red-700 flex items-center gap-2">
+                          <XCircle className="w-5 h-5 flex-shrink-0" />
+                          <span>Une erreur est survenue. Veuillez réessayer ou nous contacter directement par email.</span>
                         </div>
                       )}
 
@@ -307,10 +311,14 @@ export default function ContactPage() {
                         type="submit"
                         variant="primary"
                         size="lg"
-                        className="w-full"
+                        className="w-full flex items-center justify-center gap-2"
                         disabled={formState === 'loading'}
                       >
-                        {formState === 'loading' ? '⏳ Envoi en cours...' : '📤 Envoyer le message'}
+                        {formState === 'loading' ? (
+                          <><Loader2 className="w-4 h-4 animate-spin" /> Envoi en cours...</>
+                        ) : (
+                          <><Send className="w-4 h-4" /> Envoyer le message</>
+                        )}
                       </Button>
                     </form>
                   )}
@@ -332,8 +340,9 @@ export default function ContactPage() {
               La réponse à votre question s'y trouve peut-être déjà !
             </p>
             <Link href="/faq">
-              <Button size="lg" variant="ghost">
-                ❓ Voir la FAQ
+              <Button size="lg" variant="ghost" className="flex items-center gap-2">
+                <HelpCircle className="w-4 h-4" />
+                Voir la FAQ
               </Button>
             </Link>
           </div>

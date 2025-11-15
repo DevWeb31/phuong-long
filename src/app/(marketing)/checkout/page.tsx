@@ -14,6 +14,7 @@ import Link from 'next/link';
 import { useCart } from '@/lib/contexts/CartContext';
 import { useAuth } from '@/lib/hooks/useAuth';
 import { Container, Card, CardHeader, CardTitle, CardContent, Button } from '@/components/common';
+import { ShoppingCart, Lightbulb, XCircle, Loader2, Lock } from 'lucide-react';
 
 export default function CheckoutPage() {
   const { items, total } = useCart();
@@ -39,7 +40,9 @@ export default function CheckoutPage() {
       <section className="py-20 bg-gray-50 dark:bg-gray-900">
         <Container>
           <div className="max-w-2xl mx-auto text-center">
-            <div className="text-6xl mb-6">🛒</div>
+            <div className="mb-6 flex justify-center">
+              <ShoppingCart className="w-24 h-24 text-gray-300 dark:text-gray-700" />
+            </div>
             <h1 className="text-2xl font-bold dark:text-gray-100 mb-4">
               Votre panier est vide
             </h1>
@@ -118,8 +121,9 @@ export default function CheckoutPage() {
                 {!user && (
                   <Card variant="bordered" className="bg-blue-50 border-blue-200">
                     <CardContent className="p-4">
-                      <p className="text-sm">
-                        💡 <Link href="/signin" className="font-semibold hover:underline">Connectez-vous</Link> pour un checkout plus rapide !
+                      <p className="text-sm flex items-start gap-1.5">
+                        <Lightbulb className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" />
+                        <span><Link href="/signin" className="font-semibold hover:underline">Connectez-vous</Link> pour un checkout plus rapide !</span>
                       </p>
                     </CardContent>
                   </Card>
@@ -263,8 +267,9 @@ export default function CheckoutPage() {
                     </div>
 
                     {error && (
-                      <div className="bg-red-50 border rounded-lg p-3 mb-4 text-sm">
-                        ❌ {error}
+                      <div className="bg-red-50 border rounded-lg p-3 mb-4 text-sm flex items-start gap-2">
+                        <XCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                        <span>{error}</span>
                       </div>
                     )}
 
@@ -272,10 +277,14 @@ export default function CheckoutPage() {
                       type="submit"
                       variant="primary"
                       size="lg"
-                      className="w-full mb-3"
+                      className="w-full mb-3 flex items-center justify-center gap-2"
                       disabled={loading}
                     >
-                      {loading ? '⏳ Traitement...' : '🔒 Payer maintenant'}
+                      {loading ? (
+                        <><Loader2 className="w-4 h-4 animate-spin" /> Traitement...</>
+                      ) : (
+                        <><Lock className="w-4 h-4" /> Payer maintenant</>
+                      )}
                     </Button>
 
                     <Link href="/cart">

@@ -10,11 +10,12 @@
 'use client';
 
 import { useState } from 'react';
-import { Container, Badge } from '@/components/common';
+import { Container } from '@/components/common';
 import type { Club } from '@/lib/types';
 import { WeeklySchedule } from './WeeklySchedule';
 import { PricingSection } from './PricingSection';
 import { cn } from '@/lib/utils/cn';
+import { MapPin, Check } from 'lucide-react';
 
 interface HorairesContentProps {
   clubs: Club[];
@@ -58,13 +59,14 @@ export function HorairesContent({ clubs }: HorairesContentProps) {
                   'border-2 flex items-center gap-2 flex-shrink-0',
                   selectedClubId === club.id
                     ? 'bg-gradient-to-r from-primary to-primary-dark text-white border-primary shadow-lg shadow-primary/30 scale-105'
-                    : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-primary hover:shadow-md'
+                    : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-primary hover:shadow-md',
+                  'inline-flex items-center gap-2'
                 )}
               >
-                <span className="text-lg">📍</span>
+                <MapPin className="w-4 h-4 text-accent" />
                 <span>{club.city}</span>
                 {selectedClubId === club.id && (
-                  <span className="ml-1">✓</span>
+                  <Check className="w-4 h-4 ml-1" />
                 )}
               </button>
             ))}

@@ -11,7 +11,7 @@
 
 import type { Club } from '@/lib/types';
 import { Card } from '@/components/common';
-import { Euro, Users, GraduationCap, Heart } from 'lucide-react';
+import { Euro, Users, GraduationCap, Heart, Info } from 'lucide-react';
 
 interface PricingSectionProps {
   club: Club;
@@ -116,7 +116,7 @@ export function PricingSection({ club }: PricingSectionProps) {
       <div className="mt-8 p-6 bg-blue-50 dark:bg-blue-950/30 rounded-xl border border-blue-200 dark:border-blue-800">
         <div className="flex items-start gap-3">
           <div className="p-2 bg-blue-100 dark:bg-blue-900/50 rounded-lg">
-            <span className="text-2xl">ℹ️</span>
+            <Info className="w-6 h-6 text-blue-600 dark:text-blue-400" />
           </div>
           <div className="flex-1">
             <h4 className="font-semibold text-blue-900 dark:text-blue-100 mb-1">

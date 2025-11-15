@@ -9,11 +9,12 @@
 
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { Container, Button, Card, CardHeader, CardTitle, CardDescription, CardContent, Badge, ParallaxBackground } from '@/components/common';
+import { Container, Button, Card, CardHeader, CardTitle, CardDescription, CardContent, Badge, ParallaxBackground, ScrollReveal } from '@/components/common';
 import { createServerClient } from '@/lib/supabase/server';
 import type { Club, Event } from '@/lib/types';
 import { BoltIcon, TrophyIcon, UserGroupIcon, ShieldCheckIcon, UsersIcon, MapPinIcon } from '@heroicons/react/24/outline';
 import { HeroContent } from '@/components/marketing/HeroContent';
+import { Sparkles, Mail, Shield } from 'lucide-react';
 
 export const metadata: Metadata = {
   title: 'Accueil - Art Martial Vietnamien',
@@ -26,22 +27,22 @@ export default async function HomePage() {
   // Récupérer les clubs actifs
   const { data: clubs } = await supabase
     .from('clubs')
-    .select('id, name, slug, city, description')
+    .select('id, name, slug, city, description, cover_image_url')
     .eq('active', true)
     .order('city');
   
-  const typedClubs = (clubs || []) as unknown as Pick<Club, 'id' | 'name' | 'slug' | 'city' | 'description'>[];
+  const typedClubs = (clubs || []) as unknown as Pick<Club, 'id' | 'name' | 'slug' | 'city' | 'description' | 'cover_image_url'>[];
   
   // Récupérer les prochains événements
   const { data: events } = await supabase
     .from('events')
-    .select('id, title, slug, start_date, event_type, location')
+    .select('id, title, slug, start_date, event_type, location, cover_image_url')
     .eq('active', true)
     .gte('start_date', new Date().toISOString())
     .order('start_date')
     .limit(3);
   
-  const typedEvents = (events || []) as unknown as Pick<Event, 'id' | 'title' | 'slug' | 'start_date' | 'event_type' | 'location'>[];
+  const typedEvents = (events || []) as unknown as Pick<Event, 'id' | 'title' | 'slug' | 'start_date' | 'event_type' | 'location' | 'cover_image_url'>[];
 
   return (
     <>
@@ -69,22 +70,26 @@ export default async function HomePage() {
         <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-gradient-to-tr from-secondary/5 to-transparent rounded-full blur-3xl" />
         
         <Container className="relative z-10">
-          <div className="text-center mb-16 animate-fade-in">
-            <div className="inline-flex items-center px-4 py-2 bg-primary/10 dark:bg-primary/20 rounded-full mb-6">
-              <span className="text-sm font-semibold text-primary dark:text-primary-light">✨ Nos Valeurs</span>
+          <ScrollReveal direction="down" delay={0}>
+            <div className="text-center mb-16">
+              <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 dark:bg-primary/20 rounded-full mb-6">
+                <Sparkles className="w-4 h-4 text-primary dark:text-primary-light" />
+                <span className="text-sm font-semibold text-primary dark:text-primary-light">Nos Valeurs</span>
+              </div>
+              <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-slate-900 dark:text-slate-100 mb-5 tracking-tight">
+                Pourquoi choisir le <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-primary-dark to-secondary">Vo Dao</span> ?
+              </h2>
+              <p className="text-lg lg:text-xl text-slate-600 dark:text-slate-400 max-w-2xl mx-auto leading-relaxed">
+                Une discipline complète qui développe le corps et l'esprit
+              </p>
             </div>
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-slate-900 dark:text-slate-100 mb-5 tracking-tight">
-              Pourquoi choisir le <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-primary-dark to-secondary">Vo Dao</span> ?
-            </h2>
-            <p className="text-lg lg:text-xl text-slate-600 dark:text-slate-400 max-w-2xl mx-auto leading-relaxed">
-              Une discipline complète qui développe le corps et l'esprit
-            </p>
-          </div>
+          </ScrollReveal>
 
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-3 gap-8 items-stretch">
             {/* Technique & Combat */}
-            <Card hoverable className="group text-center bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 hover:border-primary/30 dark:hover:border-primary/30 hover:shadow-xl hover:shadow-primary/10 transition-all duration-300">
-              <CardContent className="pt-10 pb-10 px-8">
+            <ScrollReveal direction="up" delay={100} className="h-full">
+            <Card hoverable className="group text-center bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 hover:border-primary/30 dark:hover:border-primary/30 hover:shadow-xl hover:shadow-primary/10 transition-all duration-300 h-full flex flex-col">
+              <CardContent className="pt-10 pb-10 px-8 flex-1 flex flex-col">
                 <div className="relative w-20 h-20 mx-auto mb-8">
                   <div className="absolute inset-0 bg-gradient-to-br from-primary to-primary-dark rounded-2xl opacity-10 group-hover:opacity-20 transition-opacity" />
                   <div className="relative w-full h-full bg-gradient-to-br from-primary to-primary-dark rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-lg">
@@ -98,10 +103,12 @@ export default async function HomePage() {
                 </CardDescription>
               </CardContent>
             </Card>
+            </ScrollReveal>
 
             {/* Excellence & Tradition */}
-            <Card hoverable className="group text-center bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 hover:border-secondary/30 dark:hover:border-secondary/30 hover:shadow-xl hover:shadow-secondary/10 transition-all duration-300">
-              <CardContent className="pt-10 pb-10 px-8">
+            <ScrollReveal direction="up" delay={200} className="h-full">
+            <Card hoverable className="group text-center bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 hover:border-secondary/30 dark:hover:border-secondary/30 hover:shadow-xl hover:shadow-secondary/10 transition-all duration-300 h-full flex flex-col">
+              <CardContent className="pt-10 pb-10 px-8 flex-1 flex flex-col">
                 <div className="relative w-20 h-20 mx-auto mb-8">
                   <div className="absolute inset-0 bg-gradient-to-br from-secondary to-secondary-dark rounded-2xl opacity-10 group-hover:opacity-20 transition-opacity" />
                   <div className="relative w-full h-full bg-gradient-to-br from-secondary to-secondary-dark rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-lg">
@@ -115,10 +122,12 @@ export default async function HomePage() {
                 </CardDescription>
               </CardContent>
             </Card>
+            </ScrollReveal>
 
             {/* Communauté */}
-            <Card hoverable className="group text-center bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 hover:border-accent/30 dark:hover:border-accent/30 hover:shadow-xl hover:shadow-accent/10 transition-all duration-300">
-              <CardContent className="pt-10 pb-10 px-8">
+            <ScrollReveal direction="up" delay={300} className="h-full">
+            <Card hoverable className="group text-center bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 hover:border-accent/30 dark:hover:border-accent/30 hover:shadow-xl hover:shadow-accent/10 transition-all duration-300 h-full flex flex-col">
+              <CardContent className="pt-10 pb-10 px-8 flex-1 flex flex-col">
                 <div className="relative w-20 h-20 mx-auto mb-8">
                   <div className="absolute inset-0 bg-gradient-to-br from-accent to-amber-600 rounded-2xl opacity-10 group-hover:opacity-20 transition-opacity" />
                   <div className="relative w-full h-full bg-gradient-to-br from-accent to-amber-600 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-lg">
@@ -132,6 +141,7 @@ export default async function HomePage() {
                 </CardDescription>
               </CardContent>
             </Card>
+            </ScrollReveal>
           </div>
         </Container>
       </section>
@@ -139,23 +149,40 @@ export default async function HomePage() {
       {/* Clubs Section */}
       <section className="py-20 lg:py-28 bg-slate-50 dark:bg-slate-900/50">
         <Container>
-          <div className="text-center mb-16">
-            <div className="inline-flex items-center px-4 py-2 bg-secondary/10 dark:bg-secondary/20 rounded-full mb-6">
-              <span className="text-sm font-semibold text-secondary dark:text-secondary-light">📍 Nos Emplacements</span>
+          <ScrollReveal direction="down" delay={0}>
+            <div className="text-center mb-16">
+              <div className="inline-flex items-center gap-2 px-4 py-2 bg-secondary/10 dark:bg-secondary/20 rounded-full mb-6">
+                <MapPinIcon className="w-4 h-4 text-secondary dark:text-secondary-light" />
+                <span className="text-sm font-semibold text-secondary dark:text-secondary-light">Nos Emplacements</span>
+              </div>
+              <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-slate-900 dark:text-slate-100 mb-5 tracking-tight">
+                Nos 5 Clubs
+              </h2>
+              <p className="text-lg lg:text-xl text-slate-600 dark:text-slate-400 max-w-2xl mx-auto leading-relaxed">
+                Trouvez le club le plus proche de chez vous
+              </p>
             </div>
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-slate-900 dark:text-slate-100 mb-5 tracking-tight">
-              Nos 5 Clubs
-            </h2>
-            <p className="text-lg lg:text-xl text-slate-600 dark:text-slate-400 max-w-2xl mx-auto leading-relaxed">
-              Trouvez le club le plus proche de chez vous
-            </p>
-          </div>
+          </ScrollReveal>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {typedClubs?.map((club) => (
-              <Link key={club.id} href={`/clubs/${club.slug}`}>
-                <Card variant="bordered" hoverable>
-                  <CardHeader>
+          <div className="flex flex-wrap justify-center gap-6">
+            {typedClubs?.map((club, index) => (
+              <ScrollReveal key={club.id} direction="up" delay={index * 100} className="w-full md:w-[calc(50%-0.75rem)] lg:w-[calc(33.333%-1rem)] max-w-md">
+              <Link href={`/clubs/${club.slug}`} className="h-full block">
+                <Card variant="bordered" hoverable className="h-full flex flex-col relative overflow-hidden">
+                  {/* Image de fond avec transparence */}
+                  {club.cover_image_url && (
+                    <>
+                      <div 
+                        className="absolute inset-0 bg-cover bg-center bg-no-repeat z-0"
+                        style={{ backgroundImage: `url(${club.cover_image_url})` }}
+                      />
+                      {/* Overlay pour améliorer la lisibilité */}
+                      <div className="absolute inset-0 bg-white/85 dark:bg-slate-900/85 z-0" />
+                    </>
+                  )}
+                  
+                  {/* Contenu au-dessus de l'image */}
+                  <CardHeader className="relative z-10">
                     <Badge variant="primary" size="sm" className="mb-2">
                       {club.city}
                     </Badge>
@@ -166,16 +193,19 @@ export default async function HomePage() {
                   </CardHeader>
                 </Card>
               </Link>
+              </ScrollReveal>
             ))}
           </div>
 
-          <div className="text-center mt-10">
-            <Link href="/clubs">
-              <Button size="lg" variant="primary">
-                Voir Tous les Clubs
-              </Button>
-            </Link>
-          </div>
+          <ScrollReveal direction="fade" delay={500}>
+            <div className="text-center mt-10">
+              <Link href="/clubs">
+                <Button size="lg" variant="primary">
+                  Voir Tous les Clubs
+                </Button>
+              </Link>
+            </div>
+          </ScrollReveal>
         </Container>
       </section>
 
@@ -183,20 +213,36 @@ export default async function HomePage() {
       {typedEvents && typedEvents.length > 0 && (
         <section className="py-16 lg:py-24 bg-white dark:bg-gray-900">
           <Container>
-            <div className="text-center mb-12">
-              <h2 className="text-3xl lg:text-4xl font-bold dark:text-gray-100 mb-4">
-                Prochains Événements
-              </h2>
-              <p className="text-lg dark:text-gray-500 max-w-2xl mx-auto">
-                Stages, compétitions, démonstrations
-              </p>
-            </div>
+            <ScrollReveal direction="down" delay={0}>
+              <div className="text-center mb-12">
+                <h2 className="text-3xl lg:text-4xl font-bold dark:text-gray-100 mb-4">
+                  Prochains Événements
+                </h2>
+                <p className="text-lg dark:text-gray-500 max-w-2xl mx-auto">
+                  Stages, compétitions, démonstrations
+                </p>
+              </div>
+            </ScrollReveal>
 
-            <div className="grid md:grid-cols-3 gap-6">
-              {typedEvents.map((event) => (
-                <Link key={event.id} href={`/events/${event.slug}`}>
-                  <Card variant="bordered" hoverable>
-                    <CardHeader>
+            <div className="grid md:grid-cols-3 gap-6 items-stretch">
+              {typedEvents.map((event, index) => (
+                <ScrollReveal key={event.id} direction="up" delay={index * 100} className="h-full">
+                <Link href={`/events/${event.slug}`} className="h-full block">
+                  <Card variant="bordered" hoverable className="h-full flex flex-col relative overflow-hidden">
+                    {/* Image de fond avec transparence */}
+                    {event.cover_image_url && (
+                      <>
+                        <div 
+                          className="absolute inset-0 bg-cover bg-center bg-no-repeat z-0"
+                          style={{ backgroundImage: `url(${event.cover_image_url})` }}
+                        />
+                        {/* Overlay pour améliorer la lisibilité */}
+                        <div className="absolute inset-0 bg-white/85 dark:bg-slate-900/85 z-0" />
+                      </>
+                    )}
+                    
+                    {/* Contenu au-dessus de l'image */}
+                    <CardHeader className="relative z-10">
                       <Badge variant="warning" size="sm" className="mb-2">
                         {new Date(event.start_date).toLocaleDateString('fr-FR', {
                           day: 'numeric',
@@ -209,16 +255,19 @@ export default async function HomePage() {
                     </CardHeader>
                   </Card>
                 </Link>
+                </ScrollReveal>
               ))}
             </div>
 
-            <div className="text-center mt-10">
-              <Link href="/events">
-                <Button size="lg" variant="ghost">
-                  Tous les Événements
-                </Button>
-              </Link>
-            </div>
+            <ScrollReveal direction="fade" delay={400}>
+              <div className="text-center mt-10">
+                <Link href="/events">
+                  <Button size="lg" variant="ghost">
+                    Tous les Événements
+                  </Button>
+                </Link>
+              </div>
+            </ScrollReveal>
           </Container>
         </section>
       )}
@@ -242,53 +291,65 @@ export default async function HomePage() {
 
         <Container className="relative z-10">
           <div className="max-w-3xl mx-auto text-center">
-            <div className="inline-flex items-center px-5 py-2.5 bg-accent/20 border border-accent/30 rounded-full backdrop-blur-sm mb-6">
-              <span className="text-accent font-semibold text-sm">⭐ Cours d'essai offert</span>
-            </div>
+            <ScrollReveal direction="down" delay={0}>
+              <div className="inline-flex items-center px-5 py-2.5 bg-accent/20 border border-accent/30 rounded-full backdrop-blur-sm mb-6">
+                <span className="text-accent font-semibold text-sm">⭐ Cours d'essai offert</span>
+              </div>
+            </ScrollReveal>
             
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-6 tracking-tight">
-              Prêt à Rejoindre le Dojo ?
-            </h2>
+            <ScrollReveal direction="up" delay={100}>
+              <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-6 tracking-tight">
+                Prêt à Rejoindre le Dojo ?
+              </h2>
+            </ScrollReveal>
             
-            <p className="text-lg md:text-xl text-slate-300 mb-10 leading-relaxed max-w-2xl mx-auto">
-              Profitez d'un <span className="text-accent font-semibold">cours d'essai 100% gratuit</span> dans le club de votre choix. 
-              Venez découvrir le Vo Dao et notre communauté passionnée.
-            </p>
+            <ScrollReveal direction="up" delay={200}>
+              <p className="text-lg md:text-xl text-slate-300 mb-10 leading-relaxed max-w-2xl mx-auto">
+                Profitez d'un <span className="text-accent font-semibold">cours d'essai 100% gratuit</span> dans le club de votre choix. 
+                Venez découvrir le Vo Dao et notre communauté passionnée.
+              </p>
+            </ScrollReveal>
             
-            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-              <Link href="/clubs">
-                <Button size="lg" className="bg-white text-slate-900 hover:bg-slate-50 hover:shadow-xl hover:shadow-white/20 transition-all min-w-[200px] font-semibold">
-                  🥋 Choisir un Club
-                </Button>
-              </Link>
-              <Link href="/contact">
-                <Button size="lg" className="bg-primary text-white hover:bg-primary-dark border-2 border-primary hover:shadow-xl hover:shadow-primary/30 transition-all min-w-[200px] font-semibold">
-                  ✉️ Nous Contacter
-                </Button>
-              </Link>
-            </div>
+            <ScrollReveal direction="fade" delay={300}>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                <Link href="/clubs">
+                  <Button size="lg" className="bg-white text-slate-900 hover:bg-slate-50 hover:shadow-xl hover:shadow-white/20 transition-all min-w-[200px] font-semibold flex items-center justify-center gap-2">
+                    <Shield className="w-4 h-4" />
+                    Choisir un Club
+                  </Button>
+                </Link>
+                <Link href="/contact">
+                  <Button size="lg" className="bg-primary text-white hover:bg-primary-dark border-2 border-primary hover:shadow-xl hover:shadow-primary/30 transition-all min-w-[200px] font-semibold flex items-center justify-center gap-2">
+                    <Mail className="w-4 h-4" />
+                    Nous Contacter
+                  </Button>
+                </Link>
+              </div>
+            </ScrollReveal>
 
             {/* Trust badges */}
-            <div className="mt-12 flex flex-wrap justify-center gap-8 text-slate-300 text-sm font-medium">
-              <div className="flex items-center gap-2.5">
-                <div className="w-10 h-10 bg-accent/10 rounded-full flex items-center justify-center">
-                  <ShieldCheckIcon className="w-5 h-5 text-accent" />
+            <ScrollReveal direction="fade" delay={400}>
+              <div className="mt-12 flex flex-wrap justify-center gap-8 text-slate-300 text-sm font-medium">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-10 h-10 bg-accent/10 rounded-full flex items-center justify-center">
+                    <ShieldCheckIcon className="w-5 h-5 text-accent" />
+                  </div>
+                  <span>40 ans d'expérience</span>
                 </div>
-                <span>40 ans d'expérience</span>
-              </div>
-              <div className="flex items-center gap-2.5">
-                <div className="w-10 h-10 bg-accent/10 rounded-full flex items-center justify-center">
-                  <UsersIcon className="w-5 h-5 text-accent" />
+                <div className="flex items-center gap-2.5">
+                  <div className="w-10 h-10 bg-accent/10 rounded-full flex items-center justify-center">
+                    <UsersIcon className="w-5 h-5 text-accent" />
+                  </div>
+                  <span>500+ pratiquants</span>
                 </div>
-                <span>500+ pratiquants</span>
-              </div>
-              <div className="flex items-center gap-2.5">
-                <div className="w-10 h-10 bg-accent/10 rounded-full flex items-center justify-center">
-                  <MapPinIcon className="w-5 h-5 text-accent" />
+                <div className="flex items-center gap-2.5">
+                  <div className="w-10 h-10 bg-accent/10 rounded-full flex items-center justify-center">
+                    <MapPinIcon className="w-5 h-5 text-accent" />
+                  </div>
+                  <span>5 villes</span>
                 </div>
-                <span>5 villes</span>
               </div>
-            </div>
+            </ScrollReveal>
           </div>
         </Container>
       </section>

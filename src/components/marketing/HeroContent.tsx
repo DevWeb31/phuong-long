@@ -12,6 +12,7 @@
 import Link from 'next/link';
 import { Button } from '@/components/common';
 import { useParallax, getParallaxOffset } from '@/lib/hooks/useParallax';
+import { Target, Shield, Sparkles } from 'lucide-react';
 
 export function HeroContent() {
   const scrollY = useParallax();
@@ -31,8 +32,8 @@ export function HeroContent() {
           willChange: 'transform',
         }}
       >
-        <div className="inline-flex items-center px-5 py-2.5 bg-white/10 backdrop-blur-xl text-white border border-white/20 rounded-full shadow-xl shadow-black/10">
-          <span className="text-accent mr-2.5">🎯</span>
+        <div className="inline-flex items-center gap-2 px-5 py-2.5 bg-white/10 backdrop-blur-xl text-white border border-white/20 rounded-full shadow-xl shadow-black/10">
+          <Target className="w-4 h-4 text-accent" />
           <span className="font-semibold text-sm tracking-wide">Cours d'essai gratuit</span>
         </div>
       </div>
@@ -81,13 +82,15 @@ export function HeroContent() {
         
         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-16 animate-scale-in">
           <Link href="/clubs">
-            <Button size="lg" className="bg-white text-slate-900 hover:bg-slate-50 shadow-2xl shadow-black/20 hover:shadow-white/30 min-w-[220px] font-semibold text-base py-6">
-              🥋 Trouver un Club
+            <Button size="lg" className="bg-white text-slate-900 hover:bg-slate-50 shadow-2xl shadow-black/20 hover:shadow-white/30 min-w-[220px] font-semibold text-base py-6 flex items-center justify-center gap-2">
+              <Shield className="w-5 h-5" />
+              Trouver un Club
             </Button>
           </Link>
           <Link href="/contact">
-            <Button size="lg" className="bg-accent text-slate-900 hover:bg-accent/90 border-2 border-accent/50 min-w-[220px] font-semibold text-base py-6 shadow-2xl shadow-black/20 hover:shadow-accent/30">
-              ✨ Essai Gratuit
+            <Button size="lg" className="bg-accent text-slate-900 hover:bg-accent/90 border-2 border-accent/50 min-w-[220px] font-semibold text-base py-6 shadow-2xl shadow-black/20 hover:shadow-accent/30 flex items-center justify-center gap-2">
+              <Sparkles className="w-5 h-5" />
+              Essai Gratuit
             </Button>
           </Link>
         </div>

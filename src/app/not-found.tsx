@@ -10,6 +10,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Container, Button, ParallaxBackground } from '@/components/common';
+import { AlertTriangle, Shield, Mail, HelpCircle, Home } from 'lucide-react';
 import { HomeIcon, MapPinIcon, EnvelopeIcon, QuestionMarkCircleIcon } from '@heroicons/react/24/outline';
 
 export const metadata: Metadata = {
@@ -35,8 +36,8 @@ export default function NotFoundPage() {
         <Container className="relative z-10">
           <div className="max-w-4xl mx-auto text-center">
             {/* Badge d'erreur */}
-            <div className="inline-flex items-center px-5 py-2.5 mb-8 bg-white/10 backdrop-blur-xl text-white border border-white/20 rounded-full shadow-xl shadow-black/10 animate-fade-in">
-              <span className="text-accent mr-2.5">⚠️</span>
+            <div className="inline-flex items-center gap-2 px-5 py-2.5 mb-8 bg-white/10 backdrop-blur-xl text-white border border-white/20 rounded-full shadow-xl shadow-black/10 animate-fade-in">
+              <AlertTriangle className="w-4 h-4 text-accent" />
               <span className="font-semibold text-sm tracking-wide">Erreur 404</span>
             </div>
 
@@ -94,13 +95,15 @@ export default function NotFoundPage() {
             {/* Boutons CTA principaux */}
             <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in">
               <Link href="/">
-                <Button size="lg" className="bg-white text-slate-900 hover:bg-slate-50 shadow-2xl shadow-black/20 hover:shadow-white/30 min-w-[200px] font-semibold">
-                  🏠 Retour à l'Accueil
+                <Button size="lg" className="bg-white text-slate-900 hover:bg-slate-50 shadow-2xl shadow-black/20 hover:shadow-white/30 min-w-[200px] font-semibold flex items-center justify-center gap-2">
+                  <Home className="w-4 h-4" />
+                  Retour à l'Accueil
                 </Button>
               </Link>
               <Link href="/clubs">
-                <Button size="lg" className="border-2 border-white/20 text-white bg-white/5 hover:bg-white/10 backdrop-blur-xl min-w-[200px] font-semibold">
-                  🥋 Nos Clubs
+                <Button size="lg" className="border-2 border-white/20 text-white bg-white/5 hover:bg-white/10 backdrop-blur-xl min-w-[200px] font-semibold flex items-center justify-center gap-2">
+                  <Shield className="w-4 h-4" />
+                  Nos Clubs
                 </Button>
               </Link>
             </div>
@@ -120,13 +123,15 @@ export default function NotFoundPage() {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link href="/contact">
-                <Button variant="primary" size="lg">
-                  ✉️ Nous Contacter
+                <Button variant="primary" size="lg" className="flex items-center gap-2">
+                  <Mail className="w-4 h-4" />
+                  Nous Contacter
                 </Button>
               </Link>
               <Link href="/faq">
-                <Button variant="ghost" size="lg">
-                  ❓ Consulter la FAQ
+                <Button variant="ghost" size="lg" className="flex items-center gap-2">
+                  <HelpCircle className="w-4 h-4" />
+                  Consulter la FAQ
                 </Button>
               </Link>
             </div>

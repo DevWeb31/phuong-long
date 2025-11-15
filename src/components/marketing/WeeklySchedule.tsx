@@ -11,7 +11,7 @@
 
 import type { Club } from '@/lib/types';
 import { Card, Badge } from '@/components/common';
-import { Clock, Users, GraduationCap, User } from 'lucide-react';
+import { Clock, Users, User } from 'lucide-react';
 
 interface CourseSession {
   time: string;
@@ -66,7 +66,7 @@ export function WeeklySchedule({ club }: WeeklyScheduleProps) {
   const getStartTimeInMinutes = (timeStr: string): number => {
     // Formats supportés: "18:00-19:00", "18h00-19h00", "18h-19h"
     const match = timeStr.match(/^(\d{1,2})[h:]?(\d{0,2})/);
-    if (!match) return 0;
+    if (!match || !match[1]) return 0;
     
     const hours = parseInt(match[1], 10);
     const minutes = match[2] ? parseInt(match[2], 10) : 0;
@@ -76,7 +76,9 @@ export function WeeklySchedule({ club }: WeeklyScheduleProps) {
   // Trier les sessions par horaire pour chaque jour
   const sortedSchedule: Record<string, (string | CourseSession)[]> = {};
   Object.keys(schedule).forEach(day => {
-    sortedSchedule[day] = [...schedule[day]].sort((a, b) => {
+    const daySessions = schedule[day];
+    if (!daySessions) return;
+    sortedSchedule[day] = [...daySessions].sort((a, b) => {
       const sessionA = normalizeSession(a);
       const sessionB = normalizeSession(b);
       return getStartTimeInMinutes(sessionA.time) - getStartTimeInMinutes(sessionB.time);

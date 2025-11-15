@@ -34,7 +34,8 @@ import {
   Clock,
   Award,
   Phone,
-  Sparkles
+  Sparkles,
+  Shield
 } from 'lucide-react';
 
 interface NavItem {
@@ -243,7 +244,7 @@ export function Header() {
                       'group relative flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200',
                     active
                       ? 'text-primary bg-gradient-to-r from-primary/10 to-transparent'
-                      : 'text-gray-700 dark:text-gray-300 text-gray-300 hover:text-primary hover:bg-gradient-to-r hover:from-gray-50 dark:hover:from-gray-800 hover:to-transparent',
+                      : 'text-slate-900 dark:text-gray-300 hover:text-primary hover:bg-gradient-to-r hover:from-gray-50 dark:hover:from-gray-800 hover:to-transparent',
                     isHovered && 'bg-gradient-to-r from-gray-50 dark:from-gray-800 to-transparent'
                     )}
                   >
@@ -321,7 +322,7 @@ export function Header() {
                 'relative p-2 rounded-lg transition-all duration-200',
                 mobileMenuOpen 
                   ? 'text-primary bg-primary/10' 
-                  : 'text-gray-700 dark:text-gray-300 text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
+                  : 'text-slate-900 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
               )}
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               aria-label={mobileMenuOpen ? 'Fermer le menu' : 'Ouvrir le menu'}
@@ -359,7 +360,7 @@ export function Header() {
                       'flex items-center gap-3 px-4 py-3 rounded-lg text-base font-medium transition-all duration-200',
                       active
                         ? 'bg-gradient-to-r from-primary/10 to-transparent text-primary translate-x-1'
-                        : 'text-gray-700 dark:text-gray-300 text-gray-300 hover:bg-gradient-to-r hover:from-gray-50 dark:hover:from-gray-800 hover:to-transparent hover:translate-x-1'
+                        : 'text-slate-900 dark:text-gray-300 hover:bg-gradient-to-r hover:from-gray-50 dark:hover:from-gray-800 hover:to-transparent hover:translate-x-1'
                     )}
                     onClick={() => setMobileMenuOpen(false)}
                     style={{
@@ -399,7 +400,7 @@ export function Header() {
                 className="flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-primary to-primary-dark text-white rounded-lg font-semibold hover:shadow-lg hover:shadow-primary/30 hover:scale-105 transition-all"
                 onClick={() => setMobileMenuOpen(false)}
               >
-                <span className="text-lg">🥋</span>
+                <Shield className="w-4 h-4" />
                 <span>Essai Gratuit</span>
               </Link>
             </div>

@@ -12,6 +12,10 @@
 import { useState, useEffect } from 'react';
 import { Modal } from './Modal';
 import { Button } from '@/components/common';
+import { Image as ImageIcon, Lightbulb } from 'lucide-react';
+import { ImagesEditor } from './ImagesEditor';
+import { SessionsEditor } from './SessionsEditor';
+import type { EventImage, EventSession } from '@/lib/types';
 
 export interface Event {
   id?: string;
@@ -57,9 +61,17 @@ export function EventFormModal({ isOpen, onClose, onSubmit, event, clubs = [], i
     active: true,
   });
 
+  const [images, setImages] = useState<Partial<EventImage>[]>([]);
+  const [sessions, setSessions] = useState<Partial<EventSession>[]>([]);
+
   useEffect(() => {
     if (event) {
       setFormData(event);
+      // Charger les images et sessions existantes si on édite un événement
+      if (event.id) {
+        loadEventImages(event.id);
+        loadEventSessions(event.id);
+      }
     } else {
       setFormData({
         title: '',
@@ -76,12 +88,53 @@ export function EventFormModal({ isOpen, onClose, onSubmit, event, clubs = [], i
         price_cents: 0,
         active: true,
       });
+      setImages([]);
+      setSessions([]);
     }
   }, [event, isOpen]);
 
+  const loadEventImages = async (eventId: string) => {
+    try {
+      const response = await fetch(`/api/events/${eventId}/images`);
+      if (response.ok) {
+        const data = await response.json();
+        setImages(data);
+      }
+    } catch (error) {
+      console.error('Error loading images:', error);
+    }
+  };
+
+  const loadEventSessions = async (eventId: string) => {
+    try {
+      const response = await fetch(`/api/events/${eventId}/sessions`);
+      if (response.ok) {
+        const data = await response.json();
+        setSessions(data);
+      }
+    } catch (error) {
+      console.error('Error loading sessions:', error);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await onSubmit(formData);
+    
+    // Nettoyer les données : convertir les chaînes vides en undefined pour les champs optionnels
+    const cleanedData = {
+      ...formData,
+      club_id: formData.club_id || undefined,
+      registration_deadline: formData.registration_deadline || undefined,
+      cover_image_url: formData.cover_image_url || undefined,
+      end_date: formData.end_date || undefined,
+      max_attendees: formData.max_attendees || undefined,
+      // Ajouter les images et sessions pour le parent
+      images: images.filter(img => img.image_url?.trim()),
+      sessions: sessions.filter(s => s.session_date && s.start_time),
+    };
+    
+    // @ts-ignore - images et sessions sont gérés séparément par le parent
+    await onSubmit(cleanedData);
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -285,8 +338,9 @@ export function EventFormModal({ isOpen, onClose, onSubmit, event, clubs = [], i
 
         {/* Image de couverture (Affiche) */}
         <div className="border-t dark:border-slate-700 pt-6">
-          <label htmlFor="cover_image_url" className="block text-sm font-semibold dark:text-gray-300 mb-2">
-            Image de couverture / Affiche 🖼️
+          <label htmlFor="cover_image_url" className="block text-sm font-semibold dark:text-gray-300 mb-2 flex items-center gap-2">
+            <ImageIcon className="w-4 h-4 text-primary" />
+            Image de couverture / Affiche
           </label>
           <input
             type="url"
@@ -297,8 +351,9 @@ export function EventFormModal({ isOpen, onClose, onSubmit, event, clubs = [], i
             className="w-full px-4 py-2.5 border dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
             placeholder="https://example.com/affiche-evenement.jpg"
           />
-          <p className="mt-1.5 text-xs text-slate-500 dark:text-slate-400">
-            💡 Ajoutez une affiche pour rendre l'événement plus attractif (comme sur Facebook)
+          <p className="mt-1.5 text-xs text-slate-500 dark:text-slate-400 flex items-start gap-1.5">
+            <Lightbulb className="w-3 h-3 flex-shrink-0 mt-0.5" />
+            <span>Ajoutez une affiche pour rendre l'événement plus attractif (comme sur Facebook)</span>
           </p>
           
           {/* Preview */}
@@ -317,6 +372,32 @@ export function EventFormModal({ isOpen, onClose, onSubmit, event, clubs = [], i
               </div>
             </div>
           )}
+        </div>
+
+        {/* Galerie d'images (Multiple) */}
+        <div className="border-t dark:border-slate-700 pt-6">
+          <ImagesEditor
+            images={images}
+            onChange={setImages}
+            disabled={isLoading}
+          />
+          <p className="mt-2 text-xs text-slate-500 dark:text-slate-400 flex items-start gap-1.5">
+            <Lightbulb className="w-3 h-3 flex-shrink-0 mt-0.5" />
+            <span>Les images seront affichées dans un carousel sur la page de l'événement. Utilisez l'étoile pour définir l'image de couverture.</span>
+          </p>
+        </div>
+
+        {/* Sessions multiples (Dates/Horaires) */}
+        <div className="border-t dark:border-slate-700 pt-6">
+          <SessionsEditor
+            sessions={sessions}
+            onChange={setSessions}
+            disabled={isLoading}
+          />
+          <p className="mt-2 text-xs text-slate-500 dark:text-slate-400 flex items-start gap-1.5">
+            <Lightbulb className="w-3 h-3 flex-shrink-0 mt-0.5" />
+            <span>Ajoutez plusieurs sessions si l'événement se déroule sur plusieurs jours ou avec des horaires différents.</span>
+          </p>
         </div>
 
         <div className="flex items-center gap-3 border-t dark:border-slate-700 pt-6">

@@ -9,6 +9,7 @@
 
 import Link from 'next/link';
 import { Container, Button, ParallaxBackground } from '@/components/common';
+import { ShoppingBag, Home, ShoppingCart } from 'lucide-react';
 
 export default function ProductNotFound() {
   return (
@@ -27,7 +28,9 @@ export default function ProductNotFound() {
         <Container className="relative z-10">
           <div className="max-w-3xl mx-auto text-center">
             {/* Icône */}
-            <div className="text-8xl mb-8 animate-fade-in">🛍️</div>
+            <div className="mb-8 animate-fade-in flex justify-center">
+              <ShoppingBag className="w-32 h-32 text-gray-300 dark:text-gray-700" />
+            </div>
             
             {/* Titre */}
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6 animate-slide-up tracking-tight">
@@ -42,13 +45,15 @@ export default function ProductNotFound() {
             {/* Boutons d'action */}
             <div className="flex flex-col sm:flex-row gap-4 justify-center animate-scale-in">
               <Link href="/shop">
-                <Button size="lg" className="bg-white text-slate-900 hover:bg-slate-50 shadow-2xl shadow-black/20 hover:shadow-white/30 min-w-[200px] font-semibold">
-                  🛒 Voir Tous les Produits
+                <Button size="lg" className="bg-white text-slate-900 hover:bg-slate-50 shadow-2xl shadow-black/20 hover:shadow-white/30 min-w-[200px] font-semibold flex items-center justify-center gap-2">
+                  <ShoppingCart className="w-4 h-4" />
+                  Voir Tous les Produits
                 </Button>
               </Link>
               <Link href="/">
-                <Button size="lg" className="border-2 border-white/20 text-white bg-white/5 hover:bg-white/10 backdrop-blur-xl min-w-[200px] font-semibold">
-                  🏠 Retour à l'Accueil
+                <Button size="lg" className="border-2 border-white/20 text-white bg-white/5 hover:bg-white/10 backdrop-blur-xl min-w-[200px] font-semibold flex items-center justify-center gap-2">
+                  <Home className="w-4 h-4" />
+                  Retour à l'Accueil
                 </Button>
               </Link>
             </div>

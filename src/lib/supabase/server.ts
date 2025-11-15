@@ -98,7 +98,7 @@ export async function createAPIClient() {
 
 /**
  * Client Admin avec Service Role Key
- * ⚠️ À UTILISER AVEC PRÉCAUTION - Bypass RLS
+ * [WARNING] À UTILISER AVEC PRÉCAUTION - Bypass RLS
  * Uniquement pour opérations admin côté serveur
  * 
  * @example

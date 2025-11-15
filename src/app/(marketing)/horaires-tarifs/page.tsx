@@ -13,6 +13,7 @@ import { Container } from '@/components/common';
 import { createServerClient } from '@/lib/supabase/server';
 import type { Club } from '@/lib/types';
 import { HorairesContent } from '@/components/marketing/HorairesContent';
+import { Calendar } from 'lucide-react';
 
 export const metadata: Metadata = {
   title: 'Horaires & Tarifs',
@@ -47,8 +48,8 @@ export default async function HorairesTarifsPage() {
 
         <Container className="relative z-10">
           <div className="max-w-4xl mx-auto text-center">
-            <div className="inline-flex items-center px-5 py-2.5 mb-8 bg-white/10 backdrop-blur-xl text-white border border-white/20 rounded-full shadow-xl shadow-black/10 animate-fade-in">
-              <span className="text-accent mr-2.5">🗓️</span>
+            <div className="inline-flex items-center gap-2 px-5 py-2.5 mb-8 bg-white/10 backdrop-blur-xl text-white border border-white/20 rounded-full shadow-xl shadow-black/10 animate-fade-in">
+              <Calendar className="w-4 h-4 text-accent" />
               <span className="font-semibold text-sm tracking-wide">{typedClubs.length} clubs disponibles</span>
             </div>
 

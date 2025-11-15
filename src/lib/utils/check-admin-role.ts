@@ -73,3 +73,30 @@ export async function hasRole(userId: string, roleName: string): Promise<boolean
   }
 }
 
+export async function checkStudentRole(userId: string): Promise<boolean> {
+  return hasRole(userId, 'student');
+}
+
+export async function getStudentClubId(userId: string): Promise<string | null> {
+  try {
+    const supabase = await createServerClient();
+    
+    const { data: userRole, error } = await supabase
+      .from('user_roles')
+      .select('club_id, role_id, roles(name)')
+      .eq('user_id', userId)
+      .eq('roles.name', 'student')
+      .maybeSingle();
+
+    if (error) {
+      console.error('Error fetching student club:', error);
+      return null;
+    }
+
+    return (userRole as any)?.club_id || null;
+  } catch (error) {
+    console.error('Exception fetching student club:', error);
+    return null;
+  }
+}
+

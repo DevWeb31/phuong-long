@@ -22,8 +22,7 @@ export function ThemeToggle() {
       onClick={toggleTheme}
       className={cn(
         'relative p-2 rounded-lg transition-all duration-300',
-        'hover:bg-gray-100 dark:hover:bg-gray-800',
-        'group'
+        'hover:bg-gray-100 dark:hover:bg-gray-800'
       )}
       aria-label={`Basculer en mode ${theme === 'light' ? 'sombre' : 'clair'}`}
     >
@@ -49,17 +48,6 @@ export function ThemeToggle() {
           )}
         />
       </div>
-
-      {/* Tooltip au hover */}
-      <span className={cn(
-        'absolute -bottom-10 left-1/2 -translate-x-1/2',
-        'px-2 py-1 bg-gray-900 dark:bg-gray-100',
-        'text-white dark:text-gray-100 text-xs font-medium rounded',
-        'opacity-0 group-hover:opacity-100 transition-opacity',
-        'pointer-events-none whitespace-nowrap'
-      )}>
-        {theme === 'light' ? 'Mode sombre' : 'Mode clair'}
-      </span>
     </button>
   );
 }

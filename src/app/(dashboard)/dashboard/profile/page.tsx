@@ -13,6 +13,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/lib/hooks/useAuth';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, Button } from '@/components/common';
 import { UserIcon } from '@heroicons/react/24/outline';
+import { Loader2, Edit, CheckCircle2, XCircle, Save } from 'lucide-react';
 
 interface ProfileData {
   fullName: string;
@@ -83,7 +84,9 @@ export default function ProfilePage() {
     return (
       <div className="flex items-center justify-center py-20">
         <div className="text-center">
-          <div className="text-4xl mb-4">⏳</div>
+          <div className="mb-4 flex justify-center">
+            <Loader2 className="w-16 h-16 text-primary animate-spin" />
+          </div>
           <p className="text-gray-600 dark:text-gray-500">Chargement...</p>
         </div>
       </div>
@@ -138,20 +141,25 @@ export default function ProfilePage() {
                 setIsEditing(!isEditing);
                 setMessage(null);
               }}
+              className="flex items-center gap-2"
             >
-              {isEditing ? 'Annuler' : '✏️ Modifier'}
+              {isEditing ? 'Annuler' : <><Edit className="w-4 h-4" /> Modifier</>}
             </Button>
           </div>
         </CardHeader>
 
         <CardContent>
           {message && (
-            <div className={`mb-6 p-4 rounded-lg ${
+            <div className={`mb-6 p-4 rounded-lg flex items-center gap-2 ${
               message.type === 'success' 
                 ? 'bg-green-50 border border-green-200 text-green-700' 
                 : 'bg-red-50 border border-red-200 text-red-700'
             }`}>
-              {message.type === 'success' ? '✅' : '❌'} {message.text}
+              {message.type === 'success' ? (
+                <><CheckCircle2 className="w-4 h-4" /> {message.text}</>
+              ) : (
+                <><XCircle className="w-4 h-4" /> {message.text}</>
+              )}
             </div>
           )}
 
@@ -270,8 +278,13 @@ export default function ProfilePage() {
                 size="lg"
                 onClick={handleSave}
                 disabled={saving}
+                className="flex items-center justify-center gap-2"
               >
-                {saving ? '⏳ Enregistrement...' : '💾 Enregistrer les modifications'}
+                {saving ? (
+                  <><Loader2 className="w-4 h-4 animate-spin" /> Enregistrement...</>
+                ) : (
+                  <><Save className="w-4 h-4" /> Enregistrer les modifications</>
+                )}
               </Button>
             </div>
           )}

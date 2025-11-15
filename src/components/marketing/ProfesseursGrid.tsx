@@ -12,7 +12,7 @@
 import Link from 'next/link';
 import { Card, CardContent, Badge } from '@/components/common';
 import type { Coach, Club } from '@/lib/types';
-import { Award, MapPin, Calendar } from 'lucide-react';
+import { Award, MapPin, Calendar, UserCircle, Mail } from 'lucide-react';
 
 interface ProfesseursGridProps {
   coaches: Array<Coach & { club: Pick<Club, 'id' | 'name' | 'city' | 'slug'> | null }>;
@@ -22,7 +22,9 @@ export function ProfesseursGrid({ coaches }: ProfesseursGridProps) {
   if (coaches.length === 0) {
     return (
       <div className="text-center py-20">
-        <div className="text-6xl mb-4">👨‍🏫</div>
+        <div className="mb-4 flex justify-center">
+          <UserCircle className="w-24 h-24 text-gray-300 dark:text-gray-700" />
+        </div>
         <h3 className="text-2xl font-bold text-slate-900 dark:text-slate-100 mb-2">
           Aucun professeur pour le moment
         </h3>
@@ -51,7 +53,7 @@ export function ProfesseursGrid({ coaches }: ProfesseursGridProps) {
             hoverable
             className="overflow-hidden group"
           >
-            <CardContent padding="none">
+            <CardContent className="p-0">
               {/* Photo du coach */}
               <div className="relative aspect-square bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-900 overflow-hidden">
                 <img
@@ -167,7 +169,8 @@ export function ProfesseursGrid({ coaches }: ProfesseursGridProps) {
               href="/contact"
               className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-primary to-primary-dark text-white rounded-lg font-semibold hover:shadow-lg hover:shadow-primary/30 transition-all"
             >
-              ✉️ Nous contacter
+              <Mail className="w-4 h-4" />
+              Nous contacter
             </Link>
           </div>
         </div>

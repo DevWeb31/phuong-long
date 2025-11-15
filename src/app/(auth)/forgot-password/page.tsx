@@ -14,6 +14,7 @@ import Link from 'next/link';
 import { Button, Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/common';
 import { useAuth } from '@/lib/hooks/useAuth';
 import { EnvelopeIcon } from '@heroicons/react/24/outline';
+import { Mail, XCircle, Loader2, Lock } from 'lucide-react';
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('');
@@ -50,7 +51,9 @@ export default function ForgotPasswordPage() {
       <div className="w-full max-w-md">
         <Card variant="bordered">
           <CardHeader className="text-center">
-            <div className="text-5xl mb-4">📧</div>
+            <div className="mb-4 flex justify-center">
+              <Mail className="w-20 h-20 text-green-600" />
+            </div>
             <CardTitle className="text-3xl">Email envoyé !</CardTitle>
             <CardDescription>
               Vérifiez votre boîte de réception
@@ -129,8 +132,9 @@ export default function ForgotPasswordPage() {
 
             {/* Error Message */}
             {error && (
-              <div className="bg-red-50 border rounded-lg p-4 text-sm">
-                ❌ {error}
+              <div className="bg-red-50 border rounded-lg p-4 text-sm flex items-start gap-2">
+                <XCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                <span>{error}</span>
               </div>
             )}
 
@@ -139,10 +143,14 @@ export default function ForgotPasswordPage() {
               type="submit"
               variant="primary"
               size="lg"
-              className="w-full"
+              className="w-full flex items-center justify-center gap-2"
               disabled={loading}
             >
-              {loading ? '⏳ Envoi...' : '📧 Envoyer le lien'}
+              {loading ? (
+                <><Loader2 className="w-4 h-4 animate-spin" /> Envoi...</>
+              ) : (
+                <><Mail className="w-4 h-4" /> Envoyer le lien</>
+              )}
             </Button>
           </form>
 
@@ -158,8 +166,9 @@ export default function ForgotPasswordPage() {
 
           {/* Back to Sign In */}
           <Link href="/signin">
-            <Button variant="ghost" size="lg" className="w-full">
-              🔐 Retour à la connexion
+            <Button variant="ghost" size="lg" className="w-full flex items-center justify-center gap-2">
+              <Lock className="w-4 h-4" />
+              Retour à la connexion
             </Button>
           </Link>
 

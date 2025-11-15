@@ -14,6 +14,7 @@ import { Container, Badge, Button } from '@/components/common';
 import { createServerClient } from '@/lib/supabase/server';
 import type { Product } from '@/lib/types/database';
 import { ShoppingCartIcon, TruckIcon, ShieldCheckIcon } from '@heroicons/react/24/outline';
+import { ShoppingBag, XCircle, AlertTriangle, CheckCircle2 } from 'lucide-react';
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -105,7 +106,7 @@ export default async function ProductPage({ params }: Props) {
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center">
-                    <span className="text-9xl">🛍️</span>
+                    <ShoppingBag className="w-32 h-32 text-gray-300 dark:text-gray-700" />
                   </div>
                 )}
                 
@@ -156,16 +157,19 @@ export default async function ProductPage({ params }: Props) {
               {/* Stock Status */}
               <div className="mb-6">
                 {isOutOfStock ? (
-                  <Badge variant="danger" size="md">
-                    ❌ Rupture de stock
+                  <Badge variant="danger" size="md" className="flex items-center gap-1.5">
+                    <XCircle className="w-3.5 h-3.5" />
+                    Rupture de stock
                   </Badge>
                 ) : isLowStock ? (
-                  <Badge variant="warning" size="md">
-                    ⚠️ Plus que {typedProduct.stock_quantity} en stock
+                  <Badge variant="warning" size="md" className="flex items-center gap-1.5">
+                    <AlertTriangle className="w-3.5 h-3.5" />
+                    Plus que {typedProduct.stock_quantity} en stock
                   </Badge>
                 ) : (
-                  <Badge variant="success" size="md">
-                    ✅ En stock
+                  <Badge variant="success" size="md" className="flex items-center gap-1.5">
+                    <CheckCircle2 className="w-3.5 h-3.5" />
+                    En stock
                   </Badge>
                 )}
               </div>

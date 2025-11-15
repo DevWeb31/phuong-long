@@ -19,7 +19,8 @@ import {
   LogOut,
   ChevronDown,
   ShieldCheck,
-  LayoutDashboard
+  LayoutDashboard,
+  Shield
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { cn } from '@/lib/utils/cn';
@@ -78,14 +79,14 @@ export function UserMenu() {
         <Link
           href="/signup"
           className={cn(
-            'inline-flex items-center gap-1.5 px-4 py-2',
+            'inline-flex items-center gap-2 px-4 py-2',
             'bg-gradient-to-r from-primary to-primary-dark text-white',
             'rounded-lg text-sm font-semibold',
             'hover:shadow-lg hover:shadow-primary/30 hover:scale-105',
             'transition-all duration-200'
           )}
         >
-          <span className="text-base">🥋</span>
+          <Shield className="w-4 h-4" />
           <span>Essai Gratuit</span>
         </Link>
       </div>

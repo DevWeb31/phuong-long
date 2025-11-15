@@ -1,62 +1,77 @@
 /**
  * Events List Page
  * 
- * Page liste événements avec filtres
+ * Page liste événements avec filtres par club et type
  * 
- * @version 1.0
- * @date 2025-11-04 21:50
+ * @version 2.0
+ * @date 2025-11-08
  */
 
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import Image from 'next/image';
-import { Container, Card, CardHeader, CardTitle, Badge, Button, ParallaxBackground } from '@/components/common';
+import { Container, Button, ParallaxBackground } from '@/components/common';
 import { createServerClient } from '@/lib/supabase/server';
 import type { Event } from '@/lib/types';
-import { CalendarIcon, MapPinIcon, UsersIcon } from '@heroicons/react/24/outline';
 import { EventsHeroContent } from '@/components/marketing/EventsHeroContent';
+import { EventsList } from '@/components/marketing/EventsList';
+import { GraduationCap, Trophy, Theater, Circle, Mail } from 'lucide-react';
 
 export const metadata: Metadata = {
   title: 'Événements',
-  description: 'Stages, compétitions, démonstrations et séminaires Phuong Long Vo Dao. Participez aux événements dans toute la France.',
+  description: 'Stages, compétitions, démonstrations et séminaires Phuong Long Vo Dao. Participez aux événements dans toute la France. Filtrez par club et par type.',
 };
 
 export default async function EventsPage() {
   const supabase = await createServerClient();
   
-  // Récupérer tous les événements à venir
+  // Récupérer TOUS les événements (passés, en cours, à venir)
   const { data: events } = await supabase
     .from('events')
     .select(`
       *,
-      club:clubs(name, city, slug)
+      club:clubs(id, name, city, slug)
     `)
     .eq('active', true)
-    .gte('start_date', new Date().toISOString())
-    .order('start_date');
+    .order('start_date', { ascending: false }); // Les plus récents d'abord
 
-  const typedEvents = (events || []) as unknown as Array<Event & { club: { name: string; city: string; slug: string } | null }>;
+  const typedEvents = (events || []) as unknown as Array<Event & { 
+    club: { 
+      id: string;
+      name: string; 
+      city: string; 
+      slug: string;
+    } | null 
+  }>;
 
-  // Grouper par type
-  const eventsByType = typedEvents?.reduce((acc, event) => {
+  // Catégoriser les événements pour les stats du hero
+  const now = new Date();
+  const upcomingEvents = typedEvents.filter(e => new Date(e.start_date) > now);
+  const currentEvents = typedEvents.filter(e => {
+    const start = new Date(e.start_date);
+    const end = e.end_date ? new Date(e.end_date) : start;
+    return start <= now && end >= now;
+  });
+
+  // Récupérer la liste des clubs qui ont des événements
+  const clubsWithEvents = Array.from(
+    new Map(
+      typedEvents
+        .filter(e => e.club)
+        .map(e => [e.club!.id, e.club!])
+    ).values()
+  ).sort((a, b) => a.name.localeCompare(b.name));
+
+  // Calculer les stats pour les événements à venir uniquement (pour les stats du hero)
+  const eventsByType = upcomingEvents.reduce((acc, event) => {
     const type = event.event_type || 'other';
-    if (!acc[type]) acc[type] = [];
-    acc[type].push(event);
+    acc[type] = (acc[type] || 0) + 1;
     return acc;
-  }, {} as Record<string, typeof typedEvents>);
-
-  const eventTypeLabels: Record<string, string> = {
-    competition: 'Compétitions',
-    stage: 'Stages',
-    demonstration: 'Démonstrations',
-    seminar: 'Séminaires',
-    other: 'Autres',
-  };
+  }, {} as Record<string, number>);
 
   return (
     <>
       {/* Hero with Parallax */}
-      <section className="relative bg-gradient-to-br from-primary via-primary-dark to-[#B91C1C] py-20 lg:py-24 overflow-hidden">
+      <section className="relative bg-gradient-to-br from-primary via-primary-dark to-[#B91C1C] py-12 lg:py-16 overflow-hidden">
         {/* Parallax Background */}
         <ParallaxBackground>
           <div className="absolute inset-0" style={{
@@ -69,157 +84,80 @@ export default async function EventsPage() {
         
         <Container className="relative z-10">
           <EventsHeroContent
-            totalEvents={typedEvents?.length || 0}
+            totalEvents={upcomingEvents.length + currentEvents.length}
           />
         </Container>
       </section>
 
-      {/* Stats */}
-      <section className="py-12 lg:py-16 bg-gradient-to-b from-white dark:from-gray-950 to-gray-50 dark:to-gray-900">
+      {/* Stats - Version ultra discrète */}
+      <section className="py-3 md:py-4 bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800">
         <Container>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-            <div className="group">
-              <div className="text-4xl lg:text-5xl font-bold bg-clip-text from-primary to-primary-dark mb-2 group-hover:scale-110 transition-transform duration-300">{typedEvents?.length || 0}</div>
-              <div className="text-sm font-semibold dark:text-gray-500 uppercase tracking-wide">Événements à venir</div>
+          <div className="flex items-center justify-center gap-4 md:gap-6 flex-wrap text-xs md:text-sm">
+            {currentEvents.length > 0 && (
+              <>
+                <div className="flex items-center gap-1.5">
+                  <Circle className="w-2 h-2 fill-green-500 text-green-500 animate-pulse" />
+                  <span className="font-bold text-green-600 dark:text-green-400">
+                    {currentEvents.length}
+                  </span>
+                  <span className="text-gray-600 dark:text-gray-400">
+                    en cours
+                  </span>
+                </div>
+                <div className="w-px h-4 bg-gray-300 dark:bg-gray-700" />
+              </>
+            )}
+            
+            <div className="flex items-center gap-1.5">
+              <span className="font-bold text-primary">
+                {upcomingEvents.length}
+              </span>
+              <span className="text-gray-600 dark:text-gray-400">
+                à venir
+              </span>
             </div>
-            <div className="group">
-              <div className="text-4xl lg:text-5xl font-bold bg-clip-text from-secondary to-secondary-dark mb-2 group-hover:scale-110 transition-transform duration-300">{eventsByType?.stage?.length || 0}</div>
-              <div className="text-sm font-semibold dark:text-gray-500 uppercase tracking-wide">Stages</div>
-            </div>
-            <div className="group">
-              <div className="text-4xl lg:text-5xl font-bold bg-clip-text from-accent to-green-600 mb-2 group-hover:scale-110 transition-transform duration-300">{eventsByType?.competition?.length || 0}</div>
-              <div className="text-sm font-semibold dark:text-gray-500 uppercase tracking-wide">Compétitions</div>
-            </div>
-            <div className="group">
-              <div className="text-4xl lg:text-5xl font-bold dark:text-gray-300 mb-2 group-hover:scale-110 transition-transform duration-300">{eventsByType?.demonstration?.length || 0}</div>
-              <div className="text-sm font-semibold dark:text-gray-500 uppercase tracking-wide">Démonstrations</div>
-            </div>
+            
+            {(eventsByType.stage || 0) > 0 && (
+              <>
+                <div className="w-px h-4 bg-gray-300 dark:bg-gray-700" />
+                <div className="flex items-center gap-1.5">
+                  <GraduationCap className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
+                  <span className="font-semibold text-blue-600 dark:text-blue-400">
+                    {eventsByType.stage || 0}
+                  </span>
+                </div>
+              </>
+            )}
+            
+            {(eventsByType.competition || 0) > 0 && (
+              <>
+                <div className="w-px h-4 bg-gray-300 dark:bg-gray-700" />
+                <div className="flex items-center gap-1.5">
+                  <Trophy className="w-3.5 h-3.5 text-red-600 dark:text-red-400" />
+                  <span className="font-semibold text-red-600 dark:text-red-400">
+                    {eventsByType.competition || 0}
+                  </span>
+                </div>
+              </>
+            )}
+            
+            {(eventsByType.demonstration || 0) > 0 && (
+              <>
+                <div className="w-px h-4 bg-gray-300 dark:bg-gray-700" />
+                <div className="flex items-center gap-1.5">
+                  <Theater className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" />
+                  <span className="font-semibold text-purple-600 dark:text-purple-400">
+                    {eventsByType.demonstration || 0}
+                  </span>
+                </div>
+              </>
+            )}
           </div>
         </Container>
       </section>
 
-      {/* Events par type */}
-      <section className="py-24 lg:py-32 bg-gradient-to-b from-gray-50 dark:from-gray-900 to-white dark:to-gray-950 relative overflow-hidden">
-        {/* Subtle background decoration */}
-        <div className="absolute top-0 right-0 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
-        <div className="absolute bottom-0 left-0 w-96 h-96 bg-secondary/5 rounded-full blur-3xl" />
-        
-        <Container className="relative z-10">
-          {eventsByType && Object.entries(eventsByType).map(([type, typeEvents]) => (
-            typeEvents && Array.isArray(typeEvents) && typeEvents.length > 0 && (
-              <div key={type} className="mb-20 last:mb-0">
-                <div className="flex items-center gap-4 mb-10">
-                  <span className="w-2 h-12 bg-gradient-to-b from-primary to-primary-dark rounded-full shadow-lg shadow-primary/20" />
-                  <h2 className="text-3xl lg:text-4xl font-bold dark:text-gray-100">
-                    {eventTypeLabels[type] || type}
-                  </h2>
-                </div>
-                
-                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-10 lg:gap-12">
-                  {typeEvents.map((event) => (
-                    <Link key={event.id} href={`/events/${event.slug}`}>
-                      <Card hoverable className="h-full flex flex-col border-none shadow-xl hover:shadow-2xl overflow-hidden group">
-                        {/* Image de couverture */}
-                        {event.cover_image_url ? (
-                          <div className="relative w-full h-52 bg-gray-200 dark:bg-gray-800 overflow-hidden">
-                            <Image
-                              src={event.cover_image_url}
-                              alt={event.title}
-                              fill
-                              className="object-cover group-hover:scale-105 transition-transform duration-500"
-                              unoptimized
-                            />
-                            {/* Overlay gradient pour les badges */}
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20" />
-                            
-                            {/* Badges sur l'image */}
-                            <div className="absolute top-3 left-3 right-3 flex items-start justify-between">
-                              <Badge variant="warning" size="sm" className="backdrop-blur-sm bg-white/90 dark:bg-gray-900/90">
-                                {new Date(event.start_date).toLocaleDateString('fr-FR', {
-                                  day: 'numeric',
-                                  month: 'short',
-                                  year: 'numeric'
-                                })}
-                              </Badge>
-                              {event.price_cents === 0 ? (
-                                <Badge variant="success" size="sm" className="backdrop-blur-sm bg-white/90 dark:bg-gray-900/90">Gratuit</Badge>
-                              ) : (
-                                <Badge variant="primary" size="sm" className="backdrop-blur-sm bg-white/90 dark:bg-gray-900/90">
-                                  {(event.price_cents / 100).toFixed(0)}€
-                                </Badge>
-                              )}
-                            </div>
-                          </div>
-                        ) : (
-                          // Fallback si pas d'image
-                          <div className="relative w-full h-52 bg-gradient-to-br from-primary via-primary-dark to-[#B91C1C] flex items-center justify-center">
-                            <CalendarIcon className="w-20 h-20 text-white/20" />
-                            <div className="absolute top-3 left-3 right-3 flex items-start justify-between">
-                              <Badge variant="warning" size="sm" className="backdrop-blur-sm bg-white/90 dark:bg-gray-900/90">
-                                {new Date(event.start_date).toLocaleDateString('fr-FR', {
-                                  day: 'numeric',
-                                  month: 'short',
-                                  year: 'numeric'
-                                })}
-                              </Badge>
-                              {event.price_cents === 0 ? (
-                                <Badge variant="success" size="sm" className="backdrop-blur-sm bg-white/90 dark:bg-gray-900/90">Gratuit</Badge>
-                              ) : (
-                                <Badge variant="primary" size="sm" className="backdrop-blur-sm bg-white/90 dark:bg-gray-900/90">
-                                  {(event.price_cents / 100).toFixed(0)}€
-                                </Badge>
-                              )}
-                            </div>
-                          </div>
-                        )}
-                        
-                        {/* Contenu de la carte */}
-                        <CardHeader className="flex-1">
-                          <CardTitle className="line-clamp-2 mb-3">
-                            {event.title}
-                          </CardTitle>
-                          
-                          <div className="space-y-2 text-sm dark:text-gray-500">
-                            {event.club && (
-                              <div className="flex items-center gap-2">
-                                <MapPinIcon className="w-4 h-4 text-gray-400 dark:text-gray-500" />
-                                <span>{event.club.city}</span>
-                              </div>
-                            )}
-                            
-                            {event.location && (
-                              <div className="flex items-start gap-2">
-                                <CalendarIcon className="w-4 h-4 text-gray-400 dark:text-gray-400 flex-shrink-0 mt-0.5" />
-                                <span className="line-clamp-1">{event.location}</span>
-                              </div>
-                            )}
-                            
-                            {event.max_attendees && (
-                              <div className="flex items-center gap-2">
-                                <UsersIcon className="w-4 h-4 text-gray-400 dark:text-gray-500" />
-                                <span>Max {event.max_attendees} places</span>
-                              </div>
-                            )}
-                          </div>
-                        </CardHeader>
-                      </Card>
-                    </Link>
-                  ))}
-                </div>
-              </div>
-            )
-          ))}
-
-          {/* Empty state */}
-          {(!typedEvents || typedEvents.length === 0) && (
-            <div className="text-center py-12">
-              <CalendarIcon className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-              <p className="text-lg dark:text-gray-500">Aucun événement à venir pour le moment.</p>
-              <p className="text-sm dark:text-gray-500 mt-2">Revenez bientôt pour découvrir nos prochains stages et compétitions !</p>
-            </div>
-          )}
-        </Container>
-      </section>
+      {/* Liste des événements avec filtres */}
+      <EventsList events={typedEvents} clubs={clubsWithEvents} />
 
       {/* CTA */}
       <section className="relative py-24 lg:py-32 bg-gradient-to-br from-gray-900 to-gray-800 overflow-hidden">
@@ -240,8 +178,9 @@ export default async function EventsPage() {
             </p>
             <div className="animate-scale-in">
               <Link href="/contact">
-                <Button size="lg" className="bg-white text-slate-900 hover:bg-slate-50 shadow-2xl shadow-black/20 hover:shadow-white/40 min-w-[240px] py-4 px-8 font-semibold">
-                  ✉️ Nous Contacter
+                <Button size="lg" className="bg-white text-slate-900 hover:bg-slate-50 shadow-2xl shadow-black/20 hover:shadow-white/40 min-w-[240px] py-4 px-8 font-semibold flex items-center justify-center gap-2">
+                  <Mail className="w-4 h-4" />
+                  Nous Contacter
                 </Button>
               </Link>
             </div>

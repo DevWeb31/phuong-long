@@ -10,6 +10,7 @@
 'use client';
 
 import { useParallax, getParallaxOffset } from '@/lib/hooks/useParallax';
+import { Shield } from 'lucide-react';
 
 export function ClubsHeroContent() {
   const scrollY = useParallax();
@@ -20,14 +21,14 @@ export function ClubsHeroContent() {
   return (
     <div className="max-w-4xl mx-auto text-center">
       <div 
-        className="inline-flex items-center px-5 py-2.5 mb-8 bg-white/10 backdrop-blur-xl text-white border border-white/20 rounded-full shadow-xl shadow-black/10 animate-fade-in"
+        className="inline-flex items-center gap-2 px-5 py-2.5 mb-8 bg-white/10 backdrop-blur-xl text-white border border-white/20 rounded-full shadow-xl shadow-black/10 animate-fade-in"
         style={{
           transform: `translateY(${badgeOffset}px)`,
           willChange: 'transform',
         }}
       >
-        <span className="text-accent mr-2.5">🥋</span>
-        <span className="font-semibold text-sm tracking-wide">5 clubs actifs en France</span>
+        <Shield className="w-4 h-4 text-accent" />
+        <span className="font-semibold text-sm tracking-wide text-accent">5 clubs actifs en France</span>
       </div>
 
       <div

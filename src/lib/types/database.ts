@@ -25,6 +25,11 @@ export interface Club {
   cover_image_url: string | null;
   schedule: Record<string, string[]> | null;
   pricing: Record<string, number> | null;
+  social_media: {
+    facebook?: string;
+    instagram?: string;
+    youtube?: string;
+  } | null;
   latitude: number | null;
   longitude: number | null;
   active: boolean;
@@ -120,6 +125,31 @@ export interface EventLike {
   created_at: string;
 }
 
+export interface EventSession {
+  id: string;
+  event_id: string;
+  session_date: string; // Date ISO (YYYY-MM-DD)
+  start_time: string; // Time (HH:MM:SS)
+  end_time: string | null; // Time (HH:MM:SS)
+  location: string | null;
+  max_attendees: number | null;
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface EventImage {
+  id: string;
+  event_id: string;
+  image_url: string;
+  display_order: number;
+  caption: string | null;
+  alt_text: string | null;
+  is_cover: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface Product {
   id: string;
   name: string;
@@ -178,7 +208,7 @@ export interface UserProfile {
 
 export interface Role {
   id: string;
-  name: 'admin' | 'moderator' | 'coach' | 'user';
+  name: 'admin' | 'moderator' | 'coach' | 'user' | 'student';
   description: string | null;
   level: number;
   created_at: string;

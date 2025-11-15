@@ -13,6 +13,7 @@ import { useState, useEffect } from 'react';
 import { DataTable, DataTableColumn, ConfirmModal } from '@/components/admin';
 import { CoachFormModal } from '@/components/admin/CoachFormModal';
 import { Badge, Button } from '@/components/common';
+import { UserCircle } from 'lucide-react';
 
 interface Coach {
   id: string;
@@ -68,7 +69,7 @@ export default function AdminCoachesPage() {
               className="w-full h-full object-cover"
             />
           ) : (
-            <div className="text-2xl">👨‍🏫</div>
+            <UserCircle className="w-12 h-12 text-gray-400 dark:text-gray-600" />
           )}
         </div>
       ),
@@ -150,16 +151,43 @@ export default function AdminCoachesPage() {
   const handleSubmit = async (coachData: Partial<Coach>) => {
     try {
       setIsSubmitting(true);
+      console.log('handleSubmit appelé avec:', coachData);
+      console.log('photo_url dans coachData:', coachData.photo_url);
+      
       const url = selectedCoach
         ? `/api/admin/coaches/${selectedCoach.id}`
         : '/api/admin/coaches';
       
       const method = selectedCoach ? 'PUT' : 'POST';
       
+      // Filtrer les champs vides et préparer les données
+      const dataToSend: Partial<Coach> = {
+        name: coachData.name || '',
+        bio: coachData.bio || null,
+        photo_url: coachData.photo_url && coachData.photo_url.trim() !== '' 
+          ? coachData.photo_url 
+          : null,
+        specialties: coachData.specialties || [],
+        years_experience: coachData.years_experience || 0,
+        active: coachData.active ?? true,
+        display_order: coachData.display_order || 0,
+        club_id: coachData.club_id || null,
+      };
+      
+      // Si c'est une mise à jour, ne pas envoyer id, created_at, updated_at
+      if (selectedCoach) {
+        delete (dataToSend as any).id;
+        delete (dataToSend as any).created_at;
+        delete (dataToSend as any).updated_at;
+      }
+      
+      console.log('Données envoyées à l\'API:', dataToSend);
+      console.log('photo_url dans dataToSend:', dataToSend.photo_url);
+      
       const response = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(coachData),
+        body: JSON.stringify(dataToSend),
       });
 
       if (response.ok) {

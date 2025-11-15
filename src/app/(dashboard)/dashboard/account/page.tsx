@@ -18,6 +18,7 @@ import {
   BellIcon, 
   TrashIcon 
 } from '@heroicons/react/24/outline';
+import { Loader2, CheckCircle2, AlertTriangle, XCircle, Lock, Trash2, Save } from 'lucide-react';
 
 export default function AccountPage() {
   const { user, loading, updatePassword } = useAuth();
@@ -63,7 +64,9 @@ export default function AccountPage() {
     return (
       <div className="flex items-center justify-center py-20">
         <div className="text-center">
-          <div className="text-4xl mb-4">⏳</div>
+          <div className="mb-4 flex justify-center">
+            <Loader2 className="w-16 h-16 text-primary animate-spin" />
+          </div>
           <p className="text-gray-600 dark:text-gray-500">Chargement...</p>
         </div>
       </div>
@@ -107,8 +110,8 @@ export default function AccountPage() {
               <p className="text-base font-medium dark:text-gray-100">{user.email}</p>
               <p className="text-sm dark:text-gray-500 mt-1">
                 {user.email_confirmed_at 
-                  ? '✅ Email vérifié' 
-                  : '⚠️ Email non vérifié - Consultez vos emails'}
+                  ? <span className="flex items-center gap-1"><CheckCircle2 className="w-3.5 h-3.5" /> Email vérifié</span>
+                  : <span className="flex items-center gap-1"><AlertTriangle className="w-3.5 h-3.5" /> Email non vérifié - Consultez vos emails</span>}
               </p>
             </div>
             <Button variant="ghost" size="sm" disabled>
@@ -133,12 +136,16 @@ export default function AccountPage() {
         </CardHeader>
         <CardContent>
           {passwordMessage && (
-            <div className={`mb-6 p-4 rounded-lg ${
+            <div className={`mb-6 p-4 rounded-lg flex items-center gap-2 ${
               passwordMessage.type === 'success' 
                 ? 'bg-green-50 border border-green-200 text-green-700' 
                 : 'bg-red-50 border border-red-200 text-red-700'
             }`}>
-              {passwordMessage.type === 'success' ? '✅' : '❌'} {passwordMessage.text}
+              {passwordMessage.type === 'success' ? (
+                <><CheckCircle2 className="w-4 h-4" /> {passwordMessage.text}</>
+              ) : (
+                <><XCircle className="w-4 h-4" /> {passwordMessage.text}</>
+              )}
             </div>
           )}
 
@@ -177,8 +184,13 @@ export default function AccountPage() {
               variant="primary"
               onClick={handlePasswordChange}
               disabled={passwordLoading || !passwordData.newPassword || !passwordData.confirmPassword}
+              className="flex items-center justify-center gap-2"
             >
-              {passwordLoading ? '⏳ Mise à jour...' : '🔒 Changer le mot de passe'}
+              {passwordLoading ? (
+                <><Loader2 className="w-4 h-4 animate-spin" /> Mise à jour...</>
+              ) : (
+                <><Lock className="w-4 h-4" /> Changer le mot de passe</>
+              )}
             </Button>
           </div>
         </CardContent>
@@ -234,8 +246,9 @@ export default function AccountPage() {
               />
             </label>
 
-            <Button variant="primary" size="sm" disabled>
-              💾 Enregistrer les préférences (bientôt)
+            <Button variant="primary" size="sm" disabled className="flex items-center gap-2">
+              <Save className="w-4 h-4" />
+              Enregistrer les préférences (bientôt)
             </Button>
           </div>
         </CardContent>
@@ -256,12 +269,14 @@ export default function AccountPage() {
         </CardHeader>
         <CardContent>
           <div className="bg-red-50 border rounded-lg p-4">
-            <p className="text-sm mb-4">
-              ⚠️ <strong>Attention :</strong> La suppression de votre compte est définitive et irréversible. 
+            <p className="text-sm mb-4 flex items-start gap-2">
+              <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+              <span><strong>Attention :</strong> La suppression de votre compte est définitive et irréversible.</span> 
               Toutes vos données (profil, inscriptions, commandes) seront supprimées.
             </p>
-            <Button variant="danger" size="sm" disabled>
-              🗑️ Supprimer mon compte (bientôt)
+            <Button variant="danger" size="sm" disabled className="flex items-center gap-2">
+              <Trash2 className="w-4 h-4" />
+              Supprimer mon compte (bientôt)
             </Button>
           </div>
         </CardContent>

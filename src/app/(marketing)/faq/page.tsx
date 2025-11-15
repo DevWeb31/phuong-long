@@ -12,6 +12,7 @@ import Link from 'next/link';
 import { Container, Accordion, Button, ParallaxBackground } from '@/components/common';
 import type { AccordionItem } from '@/components/common';
 import { FAQHeroContent } from '@/components/marketing/FAQHeroContent';
+import { Shield, Calendar, Shirt, Trophy, Mail, MapPin } from 'lucide-react';
 
 export const metadata: Metadata = {
   title: 'FAQ - Questions Fréquentes | Phuong Long Vo Dao',
@@ -176,24 +177,27 @@ export default function FAQPage() {
           <div className="max-w-4xl mx-auto space-y-12">
             {/* Généralités */}
             <div id="general">
-              <h2 className="text-3xl font-bold dark:text-gray-100 mb-6">
-                🥋 Généralités sur le Vo Dao
+              <h2 className="text-3xl font-bold dark:text-gray-100 mb-6 flex items-center gap-3">
+                <Shield className="w-7 h-7 text-primary" />
+                Généralités sur le Vo Dao
               </h2>
               <Accordion items={generalQuestions} />
             </div>
 
             {/* Cours */}
             <div id="courses">
-              <h2 className="text-3xl font-bold dark:text-gray-100 mb-6">
-                📅 Les Cours
+              <h2 className="text-3xl font-bold dark:text-gray-100 mb-6 flex items-center gap-3">
+                <Calendar className="w-7 h-7 text-primary" />
+                Les Cours
               </h2>
               <Accordion items={courseQuestions} />
             </div>
 
             {/* Équipement */}
             <div id="equipment">
-              <h2 className="text-3xl font-bold dark:text-gray-100 mb-6">
-                👕 Équipement
+              <h2 className="text-3xl font-bold dark:text-gray-100 mb-6 flex items-center gap-3">
+                <Shirt className="w-7 h-7 text-primary" />
+                Équipement
               </h2>
               <Accordion items={equipmentQuestions} />
             </div>
@@ -208,8 +212,9 @@ export default function FAQPage() {
 
             {/* Progression */}
             <div id="progress">
-              <h2 className="text-3xl font-bold dark:text-gray-100 mb-6">
-                🏆 Progression & Compétitions
+              <h2 className="text-3xl font-bold dark:text-gray-100 mb-6 flex items-center gap-3">
+                <Trophy className="w-7 h-7 text-primary" />
+                Progression & Compétitions
               </h2>
               <Accordion items={progressQuestions} />
             </div>
@@ -229,13 +234,15 @@ export default function FAQPage() {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link href="/contact">
-                <Button size="lg" variant="primary">
-                  ✉️ Nous Contacter
+                <Button size="lg" variant="primary" className="flex items-center gap-2">
+                  <Mail className="w-4 h-4" />
+                  Nous Contacter
                 </Button>
               </Link>
               <Link href="/clubs">
-                <Button size="lg" variant="ghost">
-                  📍 Trouver un Club
+                <Button size="lg" variant="ghost" className="flex items-center gap-2">
+                  <MapPin className="w-4 h-4" />
+                  Trouver un Club
                 </Button>
               </Link>
             </div>

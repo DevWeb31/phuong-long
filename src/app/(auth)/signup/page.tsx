@@ -14,6 +14,7 @@ import Link from 'next/link';
 import { Button, Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/common';
 import { useAuth } from '@/lib/hooks/useAuth';
 import { EnvelopeIcon, LockClosedIcon, UserIcon } from '@heroicons/react/24/outline';
+import { CheckCircle2, XCircle, Loader2, Sparkles, Lock } from 'lucide-react';
 
 export default function SignUpPage() {
   const [formData, setFormData] = useState({
@@ -86,7 +87,9 @@ export default function SignUpPage() {
       <div className="w-full max-w-md">
         <Card variant="bordered">
           <CardHeader className="text-center">
-            <div className="text-5xl mb-4">✅</div>
+            <div className="mb-4 flex justify-center">
+              <CheckCircle2 className="w-20 h-20 text-green-600" />
+            </div>
             <CardTitle className="text-3xl">Compte créé !</CardTitle>
             <CardDescription>
               Vérifiez votre email pour confirmer votre inscription
@@ -227,8 +230,9 @@ export default function SignUpPage() {
 
             {/* Error Message */}
             {error && (
-              <div className="bg-red-50 border rounded-lg p-4 text-sm">
-                ❌ {error}
+              <div className="bg-red-50 border rounded-lg p-4 text-sm flex items-start gap-2">
+                <XCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                <span>{error}</span>
               </div>
             )}
 
@@ -237,10 +241,14 @@ export default function SignUpPage() {
               type="submit"
               variant="primary"
               size="lg"
-              className="w-full"
+              className="w-full flex items-center justify-center gap-2"
               disabled={loading}
             >
-              {loading ? '⏳ Création du compte...' : '✨ Créer mon compte'}
+              {loading ? (
+                <><Loader2 className="w-4 h-4 animate-spin" /> Création du compte...</>
+              ) : (
+                <><Sparkles className="w-4 h-4" /> Créer mon compte</>
+              )}
             </Button>
 
             {/* Terms */}
@@ -268,8 +276,9 @@ export default function SignUpPage() {
 
           {/* Sign In Link */}
           <Link href="/signin">
-            <Button variant="ghost" size="lg" className="w-full">
-              🔐 Se connecter
+            <Button variant="ghost" size="lg" className="w-full flex items-center justify-center gap-2">
+              <Lock className="w-4 h-4" />
+              Se connecter
             </Button>
           </Link>
 

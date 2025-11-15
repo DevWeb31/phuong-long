@@ -15,6 +15,7 @@ import { useRouter } from 'next/navigation';
 import { Button, Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/common';
 import { useAuth } from '@/lib/hooks/useAuth';
 import { EnvelopeIcon, LockClosedIcon } from '@heroicons/react/24/outline';
+import { XCircle, Loader2, Lock, Sparkles } from 'lucide-react';
 
 export default function SignInPage() {
   const [email, setEmail] = useState('');
@@ -114,8 +115,9 @@ export default function SignInPage() {
 
             {/* Error Message */}
             {error && (
-              <div className="bg-red-50 border rounded-lg p-4 text-sm">
-                ❌ {error}
+              <div className="bg-red-50 border rounded-lg p-4 text-sm flex items-start gap-2">
+                <XCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                <span>{error}</span>
               </div>
             )}
 
@@ -124,10 +126,14 @@ export default function SignInPage() {
               type="submit"
               variant="primary"
               size="lg"
-              className="w-full"
+              className="w-full flex items-center justify-center gap-2"
               disabled={loading}
             >
-              {loading ? '⏳ Connexion...' : '🔐 Se connecter'}
+              {loading ? (
+                <><Loader2 className="w-4 h-4 animate-spin" /> Connexion...</>
+              ) : (
+                <><Lock className="w-4 h-4" /> Se connecter</>
+              )}
             </Button>
           </form>
 
@@ -143,8 +149,9 @@ export default function SignInPage() {
 
           {/* Sign Up Link */}
           <Link href="/signup">
-            <Button variant="ghost" size="lg" className="w-full">
-              ✨ Créer un compte
+            <Button variant="ghost" size="lg" className="w-full flex items-center justify-center gap-2">
+              <Sparkles className="w-4 h-4" />
+              Créer un compte
             </Button>
           </Link>
 

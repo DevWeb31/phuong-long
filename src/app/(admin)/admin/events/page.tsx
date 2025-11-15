@@ -169,20 +169,83 @@ export default function AdminEventsPage() {
     try {
       setIsSubmitting(true);
       
+      const images = eventData.images || [];
+      const sessions = eventData.sessions || [];
+      const eventDataWithoutExtras = { ...eventData };
+      delete eventDataWithoutExtras.images;
+      delete eventDataWithoutExtras.sessions;
+      
+      let eventId: string;
+      
       if (selectedEvent) {
+        // Mise à jour d'un événement existant
         const response = await fetch(`/api/admin/events/${selectedEvent.id}`, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(eventData),
+          body: JSON.stringify(eventDataWithoutExtras),
         });
-        if (!response.ok) throw new Error('Erreur lors de la mise à jour');
+        if (!response.ok) {
+          const errorData = await response.json();
+          console.error('Update error details:', errorData);
+          throw new Error(errorData.details || 'Erreur lors de la mise à jour');
+        }
+        eventId = selectedEvent.id;
       } else {
+        // Création d'un nouvel événement
         const response = await fetch('/api/admin/events', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(eventData),
+          body: JSON.stringify(eventDataWithoutExtras),
         });
-        if (!response.ok) throw new Error('Erreur lors de la création');
+        if (!response.ok) {
+          const errorData = await response.json();
+          console.error('Create error details:', errorData);
+          throw new Error(errorData.details || 'Erreur lors de la création');
+        }
+        const createdEvent = await response.json();
+        eventId = createdEvent.id;
+      }
+
+      // Sauvegarder les images si présentes
+      if (images.length > 0) {
+        // D'abord supprimer toutes les images existantes
+        const existingImagesResponse = await fetch(`/api/events/${eventId}/images`);
+        if (existingImagesResponse.ok) {
+          const existingImages = await existingImagesResponse.json();
+          for (const img of existingImages) {
+            await fetch(`/api/events/images/${img.id}`, { method: 'DELETE' });
+          }
+        }
+
+        // Puis créer les nouvelles images
+        for (const image of images) {
+          await fetch(`/api/events/${eventId}/images`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(image),
+          });
+        }
+      }
+
+      // Sauvegarder les sessions si présentes
+      if (sessions.length > 0) {
+        // D'abord supprimer toutes les sessions existantes
+        const existingSessionsResponse = await fetch(`/api/events/${eventId}/sessions`);
+        if (existingSessionsResponse.ok) {
+          const existingSessions = await existingSessionsResponse.json();
+          for (const session of existingSessions) {
+            await fetch(`/api/events/sessions/${session.id}`, { method: 'DELETE' });
+          }
+        }
+
+        // Puis créer les nouvelles sessions
+        for (const session of sessions) {
+          await fetch(`/api/events/${eventId}/sessions`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(session),
+          });
+        }
       }
 
       await loadEvents();

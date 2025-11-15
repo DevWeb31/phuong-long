@@ -1,4 +1,6 @@
 import type { Config } from 'tailwindcss';
+import forms from '@tailwindcss/forms';
+import typography from '@tailwindcss/typography';
 
 const config: Config = {
   darkMode: 'class',
@@ -102,8 +104,22 @@ const config: Config = {
     },
   },
   plugins: [
-    require('@tailwindcss/forms'),
-    require('@tailwindcss/typography'),
+    forms,
+    typography,
+    function({ addUtilities }: any) {
+      addUtilities({
+        '.scrollbar-hide': {
+          /* IE and Edge */
+          '-ms-overflow-style': 'none',
+          /* Firefox */
+          'scrollbar-width': 'none',
+          /* Safari and Chrome */
+          '&::-webkit-scrollbar': {
+            display: 'none'
+          }
+        }
+      });
+    },
   ],
 };
 

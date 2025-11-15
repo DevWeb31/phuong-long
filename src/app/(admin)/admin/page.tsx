@@ -21,6 +21,7 @@ import {
   EyeIcon,
   ChartBarIcon,
 } from '@heroicons/react/24/outline';
+import { ShoppingCart, FileText, Check, Calendar } from 'lucide-react';
 
 export default function AdminDashboardPage() {
   return (
@@ -141,7 +142,7 @@ export default function AdminDashboardPage() {
             <div className="space-y-4">
               <div className="flex items-start gap-3">
                 <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
-                  <span className="text-green-600">✓</span>
+                  <Check className="w-4 h-4 text-green-600" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium dark:text-gray-100">Nouvel utilisateur inscrit</p>
@@ -151,7 +152,7 @@ export default function AdminDashboardPage() {
 
               <div className="flex items-start gap-3">
                 <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
-                  <span className="text-blue-600">📝</span>
+                  <FileText className="w-4 h-4 text-blue-600" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium dark:text-gray-100">Article publié</p>
@@ -161,7 +162,7 @@ export default function AdminDashboardPage() {
 
               <div className="flex items-start gap-3">
                 <div className="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center flex-shrink-0">
-                  <span className="text-yellow-600">📅</span>
+                  <Calendar className="w-4 h-4 text-yellow-600" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium dark:text-gray-100">Événement créé</p>
@@ -171,7 +172,7 @@ export default function AdminDashboardPage() {
 
               <div className="flex items-start gap-3">
                 <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center flex-shrink-0">
-                  <span className="text-purple-600">🛒</span>
+                  <ShoppingCart className="w-4 h-4 text-purple-600" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium dark:text-gray-100">Nouvelle commande</p>
