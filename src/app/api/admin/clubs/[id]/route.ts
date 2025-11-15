@@ -39,12 +39,26 @@ export async function PATCH(request: Request, { params }: RouteParams) {
     // @ts-ignore - Supabase update type incompatibility
     const { data, error } = await supabase.from('clubs').update(body).eq('id', id).select().single();
 
-    if (error) throw error;
+    if (error) {
+      console.error('Supabase error:', error);
+      return NextResponse.json(
+        { 
+          error: 'Erreur lors de la mise à jour',
+          details: error.message,
+          code: error.code 
+        },
+        { status: 500 }
+      );
+    }
 
     return NextResponse.json(data);
   } catch (error) {
     console.error('Error updating club:', error);
-    return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 });
+    const errorMessage = error instanceof Error ? error.message : 'Erreur serveur';
+    return NextResponse.json(
+      { error: 'Erreur serveur', details: errorMessage },
+      { status: 500 }
+    );
   }
 }
 

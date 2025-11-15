@@ -48,13 +48,12 @@ export async function POST(
     }
     
     // Ajouter la participation
-    const { error } = await supabase
-      .from('event_registrations')
-      .insert([{
-        event_id: eventId,
-        user_id: user.id,
-        status: 'confirmed',
-      }]);
+    // @ts-ignore - Supabase insert type incompatibility
+    const { error } = await supabase.from('event_registrations').insert([{
+      event_id: eventId,
+      user_id: user.id,
+      status: 'confirmed',
+    }]);
     
     if (error) {
       // Si déjà inscrit, ignorer l'erreur

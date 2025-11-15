@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
     // - Nodemailer avec SMTP
     
     // Pour l'instant, on simule un succès et on log les données
-    console.log('📧 Nouveau message de contact:', {
+    console.log('[EMAIL] Nouveau message de contact:', {
       from: validatedData.email,
       name: validatedData.name,
       subject: validatedData.subject,
@@ -74,7 +74,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.error('❌ Erreur API contact:', error);
+    console.error('[ERROR] Erreur API contact:', error);
     
     return NextResponse.json(
       { 

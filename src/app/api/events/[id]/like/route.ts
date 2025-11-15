@@ -12,7 +12,7 @@ import { createServerClient } from '@/lib/supabase/server';
 
 // POST - Ajouter un like
 export async function POST(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
@@ -27,9 +27,8 @@ export async function POST(
     }
     
     // Ajouter le like
-    const { error } = await supabase
-      .from('event_likes')
-      .insert([{ event_id: eventId, user_id: user.id }]);
+    // @ts-ignore - Supabase insert type incompatibility
+    const { error } = await supabase.from('event_likes').insert([{ event_id: eventId, user_id: user.id }]);
     
     if (error) {
       // Si déjà liké, ignorer l'erreur
@@ -49,7 +48,7 @@ export async function POST(
 
 // DELETE - Retirer un like
 export async function DELETE(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
