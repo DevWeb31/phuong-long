@@ -137,7 +137,6 @@ export function ScheduleEditor({ value, onChange, clubId: _clubId }: ScheduleEdi
       {DAYS.map((day) => {
         const daySessions = schedule[day.key] || [];
         const hasSession = daySessions.length > 0;
-        const isExpanded = expandedDay === day.key;
 
         return (
           <div
