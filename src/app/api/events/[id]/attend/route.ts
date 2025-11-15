@@ -34,14 +34,15 @@ export async function POST(
       .eq('id', eventId)
       .single();
     
-    if (event?.max_attendees) {
+    // @ts-ignore - Supabase select type incompatibility
+    if ((event as any)?.max_attendees) {
       const { count } = await supabase
         .from('event_registrations')
         .select('*', { count: 'exact', head: true })
         .eq('event_id', eventId)
         .eq('status', 'confirmed');
       
-      if (count && count >= event.max_attendees) {
+      if (count && count >= (event as any).max_attendees) {
         return NextResponse.json({ error: 'Événement complet' }, { status: 400 });
       }
     }
