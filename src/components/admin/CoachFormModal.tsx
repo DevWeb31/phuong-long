@@ -9,9 +9,10 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Modal } from './Modal';
 import { Button, Badge } from '@/components/common';
+import { ImageCropper } from './ImageCropper';
 import { Plus, X } from 'lucide-react';
 
 export interface Coach {
@@ -41,6 +42,7 @@ interface CoachFormModalProps {
 }
 
 export function CoachFormModal({ isOpen, onClose, onSubmit, coach, isLoading = false }: CoachFormModalProps) {
+  // État initial vide
   const [formData, setFormData] = useState<Partial<Coach>>({
     name: '',
     bio: '',
@@ -72,10 +74,38 @@ export function CoachFormModal({ isOpen, onClose, onSubmit, coach, isLoading = f
     fetchClubs();
   }, []);
 
+  // Référence pour préserver la photo_url pendant l'édition d'un coach
+  const photoUrlRef = useRef<string>('');
+
   useEffect(() => {
-    if (coach) {
-      setFormData(coach);
+    // Ne réinitialiser que lors de l'ouverture de la modale
+    if (isOpen) {
+      if (coach && coach.id) {
+        // Coach existant : utiliser la photo du coach, pas la ref
+        const coachPhotoUrl = coach.photo_url || '';
+        setFormData({
+          ...coach,
+          photo_url: coachPhotoUrl,
+        });
+        // Réinitialiser la ref pour ce coach
+        photoUrlRef.current = coachPhotoUrl;
+      } else {
+        // Nouveau coach OU coach est null/undefined : réinitialiser complètement
+        photoUrlRef.current = '';
+        setFormData({
+          name: '',
+          bio: '',
+          photo_url: '',
+          specialties: [],
+          years_experience: 0,
+          active: true,
+          display_order: 0,
+          club_id: null,
+        });
+      }
     } else {
+      // Quand la modale se ferme, réinitialiser complètement pour éviter les fuites d'état
+      photoUrlRef.current = '';
       setFormData({
         name: '',
         bio: '',
@@ -87,10 +117,11 @@ export function CoachFormModal({ isOpen, onClose, onSubmit, coach, isLoading = f
         club_id: null,
       });
     }
-  }, [coach, isOpen]);
+  }, [coach, isOpen]); // Utiliser coach directement pour détecter les changements null/undefined
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log('Données du formulaire à envoyer:', formData);
     await onSubmit(formData);
   };
 
@@ -223,40 +254,26 @@ export function CoachFormModal({ isOpen, onClose, onSubmit, coach, isLoading = f
             </p>
           </div>
 
-          {/* Photo URL */}
+          {/* Photo avec recadrage */}
           <div className="md:col-span-2">
-            <label htmlFor="photo_url" className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
-              Photo (URL) 📷
+            <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
+              Photo du professeur 📷
             </label>
-            <input
-              type="url"
-              id="photo_url"
-              name="photo_url"
+            <ImageCropper
+              key={`${isOpen ? (coach?.id ?? 'new') : 'closed'}`} // Force la réinitialisation quand on change de coach ou ferme/ouvre
               value={formData.photo_url || ''}
-              onChange={handleChange}
-              className="w-full px-4 py-2.5 border dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
-              placeholder="https://example.com/photo-coach.jpg"
+              onChange={(url) => {
+                console.log('ImageCropper onChange appelé avec URL:', url);
+                // Sauvegarder dans la ref pour préserver pendant l'édition
+                photoUrlRef.current = url;
+                setFormData(prev => {
+                  const updated = { ...prev, photo_url: url };
+                  console.log('formData mis à jour avec photo_url:', updated.photo_url);
+                  return updated;
+                });
+              }}
+              circular={true}
             />
-            
-            {/* Preview */}
-            <div className="mt-4">
-              <p className="text-xs font-semibold text-slate-700 dark:text-slate-300 mb-2">Aperçu :</p>
-              <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-slate-200 dark:border-slate-700 mx-auto">
-                <img
-                  src={formData.photo_url || 'https://us.123rf.com/450wm/glebstock/glebstock1405/glebstock140500249/29946904-noir-et-blanc-silhouette-portrait-de-l-homme-inconnu.jpg?ver=6'}
-                  alt="Aperçu"
-                  className="w-full h-full object-cover"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).src = 'https://us.123rf.com/450wm/glebstock/glebstock1405/glebstock140500249/29946904-noir-et-blanc-silhouette-portrait-de-l-homme-inconnu.jpg?ver=6';
-                  }}
-                />
-              </div>
-              {!formData.photo_url && (
-                <p className="text-xs text-center text-slate-500 dark:text-slate-400 mt-2">
-                  Image par défaut (silhouette)
-                </p>
-              )}
-            </div>
           </div>
         </div>
 
