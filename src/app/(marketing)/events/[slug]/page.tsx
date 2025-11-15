@@ -9,7 +9,6 @@
 
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import { Container, Card, CardContent, CardHeader, CardTitle, Badge, ImageCarousel } from '@/components/common';
 import { createServerClient } from '@/lib/supabase/server';
