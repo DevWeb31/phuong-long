@@ -45,7 +45,7 @@ const DAYS = [
 ];
 
 export function ScheduleEditor({ value, onChange, clubId: _clubId }: ScheduleEditorProps) {
-  const [expandedDay, setExpandedDay] = useState<string | null>(null);
+  const [_expandedDay, setExpandedDay] = useState<string | null>(null);
   const [coaches, setCoaches] = useState<Coach[]>([]);
   
   const schedule = value || {};
