@@ -50,7 +50,7 @@ export async function DELETE(request: Request) {
     // Format: https://[project].supabase.co/storage/v1/object/public/[bucket]/[filename]
     const urlMatch = imageUrl.match(/\/storage\/v1\/object\/public\/([^\/]+)\/(.+)$/);
     
-    if (!urlMatch) {
+    if (!urlMatch || !urlMatch[1] || !urlMatch[2]) {
       console.warn('URL non reconnue comme URL Supabase Storage:', imageUrl);
       return NextResponse.json(
         { error: 'URL invalide ou non issue de Supabase Storage' },
@@ -65,6 +65,14 @@ export async function DELETE(request: Request) {
       return NextResponse.json(
         { error: 'Seules les images du bucket coaches peuvent être supprimées' },
         { status: 403 }
+      );
+    }
+
+    // Vérifier que fileName est défini
+    if (!fileName) {
+      return NextResponse.json(
+        { error: 'Nom de fichier invalide' },
+        { status: 400 }
       );
     }
 
