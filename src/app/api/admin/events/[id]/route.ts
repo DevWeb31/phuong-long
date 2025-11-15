@@ -39,10 +39,8 @@ export async function PATCH(request: Request, { params }: RouteParams) {
     const { club, created_at, updated_at, id: _, ...cleanData } = body;
 
     // Mettre à jour sans récupérer les relations
-    const { error } = await supabase
-      .from('events')
-      .update(cleanData)
-      .eq('id', id);
+    // @ts-ignore - Supabase update type incompatibility
+    const { error } = await supabase.from('events').update(cleanData).eq('id', id);
 
     if (error) {
       console.error('Error updating event:', error);
