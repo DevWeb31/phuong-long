@@ -9,6 +9,7 @@
 
 import { createAPIClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
+import { checkAdminRole } from '@/lib/utils/check-admin-role';
 
 export const runtime = 'nodejs';
 
@@ -26,14 +27,8 @@ export async function DELETE(request: Request) {
     }
 
     // Vérifier le rôle admin
-    const { data: roleData } = await supabase
-      .from('user_roles')
-      .select('roles(name)')
-      .eq('user_id', user.id)
-      .single();
-
-    const roleName = (roleData?.roles as { name: string } | null)?.name;
-    if (roleName !== 'admin') {
+    const isAdmin = await checkAdminRole(user.id);
+    if (!isAdmin) {
       return NextResponse.json(
         { error: 'Accès refusé. Rôle admin requis.' },
         { status: 403 }
