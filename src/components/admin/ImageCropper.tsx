@@ -229,7 +229,6 @@ export function ImageCropper({
 
         const containerRect = containerRef.current!.getBoundingClientRect();
         const imageElement = imageRef.current!;
-        const imageRect = imageElement.getBoundingClientRect();
         
         const containerSize = Math.min(containerRect.width, containerRect.height);
         const cropSize = containerSize; // 100% du conteneur pour un recadrage carré complet
