@@ -15,6 +15,7 @@ export async function GET() {
     const supabase = await createServerClient();
     
     // Récupérer TOUS les événements (sans filtre)
+    // @ts-ignore - Supabase select type incompatibility
     const { data: allEvents, error } = await supabase
       .from('events')
       .select('id, title, start_date, active, event_type')
@@ -25,18 +26,18 @@ export async function GET() {
     }
 
     const now = new Date().toISOString();
-    const activeEvents = allEvents?.filter(e => e.active) || [];
-    const upcomingEvents = allEvents?.filter(e => e.start_date >= now) || [];
-    const activeAndUpcoming = allEvents?.filter(e => e.active && e.start_date >= now) || [];
+    const activeEvents = (allEvents as any[])?.filter((e: any) => e.active) || [];
+    const upcomingEvents = (allEvents as any[])?.filter((e: any) => e.start_date >= now) || [];
+    const activeAndUpcoming = (allEvents as any[])?.filter((e: any) => e.active && e.start_date >= now) || [];
 
     return NextResponse.json({
-      total: allEvents?.length || 0,
+      total: (allEvents as any[])?.length || 0,
       active: activeEvents.length,
       upcoming: upcomingEvents.length,
       activeAndUpcoming: activeAndUpcoming.length,
       now: now,
-      allEvents: allEvents || [],
-      message: allEvents?.length === 0 
+      allEvents: (allEvents as any[]) || [],
+      message: (allEvents as any[])?.length === 0 
         ? "Aucun événement dans la base de données. Créez-en un dans /admin/events"
         : activeAndUpcoming.length === 0
         ? "Des événements existent mais ne sont pas affichés car ils sont soit inactifs, soit passés"
