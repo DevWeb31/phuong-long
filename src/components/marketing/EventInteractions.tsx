@@ -10,10 +10,10 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/common';
-import { Heart, Check, Loader2 } from 'lucide-react';
+import { Heart, Check, Loader2, Lightbulb } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 
 interface EventInteractionsProps {
@@ -179,8 +179,9 @@ export function EventInteractions({
 
       {/* Message pour utilisateurs non connectés */}
       {!isAuthenticated && (
-        <p className="text-xs text-center text-slate-500 dark:text-slate-400 pt-2">
-          💡 Connectez-vous pour interagir avec cet événement
+        <p className="text-xs text-center text-slate-500 dark:text-slate-400 pt-2 flex items-center justify-center gap-1.5">
+          <Lightbulb className="w-3 h-3" />
+          <span>Connectez-vous pour interagir avec cet événement</span>
         </p>
       )}
     </div>
