@@ -38,11 +38,10 @@ export async function POST(request: Request) {
     const supabase = await createServerClient();
     const body = await request.json();
     
-    const { data: coach, error } = await supabase
-      .from('coaches')
-      .insert([body])
-      .select()
-      .single();
+    console.log('Création coach:', body);
+    
+    // @ts-ignore - Supabase insert type incompatibility
+    const { data: coach, error } = await supabase.from('coaches').insert([body]).select().single();
     
     if (error) {
       console.error('Error creating coach:', error);
