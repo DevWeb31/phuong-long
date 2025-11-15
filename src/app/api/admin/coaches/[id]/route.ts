@@ -22,7 +22,7 @@ export async function PUT(
     
     console.log('Mise à jour coach:', { id, body });
     
-    // @ts-expect-error - Supabase update type incompatibility avec TypeScript strict
+    // @ts-ignore - Supabase update type incompatibility avec TypeScript strict
     const { data: coach, error } = await supabase
       .from('coaches')
       .update(body)
