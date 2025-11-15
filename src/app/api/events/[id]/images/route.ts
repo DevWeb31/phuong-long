@@ -64,7 +64,7 @@ export async function POST(_request: Request, context: RouteContext) {
       .limit(1);
 
     const nextOrder = existingImages && existingImages.length > 0 && existingImages[0]
-      ? existingImages[0].display_order + 1 
+      ? (existingImages[0] as any).display_order + 1 
       : 0;
 
     const imageData = {
