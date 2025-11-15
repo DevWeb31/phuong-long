@@ -51,6 +51,7 @@ interface DataTableProps<T> {
   emptyMessage?: string;
   newItemLabel?: string;
   newItemHref?: string;
+  isLoading?: boolean;
 }
 
 export function DataTable<T extends { id: string | number }>({
@@ -66,6 +67,7 @@ export function DataTable<T extends { id: string | number }>({
   emptyMessage = 'Aucune donnée disponible',
   newItemLabel,
   newItemHref,
+  isLoading = false,
 }: DataTableProps<T>) {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortColumn, setSortColumn] = useState<keyof T | string | null>(null);
@@ -230,7 +232,19 @@ export function DataTable<T extends { id: string | number }>({
             </tr>
           </thead>
           <tbody className="bg-white dark:bg-gray-900 divide-y dark:divide-gray-800">
-            {paginatedData.length === 0 ? (
+            {isLoading ? (
+              <tr>
+                <td
+                  colSpan={columns.length + (allActions.length > 0 ? 1 : 0)}
+                  className="px-6 py-12 text-center dark:text-gray-500"
+                >
+                  <div className="flex items-center justify-center gap-2">
+                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+                    <span>Chargement...</span>
+                  </div>
+                </td>
+              </tr>
+            ) : paginatedData.length === 0 ? (
               <tr>
                 <td
                   colSpan={columns.length + (allActions.length > 0 ? 1 : 0)}
