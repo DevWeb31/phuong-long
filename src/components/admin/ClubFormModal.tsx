@@ -118,17 +118,17 @@ export function ClubFormModal({ isOpen, onClose, onSubmit, club, isLoading = fal
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Nettoyer les données : convertir les chaînes vides en null pour les champs optionnels
+    // Nettoyer les données : convertir les chaînes vides en undefined pour les champs optionnels
     const cleanedSocialMedia = formData.social_media ? {
-      facebook: formData.social_media.facebook?.trim() || null,
-      instagram: formData.social_media.instagram?.trim() || null,
-      youtube: formData.social_media.youtube?.trim() || null,
-    } : null;
+      facebook: formData.social_media.facebook?.trim() || undefined,
+      instagram: formData.social_media.instagram?.trim() || undefined,
+      youtube: formData.social_media.youtube?.trim() || undefined,
+    } : undefined;
     
-    // Retirer les valeurs null du social_media
+    // Retirer les valeurs undefined du social_media
     const cleanedSocialMediaFiltered = cleanedSocialMedia ? Object.fromEntries(
-      Object.entries(cleanedSocialMedia).filter(([_, v]) => v !== null && v !== '')
-    ) : null;
+      Object.entries(cleanedSocialMedia).filter(([_, v]) => v !== undefined && v !== '')
+    ) : undefined;
     
     const cleanedData: Partial<Club> = {
       ...formData,
@@ -137,7 +137,7 @@ export function ClubFormModal({ isOpen, onClose, onSubmit, club, isLoading = fal
       phone: formData.phone || undefined,
       email: formData.email || undefined,
       social_media: cleanedSocialMediaFiltered && Object.keys(cleanedSocialMediaFiltered).length > 0 
-        ? cleanedSocialMediaFiltered 
+        ? cleanedSocialMediaFiltered as { facebook?: string; instagram?: string; youtube?: string }
         : undefined,
     };
     
