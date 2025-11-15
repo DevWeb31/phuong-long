@@ -14,6 +14,15 @@ import { Modal } from './Modal';
 import { Button } from '@/components/common';
 import { ScheduleEditor } from './ScheduleEditor';
 import { PricingEditor } from './PricingEditor';
+import { Image as ImageIcon, Map as MapIcon, Calendar as CalendarIcon, Euro, Lightbulb, Facebook, Instagram, Youtube } from 'lucide-react';
+
+export interface CourseSession {
+  time: string;
+  type?: string;
+  level?: string;
+  instructor?: string;
+  instructors?: string[];
+}
 
 export interface Club {
   id?: string;
@@ -28,8 +37,13 @@ export interface Club {
   cover_image_url?: string;
   latitude?: number | null;
   longitude?: number | null;
-  schedule?: Record<string, string[]> | null;
+  schedule?: Record<string, CourseSession[]> | null;
   pricing?: Record<string, number> | null;
+  social_media?: {
+    facebook?: string;
+    instagram?: string;
+    youtube?: string;
+  } | null;
   active: boolean;
   members_count?: number;
   created_at?: string;
@@ -58,12 +72,24 @@ export function ClubFormModal({ isOpen, onClose, onSubmit, club, isLoading = fal
     longitude: null,
     schedule: null,
     pricing: null,
+    social_media: {
+      facebook: '',
+      instagram: '',
+      youtube: '',
+    },
     active: true,
   });
 
   useEffect(() => {
     if (club) {
-      setFormData(club);
+      setFormData({
+        ...club,
+        social_media: club.social_media || {
+          facebook: '',
+          instagram: '',
+          youtube: '',
+        },
+      });
     } else {
       setFormData({
         name: '',
@@ -79,6 +105,11 @@ export function ClubFormModal({ isOpen, onClose, onSubmit, club, isLoading = fal
         longitude: null,
         schedule: null,
         pricing: null,
+        social_media: {
+          facebook: '',
+          instagram: '',
+          youtube: '',
+        },
         active: true,
       });
     }
@@ -86,7 +117,31 @@ export function ClubFormModal({ isOpen, onClose, onSubmit, club, isLoading = fal
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await onSubmit(formData);
+    
+    // Nettoyer les données : convertir les chaînes vides en null pour les champs optionnels
+    const cleanedSocialMedia = formData.social_media ? {
+      facebook: formData.social_media.facebook?.trim() || null,
+      instagram: formData.social_media.instagram?.trim() || null,
+      youtube: formData.social_media.youtube?.trim() || null,
+    } : null;
+    
+    // Retirer les valeurs null du social_media
+    const cleanedSocialMediaFiltered = cleanedSocialMedia ? Object.fromEntries(
+      Object.entries(cleanedSocialMedia).filter(([_, v]) => v !== null && v !== '')
+    ) : null;
+    
+    const cleanedData = {
+      ...formData,
+      cover_image_url: formData.cover_image_url || null,
+      description: formData.description || null,
+      phone: formData.phone || null,
+      email: formData.email || null,
+      social_media: cleanedSocialMediaFiltered && Object.keys(cleanedSocialMediaFiltered).length > 0 
+        ? cleanedSocialMediaFiltered 
+        : null,
+    };
+    
+    await onSubmit(cleanedData);
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -242,8 +297,9 @@ export function ClubFormModal({ isOpen, onClose, onSubmit, club, isLoading = fal
 
           {/* Image de couverture */}
           <div className="md:col-span-2">
-            <label htmlFor="cover_image_url" className="block text-sm font-semibold dark:text-gray-300 mb-2">
-              Image de couverture (URL) 🖼️
+            <label htmlFor="cover_image_url" className="block text-sm font-semibold dark:text-gray-300 mb-2 flex items-center gap-2">
+              <ImageIcon className="w-4 h-4 text-primary" />
+              Image de couverture (URL)
             </label>
             <input
               type="url"
@@ -254,8 +310,9 @@ export function ClubFormModal({ isOpen, onClose, onSubmit, club, isLoading = fal
               className="w-full px-4 py-2.5 border dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
               placeholder="https://example.com/club-image.jpg"
             />
-            <p className="mt-1.5 text-xs dark:text-gray-500">
-              💡 Conseil : Utilisez une image 16:9 (ex: 1200x675px) pour un meilleur rendu
+            <p className="mt-1.5 text-xs dark:text-gray-500 flex items-start gap-1.5">
+              <Lightbulb className="w-3 h-3 flex-shrink-0 mt-0.5" />
+              <span>Conseil : Utilisez une image 16:9 (ex: 1200x675px) pour un meilleur rendu</span>
             </p>
             
             {/* Preview */}
@@ -312,8 +369,9 @@ export function ClubFormModal({ isOpen, onClose, onSubmit, club, isLoading = fal
 
         {/* Coordonnées GPS */}
         <div className="border-t dark:border-gray-700 pt-6">
-          <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-4">
-            🗺️ Coordonnées GPS (pour la carte)
+          <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-4 flex items-center gap-2">
+            <MapIcon className="w-5 h-5 text-primary" />
+            Coordonnées GPS (pour la carte)
           </h3>
           
           <div className="grid md:grid-cols-2 gap-6">
@@ -355,25 +413,103 @@ export function ClubFormModal({ isOpen, onClose, onSubmit, club, isLoading = fal
 
         {/* Horaires (Schedule) - Visual Editor */}
         <div className="border-t dark:border-gray-700 pt-6">
-          <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-4">
-            🗓️ Horaires des cours
+          <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-4 flex items-center gap-2">
+            <CalendarIcon className="w-5 h-5 text-primary" />
+            Horaires des cours
           </h3>
           <ScheduleEditor
-            value={formData.schedule as Record<string, any[]> | null}
-            onChange={(schedule) => setFormData(prev => ({ ...prev, schedule }))}
+            value={formData.schedule as Record<string, CourseSession[]> | null}
+            onChange={(schedule) => setFormData(prev => ({ ...prev, schedule: schedule as Record<string, CourseSession[]> }))}
             clubId={formData.id}
           />
         </div>
 
         {/* Tarifs (Pricing) - Visual Editor */}
         <div className="border-t dark:border-gray-700 pt-6">
-          <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-4">
-            💰 Tarifs annuels
+          <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-4 flex items-center gap-2">
+            <Euro className="w-5 h-5 text-primary" />
+            Tarifs annuels
           </h3>
           <PricingEditor
             value={formData.pricing as Record<string, number> | null}
             onChange={(pricing) => setFormData(prev => ({ ...prev, pricing }))}
           />
+        </div>
+
+        {/* Réseaux sociaux */}
+        <div className="border-t dark:border-gray-700 pt-6">
+          <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-4 flex items-center gap-2">
+            <Facebook className="w-5 h-5 text-primary" />
+            Réseaux sociaux
+          </h3>
+          
+          <div className="space-y-4">
+            {/* Facebook */}
+            <div>
+              <label htmlFor="social_facebook" className="block text-sm font-semibold dark:text-gray-300 mb-2 flex items-center gap-2">
+                <Facebook className="w-4 h-4 text-blue-600" />
+                Facebook
+              </label>
+              <input
+                type="url"
+                id="social_facebook"
+                value={formData.social_media?.facebook || ''}
+                onChange={(e) => setFormData(prev => ({
+                  ...prev,
+                  social_media: {
+                    ...prev.social_media,
+                    facebook: e.target.value,
+                  } as Club['social_media'],
+                }))}
+                className="w-full px-4 py-2.5 border dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                placeholder="https://www.facebook.com/phuonglongvodao"
+              />
+            </div>
+
+            {/* Instagram */}
+            <div>
+              <label htmlFor="social_instagram" className="block text-sm font-semibold dark:text-gray-300 mb-2 flex items-center gap-2">
+                <Instagram className="w-4 h-4 text-pink-600" />
+                Instagram
+              </label>
+              <input
+                type="url"
+                id="social_instagram"
+                value={formData.social_media?.instagram || ''}
+                onChange={(e) => setFormData(prev => ({
+                  ...prev,
+                  social_media: {
+                    ...prev.social_media,
+                    instagram: e.target.value,
+                  } as Club['social_media'],
+                }))}
+                className="w-full px-4 py-2.5 border dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                placeholder="https://www.instagram.com/phuonglongvodao"
+              />
+            </div>
+
+            {/* YouTube */}
+            <div>
+              <label htmlFor="social_youtube" className="block text-sm font-semibold dark:text-gray-300 mb-2 flex items-center gap-2">
+                <Youtube className="w-4 h-4 text-red-600" />
+                YouTube
+              </label>
+              <input
+                type="url"
+                id="social_youtube"
+                value={formData.social_media?.youtube || ''}
+                onChange={(e) => setFormData(prev => ({
+                  ...prev,
+                  social_media: {
+                    ...prev.social_media,
+                    youtube: e.target.value,
+                  } as Club['social_media'],
+                }))}
+                className="w-full px-4 py-2.5 border dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                placeholder="https://www.youtube.com/@phuonglongvodao"
+              />
+            </div>
+          </div>
         </div>
 
         {/* Actif */}
