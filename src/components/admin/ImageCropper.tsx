@@ -26,7 +26,7 @@ interface ImageCropperProps {
 export function ImageCropper({
   value,
   onChange,
-  aspectRatio = 1,
+  aspectRatio: _aspectRatio = 1,
   circular = true,
   minZoom = 0.5,
   maxZoom = 3,
