@@ -84,24 +84,32 @@ export function ScheduleEditor({ value, onChange, clubId: _clubId }: ScheduleEdi
 
   const removeSession = (day: string, index: number) => {
     const newSchedule = { ...schedule };
-    newSchedule[day].splice(index, 1);
-    if (newSchedule[day].length === 0) {
-      delete newSchedule[day];
+    if (newSchedule[day]) {
+      newSchedule[day].splice(index, 1);
+      if (newSchedule[day].length === 0) {
+        delete newSchedule[day];
+      }
     }
     onChange(newSchedule);
   };
 
   const updateSession = (day: string, index: number, field: keyof CourseSession, value: string) => {
     const newSchedule = { ...schedule };
-    newSchedule[day][index] = {
-      ...newSchedule[day][index],
-      [field]: value || undefined,
-    };
-    onChange(newSchedule);
+    if (newSchedule[day] && newSchedule[day][index]) {
+      newSchedule[day][index] = {
+        ...newSchedule[day][index],
+        [field]: value || undefined,
+      };
+      onChange(newSchedule);
+    }
   };
 
   const toggleInstructor = (day: string, index: number, instructorName: string) => {
     const newSchedule = { ...schedule };
+    if (!newSchedule[day] || !newSchedule[day][index]) {
+      return;
+    }
+    
     const session = newSchedule[day][index];
     
     // Migrer de l'ancien format (string) vers le nouveau (array) si nécessaire
