@@ -8,7 +8,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { createAPIClient } from '@/lib/supabase/server';
+import { createServerClient } from '@/lib/supabase/server';
 
 // PUT - Mettre à jour un coach
 export async function PUT(
@@ -17,18 +17,13 @@ export async function PUT(
 ) {
   try {
     const { id } = await params;
-    const supabase = await createAPIClient();
+    const supabase = await createServerClient();
     const body = await request.json();
     
     console.log('Mise à jour coach:', { id, body });
     
-    // @ts-ignore - Supabase update type incompatibility avec TypeScript strict
-    const { data: coach, error } = await supabase
-      .from('coaches')
-      .update(body)
-      .eq('id', id)
-      .select()
-      .single();
+    // @ts-ignore - Supabase update type incompatibility
+    const { data: coach, error } = await supabase.from('coaches').update(body).eq('id', id).select().single();
     
     if (error) {
       console.error('Error updating coach:', error);
@@ -49,7 +44,7 @@ export async function DELETE(
 ) {
   try {
     const { id } = await params;
-    const supabase = await createAPIClient();
+    const supabase = await createServerClient();
     
     const { error } = await supabase
       .from('coaches')
