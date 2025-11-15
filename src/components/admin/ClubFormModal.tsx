@@ -130,15 +130,15 @@ export function ClubFormModal({ isOpen, onClose, onSubmit, club, isLoading = fal
       Object.entries(cleanedSocialMedia).filter(([_, v]) => v !== null && v !== '')
     ) : null;
     
-    const cleanedData = {
+    const cleanedData: Partial<Club> = {
       ...formData,
-      cover_image_url: formData.cover_image_url || null,
-      description: formData.description || null,
-      phone: formData.phone || null,
-      email: formData.email || null,
+      cover_image_url: formData.cover_image_url || undefined,
+      description: formData.description || undefined,
+      phone: formData.phone || undefined,
+      email: formData.email || undefined,
       social_media: cleanedSocialMediaFiltered && Object.keys(cleanedSocialMediaFiltered).length > 0 
         ? cleanedSocialMediaFiltered 
-        : null,
+        : undefined,
     };
     
     await onSubmit(cleanedData);
