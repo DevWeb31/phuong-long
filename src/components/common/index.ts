@@ -22,4 +22,7 @@ export { Badge, type BadgeProps } from './Badge';
 export { Accordion, type AccordionItem, type AccordionProps } from './Accordion';
 export { ParallaxSection, ParallaxBackground } from './ParallaxSection';
 export { ClubImage } from './ClubImage';
+export { ImageCarousel } from './ImageCarousel';
+export { ImageLightbox } from './ImageLightbox';
+export { ScrollReveal } from './ScrollReveal';
 
