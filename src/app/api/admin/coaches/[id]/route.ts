@@ -9,6 +9,9 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@/lib/supabase/server';
+import type { Database } from '@/lib/supabase/database.types';
+
+type CoachUpdate = Database['public']['Tables']['coaches']['Update'];
 
 // PUT - Mettre à jour un coach
 export async function PUT(
@@ -18,7 +21,9 @@ export async function PUT(
   try {
     const { id } = await params;
     const supabase = await createServerClient();
-    const body = await request.json();
+    const body = await request.json() as CoachUpdate;
+    
+    console.log('Mise à jour coach:', { id, body });
     
     const { data: coach, error } = await supabase
       .from('coaches')
