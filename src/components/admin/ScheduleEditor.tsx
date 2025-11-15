@@ -11,7 +11,7 @@
 
 import { useState, useEffect } from 'react';
 import { Button, Badge } from '@/components/common';
-import { Plus, Trash2, Clock } from 'lucide-react';
+import { Plus, Trash2, Clock, Calendar, Check, AlertTriangle } from 'lucide-react';
 
 interface CourseSession {
   time: string;
@@ -44,7 +44,7 @@ const DAYS = [
   { key: 'dimanche', label: 'Dimanche' },
 ];
 
-export function ScheduleEditor({ value, onChange, clubId }: ScheduleEditorProps) {
+export function ScheduleEditor({ value, onChange, clubId: _clubId }: ScheduleEditorProps) {
   const [expandedDay, setExpandedDay] = useState<string | null>(null);
   const [coaches, setCoaches] = useState<Coach[]>([]);
   
@@ -143,7 +143,7 @@ export function ScheduleEditor({ value, onChange, clubId }: ScheduleEditorProps)
             {/* Header du jour */}
             <div className="p-4 flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <span className="text-xl">📅</span>
+                <Calendar className="w-5 h-5 text-primary" />
                 <h4 className="font-bold text-slate-900 dark:text-slate-100">
                   {day.label}
                 </h4>
@@ -285,7 +285,7 @@ export function ScheduleEditor({ value, onChange, clubId }: ScheduleEditorProps)
                                         : 'bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:border-primary/50 hover:bg-slate-50 dark:hover:bg-slate-700'
                                     }`}
                                   >
-                                    {isSelected && <span className="mr-1">✓</span>}
+                                    {isSelected && <Check className="w-3 h-3 mr-1" />}
                                     {coach.name}
                                   </button>
                                 );
@@ -293,8 +293,9 @@ export function ScheduleEditor({ value, onChange, clubId }: ScheduleEditorProps)
                             </div>
                           </>
                         ) : (
-                          <p className="text-xs text-amber-600 dark:text-amber-400 p-3 bg-amber-50 dark:bg-amber-950/30 rounded-lg border border-amber-200 dark:border-amber-800">
-                            ⚠️ Aucun coach disponible. Ajoutez-en dans la section Coaches de l'admin.
+                          <p className="text-xs text-amber-600 dark:text-amber-400 p-3 bg-amber-50 dark:bg-amber-950/30 rounded-lg border border-amber-200 dark:border-amber-800 flex items-start gap-2">
+                            <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                            <span>Aucun coach disponible. Ajoutez-en dans la section Coaches de l'admin.</span>
                           </p>
                         )}
                       </div>
