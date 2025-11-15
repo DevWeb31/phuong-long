@@ -18,9 +18,9 @@ import { Plus, X } from 'lucide-react';
 export interface Coach {
   id?: string;
   name: string;
-  bio?: string;
-  photo_url?: string;
-  specialties?: string[];
+  bio?: string | null;
+  photo_url?: string | null;
+  specialties?: string[] | null;
   years_experience: number;
   active: boolean;
   display_order: number;
