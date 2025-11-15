@@ -27,6 +27,7 @@ export async function POST(
     }
     
     // Vérifier si l'événement est complet
+    // @ts-ignore - Supabase select type incompatibility
     const { data: event } = await supabase
       .from('events')
       .select('max_attendees')
