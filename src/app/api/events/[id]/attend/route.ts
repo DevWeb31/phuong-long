@@ -12,7 +12,7 @@ import { createServerClient } from '@/lib/supabase/server';
 
 // POST - S'inscrire à un événement (Je serai là !)
 export async function POST(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
@@ -72,7 +72,7 @@ export async function POST(
 
 // DELETE - Se désinscrire d'un événement
 export async function DELETE(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
