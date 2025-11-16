@@ -83,7 +83,7 @@ export async function POST(request: Request) {
 
     const { data, error } = await supabase
       .from('site_settings')
-      .upsert(updateData, {
+      .upsert(updateData as any, {
         onConflict: 'key',
       })
       .select()

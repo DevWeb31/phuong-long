@@ -34,7 +34,8 @@ export async function GET() {
 
     const settings: Record<string, unknown> = {};
     if (data) {
-      settings[data.key] = data.value;
+      const setting = data as { key: string; value: unknown };
+      settings[setting.key] = setting.value;
     }
 
     return NextResponse.json(settings);
