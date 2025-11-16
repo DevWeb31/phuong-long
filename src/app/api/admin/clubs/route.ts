@@ -29,14 +29,35 @@ export async function GET() {
       return NextResponse.json({ error: 'Non autorisé' }, { status: 403 });
     }
 
-    const { data, error } = await supabase
+    const { data: clubs, error } = await supabase
       .from('clubs')
       .select('*')
       .order('created_at', { ascending: false });
 
     if (error) throw error;
 
-    return NextResponse.json(data);
+    // Compter les membres pour chaque club
+    const clubsWithMembers = await Promise.all(
+      (clubs || []).map(async (club) => {
+        // Compter les utilisateurs ayant un rôle associé à ce club
+        const { count, error: countError } = await supabase
+          .from('user_roles')
+          .select('*', { count: 'exact', head: true })
+          .eq('club_id', club.id);
+
+        if (countError) {
+          console.error(`Error counting members for club ${club.id}:`, countError);
+          return { ...club, members_count: 0 };
+        }
+
+        return {
+          ...club,
+          members_count: count || 0,
+        };
+      })
+    );
+
+    return NextResponse.json(clubsWithMembers);
   } catch (error) {
     console.error('Error fetching clubs:', error);
     return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 });
