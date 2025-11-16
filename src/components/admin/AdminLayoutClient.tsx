@@ -128,7 +128,7 @@ export function AdminLayoutClient({
         {/* Sidebar */}
         <aside
           className={cn(
-            'fixed lg:static inset-y-0 left-0 z-50 w-64 min-h-[calc(100vh-4rem)] bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm border-r border-gray-200 dark:border-gray-800 shadow-sm transform transition-transform duration-300 ease-in-out overflow-hidden',
+            'fixed lg:static inset-y-0 left-0 z-50 lg:z-auto w-64 min-h-[calc(100vh-4rem)] bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm border-r border-gray-200 dark:border-gray-800 shadow-sm transform transition-transform duration-300 ease-in-out overflow-hidden',
             mobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0',
             'mt-16 lg:mt-0'
           )}
@@ -182,10 +182,12 @@ export function AdminLayoutClient({
         </aside>
 
         {/* Main Content */}
-        <main className="flex-1 py-6 lg:py-8 px-4 lg:px-6">
-          <Container className="max-w-full" padding={false}>
-            {children}
-          </Container>
+        <main className="flex-1 min-w-0 py-6 lg:py-8 px-4 lg:px-6">
+          <div className="w-full overflow-x-auto">
+            <Container size="full" padding={false}>
+              {children}
+            </Container>
+          </div>
         </main>
       </div>
     </div>
