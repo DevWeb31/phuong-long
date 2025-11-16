@@ -9,6 +9,7 @@
 
 import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
+import { hasRoleLevel } from '@/lib/utils/check-admin-role';
 
 export async function middleware(request: NextRequest) {
   let response = NextResponse.next({
@@ -72,6 +73,65 @@ export async function middleware(request: NextRequest) {
   );
 
   const { data: { user } } = await supabase.auth.getUser();
+
+  // Vérifier le mode maintenance (sauf pour les routes admin, API, signin et maintenance)
+  if (!request.nextUrl.pathname.startsWith('/admin') && 
+      !request.nextUrl.pathname.startsWith('/api') &&
+      request.nextUrl.pathname !== '/maintenance' &&
+      request.nextUrl.pathname !== '/signin') {
+    try {
+      const { data: maintenanceSetting } = await supabase
+        .from('site_settings')
+        .select('value')
+        .eq('key', 'maintenance.enabled')
+        .maybeSingle();
+
+      const isMaintenanceEnabled = maintenanceSetting?.value === true || 
+                                   maintenanceSetting?.value === 'true' || 
+                                   maintenanceSetting?.value === '"true"';
+
+      if (isMaintenanceEnabled) {
+        // Vérifier si l'utilisateur a un rôle de niveau <= 1 (admin/développeur)
+        let canAccess = false;
+        if (user) {
+          // Vérifier si l'utilisateur a un rôle de niveau <= 1
+          canAccess = await hasRoleLevel(user.id, 1);
+          
+          // Si l'utilisateur n'a pas de rôle de niveau <= 1, vérifier s'il a un niveau >= 2
+          if (!canAccess) {
+            // Récupérer tous les rôles de l'utilisateur pour vérifier le niveau minimum
+            const { data: userRoles } = await supabase
+              .from('user_roles')
+              .select('role_id, roles(name, level)')
+              .eq('user_id', user.id);
+            
+            const roles = (userRoles as any[]) || [];
+            const hasLevel2OrHigher = roles.some((ur: any) => {
+              const roleLevel = ur.roles?.level;
+              return roleLevel !== undefined && roleLevel >= 2;
+            });
+            
+            // Si l'utilisateur a un niveau >= 2, refuser l'accès
+            if (hasLevel2OrHigher) {
+              const url = request.nextUrl.clone();
+              url.pathname = '/maintenance';
+              return NextResponse.redirect(url);
+            }
+          }
+        }
+
+        // Si l'utilisateur n'est pas connecté ou n'a pas de rôle de niveau <= 1, rediriger vers la maintenance
+        if (!canAccess) {
+          const url = request.nextUrl.clone();
+          url.pathname = '/maintenance';
+          return NextResponse.redirect(url);
+        }
+      }
+    } catch (error) {
+      // En cas d'erreur (table n'existe pas encore, etc.), continuer normalement
+      console.error('Error checking maintenance mode:', error);
+    }
+  }
 
   // Protéger les routes /dashboard/*
   if (request.nextUrl.pathname.startsWith('/dashboard')) {
@@ -171,6 +231,13 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/dashboard/:path*', '/admin/:path*', '/shop/:path*', '/signin', '/signup'],
+  matcher: [
+    '/dashboard/:path*', 
+    '/admin/:path*', 
+    '/shop/:path*', 
+    '/signin', 
+    '/signup',
+    '/((?!api|_next/static|_next/image|favicon.ico|logo.*|maintenance).*)',
+  ],
 };
 

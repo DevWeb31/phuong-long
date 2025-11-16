@@ -12,6 +12,7 @@
 
 import { BuildingOffice2Icon, FunnelIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import { GraduationCap, Trophy, Theater, BookOpen, Calendar } from 'lucide-react';
+import { ScrollReveal } from '@/components/common';
 
 interface Club {
   id: string;
@@ -61,7 +62,8 @@ export function EventsFilters({
   return (
     <div className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-        <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+        <ScrollReveal direction="down" delay={0}>
+          <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
           {/* Filtres compacts */}
           <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto flex-1">
             {/* Icône Filtres */}
@@ -124,14 +126,17 @@ export function EventsFilters({
             )}
           </div>
 
-          {/* Compteur de résultats */}
-          <div className="flex items-center gap-2 text-sm whitespace-nowrap">
-            <span className="font-semibold text-primary text-lg">{eventCounts.total}</span>
-            <span className="text-gray-600 dark:text-gray-400">
-              {eventCounts.total > 1 ? 'événements' : 'événement'}
-            </span>
+            {/* Compteur de résultats */}
+            <ScrollReveal direction="left" delay={100}>
+              <div className="flex items-center gap-2 text-sm whitespace-nowrap">
+                <span className="font-semibold text-primary text-lg">{eventCounts.total}</span>
+                <span className="text-gray-600 dark:text-gray-400">
+                  {eventCounts.total > 1 ? 'événements' : 'événement'}
+                </span>
+              </div>
+            </ScrollReveal>
           </div>
-        </div>
+        </ScrollReveal>
 
         {/* Badges des filtres actifs (en dessous) */}
         {hasActiveFilters && (

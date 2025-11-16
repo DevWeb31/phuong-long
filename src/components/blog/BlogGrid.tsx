@@ -3,11 +3,13 @@
  * 
  * Affiche une grille responsive d'articles avec gestion du loading
  * 
- * @version 1.0
+ * @version 1.1
  * @date 2025-11-11
+ * @updated Added ScrollReveal animations
  */
 
 import { BlogCard } from './BlogCard';
+import { ScrollReveal } from '@/components/common';
 import type { BlogPost } from '@/lib/types/database';
 
 interface BlogGridProps {
@@ -74,12 +76,13 @@ export function BlogGrid({
       {posts.map((post, index) => {
         const variant = getVariant(index);
         return (
-          <BlogCard 
-            key={post.id} 
-            post={post}
-            variant={variant}
-            priority={index < 3} // Priorité pour les 3 premiers (optimisation LCP)
-          />
+          <ScrollReveal key={post.id} direction="up" delay={index * 50}>
+            <BlogCard 
+              post={post}
+              variant={variant}
+              priority={index < 3} // Priorité pour les 3 premiers (optimisation LCP)
+            />
+          </ScrollReveal>
         );
       })}
     </div>

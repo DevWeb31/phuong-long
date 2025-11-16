@@ -23,6 +23,7 @@ interface BlogPost {
   created_at: string;
   slug?: string;
   views_count?: number;
+  cover_image_url?: string | null;
 }
 
 const statusLabels: Record<string, string> = {
@@ -63,6 +64,32 @@ export default function AdminBlogPage() {
   };
 
   const columns: DataTableColumn<BlogPost>[] = [
+    {
+      key: 'cover_image_url',
+      label: 'Image',
+      sortable: false,
+      render: (value, row) => (
+        <div className="w-10 h-10 rounded-lg overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900 flex items-center justify-center">
+          {value ? (
+            <img
+              src={value as string}
+              alt={row.title}
+              className="w-full h-full object-cover"
+              onError={(e) => {
+                (e.target as HTMLImageElement).style.display = 'none';
+                const fallbackDiv = document.createElement('div');
+                fallbackDiv.className = 'w-6 h-6 text-gray-400 dark:text-gray-600';
+                fallbackDiv.innerHTML = '📝';
+                (e.target as HTMLImageElement).parentElement!.innerHTML = '';
+                (e.target as HTMLImageElement).parentElement!.appendChild(fallbackDiv);
+              }}
+            />
+          ) : (
+            <span className="text-2xl">📝</span>
+          )}
+        </div>
+      ),
+    },
     {
       key: 'title',
       label: 'Titre',

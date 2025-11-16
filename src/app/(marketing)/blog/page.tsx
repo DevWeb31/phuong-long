@@ -9,7 +9,7 @@
 
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { Container, Badge, ParallaxBackground } from '@/components/common';
+import { Container, Badge, ParallaxBackground, ScrollReveal } from '@/components/common';
 import { createServerClient } from '@/lib/supabase/server';
 import type { BlogPost } from '@/lib/types/database';
 import { BlogHeroContent } from '@/components/marketing/BlogHeroContent';
@@ -115,7 +115,9 @@ export default async function BlogPage({ searchParams }: Props) {
       {/* Barre de recherche */}
       <section className="bg-white dark:bg-gray-900 border-b dark:border-gray-800 py-8">
         <Container>
-          <BlogSearchBar />
+          <ScrollReveal direction="down" delay={0}>
+            <BlogSearchBar />
+          </ScrollReveal>
         </Container>
       </section>
 
@@ -123,83 +125,97 @@ export default async function BlogPage({ searchParams }: Props) {
       <section className="py-16 lg:py-20 bg-gray-50 dark:bg-gray-900">
         <Container>
           {/* Header avec filtres intégrés */}
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
-            {/* Message de recherche ou titre */}
-            {searchQuery ? (
-              <div>
-                <p className="text-lg text-gray-600 dark:text-gray-400">
-                  {typedPosts.length > 0 ? (
-                    <>
-                      <span className="font-semibold text-gray-900 dark:text-white">{count}</span> résultat{count! > 1 ? 's' : ''} pour <span className="font-semibold text-primary">"{searchQuery}"</span>
-                    </>
-                  ) : (
-                    <>Aucun résultat pour <span className="font-semibold text-gray-900 dark:text-white">"{searchQuery}"</span></>
-                  )}
-                </p>
-              </div>
-            ) : (
-              <div>
-                <h2 id="blog-articles-title" className="text-2xl font-bold text-gray-900 dark:text-white scroll-mt-24">
-                  {selectedTag ? `Articles : ${selectedTag}` : 'Tous les articles'}
-                </h2>
-                {selectedTag && (
-                  <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                    {count} article{count! > 1 ? 's' : ''} trouvé{count! > 1 ? 's' : ''}
-                  </p>
-                )}
-              </div>
-            )}
+          <ScrollReveal direction="down" delay={0}>
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
+              {/* Message de recherche ou titre */}
+              {searchQuery ? (
+                <ScrollReveal direction="left" delay={0}>
+                  <div>
+                    <p className="text-lg text-gray-600 dark:text-gray-400">
+                      {typedPosts.length > 0 ? (
+                        <>
+                          <span className="font-semibold text-gray-900 dark:text-white">{count}</span> résultat{count! > 1 ? 's' : ''} pour <span className="font-semibold text-primary">"{searchQuery}"</span>
+                        </>
+                      ) : (
+                        <>Aucun résultat pour <span className="font-semibold text-gray-900 dark:text-white">"{searchQuery}"</span></>
+                      )}
+                    </p>
+                  </div>
+                </ScrollReveal>
+              ) : (
+                <ScrollReveal direction="left" delay={0}>
+                  <div>
+                    <h2 id="blog-articles-title" className="text-2xl font-bold text-gray-900 dark:text-white scroll-mt-24">
+                      {selectedTag ? `Articles : ${selectedTag}` : 'Tous les articles'}
+                    </h2>
+                    {selectedTag && (
+                      <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                        {count} article{count! > 1 ? 's' : ''} trouvé{count! > 1 ? 's' : ''}
+                      </p>
+                    )}
+                  </div>
+                </ScrollReveal>
+              )}
 
-            {/* Filtres par Tags intégrés */}
-            {allTags.length > 0 && (
-              <BlogTagFilter availableTags={allTags} />
-            )}
-          </div>
+              {/* Filtres par Tags intégrés */}
+              {allTags.length > 0 && (
+                <ScrollReveal direction="right" delay={50}>
+                  <BlogTagFilter availableTags={allTags} />
+                </ScrollReveal>
+              )}
+            </div>
+          </ScrollReveal>
 
           {/* Hero Article - Dernier article publié (uniquement sur première page sans filtres) */}
           {currentPage === 1 && !selectedTag && !searchQuery && typedPosts.length > 0 && typedPosts[0] && (
-            <div className="mb-16">
+            <ScrollReveal direction="up" delay={100} className="mb-16">
               <BlogHeroCard post={typedPosts[0]} />
-            </div>
+            </ScrollReveal>
           )}
 
           {/* Grille des autres articles */}
-          <BlogGrid 
-            posts={
-              // Si première page sans filtres, on affiche les articles à partir du 2ème
-              currentPage === 1 && !selectedTag && !searchQuery && typedPosts.length > 0
-                ? typedPosts.slice(1)
-                : typedPosts
-            }
-            emptyMessage={
-              selectedTag 
-                ? `Aucun article trouvé pour le tag "${selectedTag}"` 
-                : searchQuery
-                ? 'Aucun article ne correspond à votre recherche'
-                : 'Aucun article publié pour le moment'
-            }
-          />
+          <ScrollReveal direction="up" delay={200}>
+            <BlogGrid 
+              posts={
+                // Si première page sans filtres, on affiche les articles à partir du 2ème
+                currentPage === 1 && !selectedTag && !searchQuery && typedPosts.length > 0
+                  ? typedPosts.slice(1)
+                  : typedPosts
+              }
+              emptyMessage={
+                selectedTag 
+                  ? `Aucun article trouvé pour le tag "${selectedTag}"` 
+                  : searchQuery
+                  ? 'Aucun article ne correspond à votre recherche'
+                  : 'Aucun article publié pour le moment'
+              }
+            />
+          </ScrollReveal>
 
           {/* Lien retour si filtré */}
           {(selectedTag || searchQuery) && typedPosts.length === 0 && (
-            <div className="text-center mt-8">
-              <Link href="/blog" className="inline-block">
-                <Badge variant="primary" size="lg">Voir tous les articles</Badge>
-              </Link>
-            </div>
+            <ScrollReveal direction="fade" delay={0}>
+              <div className="text-center mt-8">
+                <Link href="/blog" className="inline-block">
+                  <Badge variant="primary" size="lg">Voir tous les articles</Badge>
+                </Link>
+              </div>
+            </ScrollReveal>
           )}
 
           {/* Pagination */}
           {totalPages > 1 && (
-            <BlogPagination
-              currentPage={currentPage}
-              totalPages={totalPages}
-              baseUrl="/blog"
-              searchParams={{ 
-                ...(selectedTag && { tag: selectedTag }),
-                ...(searchQuery && { q: searchQuery })
-              }}
-            />
+            <ScrollReveal direction="fade" delay={300}>
+              <BlogPagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                baseUrl="/blog"
+                searchParams={{ 
+                  ...(selectedTag && { tag: selectedTag }),
+                  ...(searchQuery && { q: searchQuery })
+                }}
+              />
+            </ScrollReveal>
           )}
         </Container>
       </section>

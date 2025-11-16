@@ -15,6 +15,7 @@
 
 import { useRef, useState, useEffect, type ReactNode } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ScrollReveal } from '@/components/common';
 
 interface EventsCarouselProps {
   children: ReactNode;
@@ -102,49 +103,53 @@ export function EventsCarousel({ children, title, count }: EventsCarouselProps) 
   };
 
   return (
-    <div className="mb-12 last:mb-0">
+    <ScrollReveal direction="up" delay={0} className="mb-12 last:mb-0">
       {/* Header avec titre et navigation */}
       {title && (
         <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-3">
-            <div className="w-1 h-8 bg-gradient-to-b from-primary to-primary-dark rounded-full" />
-            <h2 className="text-xl lg:text-2xl font-bold text-gray-900 dark:text-gray-100">
-              {title}
-            </h2>
-            {count !== undefined && (
-              <span className="text-xs bg-gray-100 dark:bg-gray-800 px-2.5 py-1 rounded-full text-gray-600 dark:text-gray-400 font-medium">
-                {count}
-              </span>
-            )}
-          </div>
+          <ScrollReveal direction="left" delay={0}>
+            <div className="flex items-center gap-3">
+              <div className="w-1 h-8 bg-gradient-to-b from-primary to-primary-dark rounded-full" />
+              <h2 className="text-xl lg:text-2xl font-bold text-gray-900 dark:text-gray-100">
+                {title}
+              </h2>
+              {count !== undefined && (
+                <span className="text-xs bg-gray-100 dark:bg-gray-800 px-2.5 py-1 rounded-full text-gray-600 dark:text-gray-400 font-medium">
+                  {count}
+                </span>
+              )}
+            </div>
+          </ScrollReveal>
 
           {/* Boutons de navigation */}
-          <div className="hidden md:flex items-center gap-2">
-            <button
-              onClick={() => scroll('left')}
-              disabled={!canScrollLeft}
-              className={`p-2 rounded-full border-2 transition-all duration-200 ${
-                canScrollLeft
-                  ? 'border-primary text-primary hover:bg-primary hover:text-white shadow-sm hover:shadow-md'
-                  : 'border-gray-200 dark:border-gray-800 text-gray-300 dark:text-gray-700 cursor-not-allowed'
-              }`}
-              aria-label="Défiler vers la gauche"
-            >
-              <ChevronLeft className="w-5 h-5" />
-            </button>
-            <button
-              onClick={() => scroll('right')}
-              disabled={!canScrollRight}
-              className={`p-2 rounded-full border-2 transition-all duration-200 ${
-                canScrollRight
-                  ? 'border-primary text-primary hover:bg-primary hover:text-white shadow-sm hover:shadow-md'
-                  : 'border-gray-200 dark:border-gray-800 text-gray-300 dark:text-gray-700 cursor-not-allowed'
-              }`}
-              aria-label="Défiler vers la droite"
-            >
-              <ChevronRight className="w-5 h-5" />
-            </button>
-          </div>
+          <ScrollReveal direction="right" delay={50}>
+            <div className="hidden md:flex items-center gap-2">
+              <button
+                onClick={() => scroll('left')}
+                disabled={!canScrollLeft}
+                className={`p-2 rounded-full border-2 transition-all duration-200 ${
+                  canScrollLeft
+                    ? 'border-primary text-primary hover:bg-primary hover:text-white shadow-sm hover:shadow-md'
+                    : 'border-gray-200 dark:border-gray-800 text-gray-300 dark:text-gray-700 cursor-not-allowed'
+                }`}
+                aria-label="Défiler vers la gauche"
+              >
+                <ChevronLeft className="w-5 h-5" />
+              </button>
+              <button
+                onClick={() => scroll('right')}
+                disabled={!canScrollRight}
+                className={`p-2 rounded-full border-2 transition-all duration-200 ${
+                  canScrollRight
+                    ? 'border-primary text-primary hover:bg-primary hover:text-white shadow-sm hover:shadow-md'
+                    : 'border-gray-200 dark:border-gray-800 text-gray-300 dark:text-gray-700 cursor-not-allowed'
+                }`}
+                aria-label="Défiler vers la droite"
+              >
+                <ChevronRight className="w-5 h-5" />
+              </button>
+            </div>
+          </ScrollReveal>
         </div>
       )}
 
@@ -192,7 +197,7 @@ export function EventsCarousel({ children, title, count }: EventsCarouselProps) 
           )}
         </div>
       </div>
-    </div>
+    </ScrollReveal>
   );
 }
 

@@ -110,3 +110,28 @@ export async function getStudentClubId(userId: string): Promise<string | null> {
   }
 }
 
+export async function hasRoleLevel(userId: string, maxLevel: number): Promise<boolean> {
+  try {
+    const supabase = await createServerClient();
+    
+    const { data: userRoles, error } = await supabase
+      .from('user_roles')
+      .select('role_id, roles(name, level)')
+      .eq('user_id', userId);
+
+    if (error) {
+      console.error('Error checking role level:', error);
+      return false;
+    }
+
+    // Vérifier si l'utilisateur a au moins un rôle avec level <= maxLevel
+    return (userRoles as any[])?.some((ur: any) => {
+      const roleLevel = ur.roles?.level;
+      return roleLevel !== undefined && roleLevel <= maxLevel;
+    }) || false;
+  } catch (error) {
+    console.error('Exception checking role level:', error);
+    return false;
+  }
+}
+

@@ -341,7 +341,7 @@ export default function ContactPage() {
             </p>
             <div className="flex justify-center">
               <Link href="/faq">
-                <Button size="lg" variant="ghost" className="flex items-center gap-2">
+                <Button size="lg" variant="secondary" className="flex items-center gap-2">
                   <HelpCircle className="w-4 h-4" />
                   Voir la FAQ
                 </Button>

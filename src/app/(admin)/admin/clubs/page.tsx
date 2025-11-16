@@ -62,7 +62,7 @@ export default function AdminClubsPage() {
       label: 'Image',
       sortable: false,
       render: (value, row) => (
-        <div className="w-16 h-16 rounded-lg overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
+        <div className="w-10 h-10 rounded-lg overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
           {value ? (
             <img
               src={value as string}
@@ -71,13 +71,13 @@ export default function AdminClubsPage() {
               onError={(e) => {
                 (e.target as HTMLImageElement).style.display = 'none';
                 const shieldDiv = document.createElement('div');
-                shieldDiv.className = 'w-12 h-12 text-gray-400';
+                shieldDiv.className = 'w-6 h-6 text-gray-400';
                 (e.target as HTMLImageElement).parentElement!.innerHTML = '';
                 (e.target as HTMLImageElement).parentElement!.appendChild(shieldDiv);
               }}
             />
           ) : (
-            <Shield className="w-12 h-12 text-gray-400 dark:text-gray-600" />
+            <Shield className="w-6 h-6 text-gray-400 dark:text-gray-600" />
           )}
         </div>
       ),
@@ -87,16 +87,6 @@ export default function AdminClubsPage() {
       label: 'Nom du club',
       sortable: true,
       render: (value) => <span className="font-medium text-gray-900 dark:text-gray-100">{value}</span>,
-    },
-    {
-      key: 'city',
-      label: 'Ville',
-      sortable: true,
-    },
-    {
-      key: 'address',
-      label: 'Adresse',
-      width: 'min-w-[200px]',
     },
     {
       key: 'members_count',
@@ -109,22 +99,6 @@ export default function AdminClubsPage() {
       ) : (
         <span className="text-gray-400 dark:text-gray-400">-</span>
       ),
-    },
-    {
-      key: 'active',
-      label: 'Statut',
-      sortable: true,
-      render: (value) => (
-        <Badge variant={value ? 'success' : 'default'} size="sm">
-          {value ? 'Actif' : 'Inactif'}
-        </Badge>
-      ),
-    },
-    {
-      key: 'created_at',
-      label: 'Créé le',
-      sortable: true,
-      render: (value) => new Date(value).toLocaleDateString('fr-FR'),
     },
   ];
 

@@ -10,6 +10,7 @@
 
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
+import { MaintenanceBanner } from '@/components/layout/MaintenanceBanner';
 
 export default async function MarketingLayout({
   children,
@@ -18,6 +19,7 @@ export default async function MarketingLayout({
 }) {
   return (
     <>
+      <MaintenanceBanner />
       <Header />
       <main className="flex-1">{children}</main>
       <Footer />

@@ -9,7 +9,7 @@
 
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { Container, Button, ParallaxBackground } from '@/components/common';
+import { Container, Button, ParallaxBackground, ScrollReveal } from '@/components/common';
 import { createServerClient } from '@/lib/supabase/server';
 import type { Event } from '@/lib/types';
 import { EventsHeroContent } from '@/components/marketing/EventsHeroContent';
@@ -92,67 +92,79 @@ export default async function EventsPage() {
       {/* Stats - Version ultra discrète */}
       <section className="py-3 md:py-4 bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800">
         <Container>
-          <div className="flex items-center justify-center gap-4 md:gap-6 flex-wrap text-xs md:text-sm">
-            {currentEvents.length > 0 && (
-              <>
+          <ScrollReveal direction="fade" delay={0}>
+            <div className="flex items-center justify-center gap-4 md:gap-6 flex-wrap text-xs md:text-sm">
+              {currentEvents.length > 0 && (
+                <>
+                  <ScrollReveal direction="left" delay={0}>
+                    <div className="flex items-center gap-1.5">
+                      <Circle className="w-2 h-2 fill-green-500 text-green-500 animate-pulse" />
+                      <span className="font-bold text-green-600 dark:text-green-400">
+                        {currentEvents.length}
+                      </span>
+                      <span className="text-gray-600 dark:text-gray-400">
+                        en cours
+                      </span>
+                    </div>
+                  </ScrollReveal>
+                  <div className="w-px h-4 bg-gray-300 dark:bg-gray-700" />
+                </>
+              )}
+              
+              <ScrollReveal direction="left" delay={50}>
                 <div className="flex items-center gap-1.5">
-                  <Circle className="w-2 h-2 fill-green-500 text-green-500 animate-pulse" />
-                  <span className="font-bold text-green-600 dark:text-green-400">
-                    {currentEvents.length}
+                  <span className="font-bold text-primary">
+                    {upcomingEvents.length}
                   </span>
                   <span className="text-gray-600 dark:text-gray-400">
-                    en cours
+                    à venir
                   </span>
                 </div>
-                <div className="w-px h-4 bg-gray-300 dark:bg-gray-700" />
-              </>
-            )}
-            
-            <div className="flex items-center gap-1.5">
-              <span className="font-bold text-primary">
-                {upcomingEvents.length}
-              </span>
-              <span className="text-gray-600 dark:text-gray-400">
-                à venir
-              </span>
+              </ScrollReveal>
+              
+              {(eventsByType.stage || 0) > 0 && (
+                <>
+                  <div className="w-px h-4 bg-gray-300 dark:bg-gray-700" />
+                  <ScrollReveal direction="left" delay={100}>
+                    <div className="flex items-center gap-1.5">
+                      <GraduationCap className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
+                      <span className="font-semibold text-blue-600 dark:text-blue-400">
+                        {eventsByType.stage || 0}
+                      </span>
+                    </div>
+                  </ScrollReveal>
+                </>
+              )}
+              
+              {(eventsByType.competition || 0) > 0 && (
+                <>
+                  <div className="w-px h-4 bg-gray-300 dark:bg-gray-700" />
+                  <ScrollReveal direction="left" delay={150}>
+                    <div className="flex items-center gap-1.5">
+                      <Trophy className="w-3.5 h-3.5 text-red-600 dark:text-red-400" />
+                      <span className="font-semibold text-red-600 dark:text-red-400">
+                        {eventsByType.competition || 0}
+                      </span>
+                    </div>
+                  </ScrollReveal>
+                </>
+              )}
+              
+              {(eventsByType.demonstration || 0) > 0 && (
+                <>
+                  <div className="w-px h-4 bg-gray-300 dark:bg-gray-700" />
+                  <ScrollReveal direction="left" delay={200}>
+                    <div className="flex items-center gap-1.5">
+                      <Theater className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" />
+                      <span className="font-semibold text-purple-600 dark:text-purple-400">
+                        {eventsByType.demonstration || 0}
+                      </span>
+                    </div>
+                  </ScrollReveal>
+                </>
+              )}
             </div>
-            
-            {(eventsByType.stage || 0) > 0 && (
-              <>
-                <div className="w-px h-4 bg-gray-300 dark:bg-gray-700" />
-                <div className="flex items-center gap-1.5">
-                  <GraduationCap className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
-                  <span className="font-semibold text-blue-600 dark:text-blue-400">
-                    {eventsByType.stage || 0}
-                  </span>
-                </div>
-              </>
-            )}
-            
-            {(eventsByType.competition || 0) > 0 && (
-              <>
-                <div className="w-px h-4 bg-gray-300 dark:bg-gray-700" />
-                <div className="flex items-center gap-1.5">
-                  <Trophy className="w-3.5 h-3.5 text-red-600 dark:text-red-400" />
-                  <span className="font-semibold text-red-600 dark:text-red-400">
-                    {eventsByType.competition || 0}
-                  </span>
-                </div>
-              </>
-            )}
-            
-            {(eventsByType.demonstration || 0) > 0 && (
-              <>
-                <div className="w-px h-4 bg-gray-300 dark:bg-gray-700" />
-                <div className="flex items-center gap-1.5">
-                  <Theater className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" />
-                  <span className="font-semibold text-purple-600 dark:text-purple-400">
-                    {eventsByType.demonstration || 0}
-                  </span>
-                </div>
-              </>
-            )}
-          </div>
+          </ScrollReveal>
         </Container>
       </section>
 
@@ -170,20 +182,26 @@ export default async function EventsPage() {
         
         <Container className="relative z-10">
           <div className="max-w-4xl mx-auto text-center">
-            <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 animate-fade-in tracking-tight">
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-accent via-amber-400 to-accent">Organisez</span> <span className="text-white">un Événement</span>
-            </h2>
-            <p className="text-xl md:text-2xl text-slate-300 mb-12 max-w-3xl mx-auto leading-relaxed animate-slide-up">
-              Vous êtes coach ou responsable de club ? Proposez votre événement.
-            </p>
-            <div className="animate-scale-in flex justify-center">
-              <Link href="/contact">
-                <Button variant="primary" size="lg" className="shadow-2xl shadow-black/20 hover:shadow-primary/40 min-w-[240px] py-4 px-8 font-semibold flex items-center justify-center gap-2">
-                  <Mail className="w-4 h-4" />
-                  Nous Contacter
-                </Button>
-              </Link>
-            </div>
+            <ScrollReveal direction="down" delay={0}>
+              <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 tracking-tight">
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-accent via-amber-400 to-accent">Organisez</span> <span className="text-white">un Événement</span>
+              </h2>
+            </ScrollReveal>
+            <ScrollReveal direction="up" delay={100}>
+              <p className="text-xl md:text-2xl text-slate-300 mb-12 max-w-3xl mx-auto leading-relaxed">
+                Vous êtes coach ou responsable de club ? Proposez votre événement.
+              </p>
+            </ScrollReveal>
+            <ScrollReveal direction="fade" delay={200}>
+              <div className="flex justify-center">
+                <Link href="/contact">
+                  <Button variant="primary" size="lg" className="shadow-2xl shadow-black/20 hover:shadow-primary/40 min-w-[240px] py-4 px-8 font-semibold flex items-center justify-center gap-2">
+                    <Mail className="w-4 h-4" />
+                    Nous Contacter
+                  </Button>
+                </Link>
+              </div>
+            </ScrollReveal>
           </div>
         </Container>
       </section>

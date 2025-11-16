@@ -171,7 +171,7 @@ export function DataTable<T extends { id: string | number }>({
                 setSearchTerm(e.target.value);
                 setCurrentPage(1);
               }}
-              className="block w-full pl-10 pr-3 py-2 border dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+              className="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent placeholder:text-gray-400 dark:placeholder:text-gray-500"
               placeholder={searchPlaceholder}
             />
           </div>
@@ -188,8 +188,8 @@ export function DataTable<T extends { id: string | number }>({
         )}
       </div>
 
-      {/* Table */}
-      <div className="overflow-x-auto border dark:border-gray-800 rounded-lg">
+      {/* Table - Desktop */}
+      <div className="hidden md:block overflow-x-auto border dark:border-gray-800 rounded-lg">
         <table className="min-w-full divide-y dark:divide-gray-800">
           <thead className="bg-gray-50 dark:bg-gray-900">
             <tr>
@@ -271,21 +271,26 @@ export function DataTable<T extends { id: string | number }>({
                           if (action.show && !action.show(row)) return null;
 
                           return (
-                            <button
-                              key={actionIndex}
-                              onClick={() => action.onClick(row)}
-                              className={`inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium transition-colors ${
-                                action.variant === 'danger'
-                                  ? 'text-red-600 hover:bg-red-50'
-                                  : action.variant === 'secondary'
-                                  ? 'text-gray-600 dark:text-gray-500 hover:bg-gray-100'
-                                  : 'text-primary hover:bg-primary/5'
-                              }`}
-                              title={action.label}
-                            >
-                              {action.icon}
-                              <span className="hidden sm:inline">{action.label}</span>
-                            </button>
+                            <div key={actionIndex} className="relative group">
+                              <button
+                                onClick={() => action.onClick(row)}
+                                className={`inline-flex items-center justify-center p-2 rounded text-xs font-medium transition-colors ${
+                                  action.variant === 'danger'
+                                    ? 'text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20'
+                                    : action.variant === 'secondary'
+                                    ? 'text-gray-600 dark:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800'
+                                    : 'text-primary hover:bg-primary/5 dark:hover:bg-primary/10'
+                                }`}
+                                title={action.label}
+                              >
+                                {action.icon}
+                              </button>
+                              {/* Tooltip */}
+                              <div className="absolute right-full mr-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 dark:bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity duration-200 whitespace-nowrap z-50">
+                                {action.label}
+                                <div className="absolute left-full top-1/2 -translate-y-1/2 border-4 border-transparent border-l-gray-900 dark:border-l-gray-800"></div>
+                              </div>
+                            </div>
                           );
                         })}
                       </div>
@@ -296,6 +301,131 @@ export function DataTable<T extends { id: string | number }>({
             )}
           </tbody>
         </table>
+      </div>
+
+      {/* Cards - Mobile */}
+      <div className="md:hidden space-y-4">
+        {isLoading ? (
+          <div className="text-center py-12 border dark:border-gray-800 rounded-lg">
+            <div className="flex items-center justify-center gap-2">
+              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+              <span className="dark:text-gray-500">Chargement...</span>
+            </div>
+          </div>
+        ) : paginatedData.length === 0 ? (
+          <div className="text-center py-12 border dark:border-gray-800 rounded-lg dark:text-gray-500">
+            {emptyMessage}
+          </div>
+        ) : (
+          paginatedData.map((row) => {
+            // Trouver la colonne image (cover_image_url ou colonne contenant "image")
+            const imageColumn = columns.find(
+              (col) => String(col.key).includes('image') || String(col.key) === 'cover_image_url'
+            );
+            const imageUrl = imageColumn ? (row[imageColumn.key as keyof T] as string | undefined) : undefined;
+            
+            // Colonnes à afficher (exclure la colonne image)
+            const displayColumns = columns.filter(
+              (col) => !String(col.key).includes('image') && String(col.key) !== 'cover_image_url'
+            );
+
+            return (
+              <div
+                key={row.id}
+                className={`relative rounded-lg overflow-hidden border dark:border-gray-800 ${
+                  imageUrl ? 'min-h-[200px]' : 'bg-white dark:bg-gray-900'
+                }`}
+                style={
+                  imageUrl
+                    ? {
+                        backgroundImage: `url(${imageUrl})`,
+                        backgroundSize: 'cover',
+                        backgroundPosition: 'center',
+                        backgroundRepeat: 'no-repeat',
+                      }
+                    : undefined
+                }
+              >
+                {/* Overlay pour améliorer la lisibilité */}
+                {imageUrl && (
+                  <div className="absolute inset-0 bg-gradient-to-b from-black/90 via-black/85 to-black/95"></div>
+                )}
+                
+                {/* Contenu de la carte */}
+                <div className={`relative p-4 space-y-3 ${imageUrl ? 'text-white' : ''}`}>
+                  {displayColumns.map((column) => {
+                    const value = row[column.key as keyof T];
+                    return (
+                      <div 
+                        key={String(column.key)} 
+                        className={`flex items-start gap-3 ${
+                          imageUrl ? 'bg-black/90 backdrop-blur-md rounded-lg p-3 shadow-lg' : ''
+                        }`}
+                      >
+                        <div className={`text-xs font-bold uppercase tracking-wider min-w-[80px] ${
+                          imageUrl 
+                            ? 'text-white drop-shadow-lg' 
+                            : 'text-gray-500 dark:text-gray-400'
+                        }`}>
+                          {column.label}:
+                        </div>
+                        <div className={`flex-1 text-sm font-bold ${
+                          imageUrl 
+                            ? (String(column.key) === 'name' || String(column.key) === 'title')
+                              ? 'text-cyan-300 drop-shadow-lg [&>*]:!text-cyan-300'
+                              : 'text-white drop-shadow-lg'
+                            : 'dark:text-gray-100'
+                        }`}>
+                          {column.render ? column.render(value, row) : String(value || '-')}
+                        </div>
+                      </div>
+                    );
+                  })}
+                  {allActions.length > 0 && (
+                    <div className={`flex items-center justify-end gap-2 pt-3 ${
+                      imageUrl 
+                        ? 'border-t border-white/20' 
+                        : 'border-t dark:border-gray-800'
+                    }`}>
+                      {allActions.map((action, actionIndex) => {
+                        if (action.show && !action.show(row)) return null;
+
+                        return (
+                          <div key={actionIndex} className="relative group">
+                            <button
+                              onClick={() => action.onClick(row)}
+                              className={`inline-flex items-center justify-center p-2 rounded text-xs font-medium transition-colors ${
+                                action.variant === 'danger'
+                                  ? imageUrl
+                                    ? 'text-red-300 hover:bg-red-500/30'
+                                    : 'text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20'
+                                  : action.variant === 'secondary'
+                                  ? imageUrl
+                                    ? 'text-white/90 hover:bg-white/20'
+                                    : 'text-gray-600 dark:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800'
+                                  : imageUrl
+                                  ? 'text-white hover:bg-white/20'
+                                  : 'text-primary hover:bg-primary/5 dark:hover:bg-primary/10'
+                              }`}
+                              title={action.label}
+                            >
+                              {action.icon}
+                            </button>
+                            {/* Tooltip */}
+                            <div className="absolute right-full mr-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 dark:bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity duration-200 whitespace-nowrap z-50">
+                              {action.label}
+                              <div className="absolute left-full top-1/2 -translate-y-1/2 border-4 border-transparent border-l-gray-900 dark:border-l-gray-800"></div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              </div>
+            );
+          })
+        )}
       </div>
 
       {/* Pagination */}
