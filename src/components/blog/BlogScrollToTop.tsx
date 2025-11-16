@@ -48,6 +48,7 @@ export function BlogScrollToTop() {
     } else {
       // Mettre à jour la référence même si on ne scroll pas
       previousPageRef.current = currentPage;
+      return undefined;
     }
   }, [page]); // Se déclenche quand la page change
 

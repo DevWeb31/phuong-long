@@ -63,7 +63,7 @@ export function HeroSlideFormModal({ isOpen, onClose, onSubmit, slide, isLoading
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value, type } = e.target;
+    const { name, value } = e.target;
     
     if (name === 'display_order' || name === 'overlay_opacity') {
       setFormData(prev => ({

@@ -8,9 +8,9 @@
  */
 
 import type { Metadata } from 'next';
-import { Container, ScrollReveal, Card, CardContent, Badge } from '@/components/common';
+import { Container, ScrollReveal, Card, CardContent } from '@/components/common';
 import { GradientButton } from '@/components/marketing/GradientButton';
-import { History, Users, Award, MapPin, Calendar, Sparkles, Target, Shield } from 'lucide-react';
+import { History, Users, Award, MapPin, Sparkles, Target, Shield } from 'lucide-react';
 
 export const metadata: Metadata = {
   title: 'Notre Histoire - Phuong Long Vo Dao',

@@ -128,6 +128,7 @@ export function BlogTableOfContents({ content: _content }: BlogTableOfContentsPr
           window.removeEventListener('scroll', handleScroll);
         };
       }
+      return undefined;
     }, 200);
 
     // Cleanup

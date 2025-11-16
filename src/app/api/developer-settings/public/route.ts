@@ -36,7 +36,7 @@ export async function GET() {
 
     // Convertir en objet simple
     const settings: Record<string, any> = {};
-    (data || []).forEach(setting => {
+    (data || []).forEach((setting: { key: string; value: unknown }) => {
       settings[setting.key] = setting.value;
     });
 

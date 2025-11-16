@@ -42,10 +42,10 @@ export function AnalyticsNavLink() {
             .from('developer_settings')
             .select('value')
             .eq('key', 'analytics.hidden')
-            .maybeSingle();
+            .maybeSingle() as { data: { value: unknown } | null };
 
           // Vérifier si value est true (booléen) ou "true" (string JSON)
-          const isHidden = settings?.value === true || settings?.value === 'true' || settings?.value === '"true"';
+          const isHidden = (settings?.value === true || settings?.value === 'true' || settings?.value === '"true"') ?? false;
           setIsAnalyticsHidden(isHidden);
 
           // Si développeur, toujours afficher (même si masquée)
@@ -65,9 +65,9 @@ export function AnalyticsNavLink() {
             .from('developer_settings')
             .select('value')
             .eq('key', 'analytics.hidden')
-            .maybeSingle();
+            .maybeSingle() as { data: { value: unknown } | null };
 
-          const isHidden = settings?.value === true || settings?.value === 'true' || settings?.value === '"true"';
+          const isHidden = (settings?.value === true || settings?.value === 'true' || settings?.value === '"true"') ?? false;
           setIsAnalyticsHidden(isHidden);
         }
       } catch (error) {

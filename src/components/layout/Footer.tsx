@@ -65,7 +65,8 @@ export async function Footer() {
       .maybeSingle();
     
     // Vérifier si value est true (booléen) ou "true" (string JSON)
-    isShopHidden = shopSetting?.value === true || shopSetting?.value === 'true' || shopSetting?.value === '"true"';
+    const shopSettingTyped = shopSetting as { value: unknown } | null | undefined;
+    isShopHidden = (shopSettingTyped?.value === true || shopSettingTyped?.value === 'true' || shopSettingTyped?.value === '"true"') ?? false;
   } catch (error) {
     // En cas d'erreur (table n'existe pas encore, etc.), considérer que la boutique n'est pas masquée
     console.error('Error checking shop visibility in footer:', error);

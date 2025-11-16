@@ -132,7 +132,10 @@ export default function DeveloperSettingsPage() {
     if (!acc[setting.category]) {
       acc[setting.category] = [];
     }
-    acc[setting.category].push(setting);
+    const category = acc[setting.category];
+    if (category) {
+      category.push(setting);
+    }
     return acc;
   }, {} as Record<string, DeveloperSetting[]>);
 

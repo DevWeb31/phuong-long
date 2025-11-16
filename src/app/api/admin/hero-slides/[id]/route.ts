@@ -27,6 +27,7 @@ export async function PUT(
     // @ts-ignore - Supabase update type incompatibility
     const { data: slide, error } = await supabase
       .from('hero_slides')
+      // @ts-expect-error - hero_slides table not yet in database types
       .update(body)
       .eq('id', id)
       .select()

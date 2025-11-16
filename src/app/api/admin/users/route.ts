@@ -37,7 +37,7 @@ export async function GET() {
     if (authError) throw authError;
 
     // Récupérer les profils utilisateurs
-    const userIds = authUsers.users.map(u => u.id);
+    const userIds = authUsers.users.map((u: { id: string }) => u.id);
     const { data: profiles, error: profilesError } = await supabase
       .from('user_profiles')
       .select('*')
@@ -60,7 +60,7 @@ export async function GET() {
     if (rolesError) throw rolesError;
 
     // Créer un map pour faciliter l'accès
-    const profilesMap = new Map((profiles || []).map(p => [p.id, p]));
+    const profilesMap = new Map((profiles || []).map((p: { id: string }) => [p.id, p]));
     const rolesMap = new Map<string, any[]>();
     
     (userRolesData || []).forEach((ur: any) => {
@@ -72,8 +72,8 @@ export async function GET() {
 
     // Combiner les données
     const usersData = authUsers.users
-      .map((authUser) => {
-        const profile = profilesMap.get(authUser.id);
+      .map((authUser: { id: string; email?: string; user_metadata?: Record<string, unknown>; last_sign_in_at?: string | null; created_at?: string }) => {
+        const profile = profilesMap.get(authUser.id) as { full_name?: string; username?: string; avatar_url?: string; bio?: string; created_at?: string } | undefined;
         const roles = rolesMap.get(authUser.id) || [];
         
         // Exclure les développeurs
@@ -88,7 +88,7 @@ export async function GET() {
         return {
           id: authUser.id,
           email: authUser.email || '',
-          full_name: profile?.full_name || authUser.user_metadata?.full_name || null,
+          full_name: profile?.full_name || (authUser.user_metadata?.full_name as string | undefined) || null,
           username: profile?.username || null,
           avatar_url: profile?.avatar_url || null,
           bio: profile?.bio || null,

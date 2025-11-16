@@ -53,6 +53,7 @@ export async function POST(request: Request) {
     // @ts-ignore - Supabase insert type incompatibility
     const { data: slide, error } = await supabase
       .from('hero_slides')
+      // @ts-expect-error - hero_slides table not yet in database types
       .insert([body])
       .select()
       .single();

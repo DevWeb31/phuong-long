@@ -458,7 +458,7 @@ export function Header() {
 
         <div className="p-4">
           <nav className="flex flex-col space-y-1">
-            {filteredNavigation.map((item, idx) => {
+            {filteredNavigation.map((item) => {
               const Icon = item.icon;
               const active = isActive(item.href);
               

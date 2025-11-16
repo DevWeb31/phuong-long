@@ -140,7 +140,7 @@ export async function middleware(request: NextRequest) {
       // Si développeur, toujours autoriser l'accès
       if (!isDeveloper) {
         // Vérifier le paramètre shop.hidden
-        const { data: shopSetting, error: shopError } = await supabase
+        const { data: shopSetting } = await supabase
           .from('developer_settings')
           .select('value')
           .eq('key', 'shop.hidden')

@@ -10,7 +10,6 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { Button } from '@/components/common';
 import { Container } from '@/components/common';
 import { ChevronLeft, ChevronRight, Play } from 'lucide-react';
 import Link from 'next/link';
@@ -74,6 +73,11 @@ export function HeroCarousel({ slides, autoPlayInterval = 5000 }: HeroCarouselPr
   }
 
   const currentSlide = activeSlides[currentIndex];
+  
+  // Si aucun slide actif, ne rien afficher
+  if (!currentSlide) {
+    return null;
+  }
 
   // Extraire l'ID de la vidéo YouTube (gère différents formats d'URL)
   const getYouTubeEmbedUrl = (videoId: string): string => {

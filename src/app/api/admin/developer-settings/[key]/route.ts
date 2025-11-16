@@ -15,7 +15,7 @@ export const runtime = 'nodejs';
 
 // GET - Get a specific setting by key
 export async function GET(
-  request: Request,
+  _request: Request,
   { params }: { params: Promise<{ key: string }> }
 ) {
   try {
@@ -90,7 +90,14 @@ export async function PUT(
       jsonValue = value;
     }
 
-    const updateData: any = {
+    const updateData: {
+      value: unknown;
+      updated_at: string;
+      label?: string;
+      description?: string;
+      category?: string;
+      type?: string;
+    } = {
       value: jsonValue,
       updated_at: new Date().toISOString(),
     };
@@ -102,6 +109,7 @@ export async function PUT(
 
     const { data, error } = await supabase
       .from('developer_settings')
+      // @ts-expect-error - developer_settings table not yet in database types
       .update(updateData)
       .eq('key', decodeURIComponent(key))
       .select()
@@ -123,7 +131,7 @@ export async function PUT(
 
 // DELETE - Delete a specific setting
 export async function DELETE(
-  request: Request,
+  _request: Request,
   { params }: { params: Promise<{ key: string }> }
 ) {
   try {

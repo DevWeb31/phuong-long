@@ -20,9 +20,7 @@ import {
   CalendarIcon,
   NewspaperIcon,
   UsersIcon,
-  ShoppingBagIcon,
   Cog6ToothIcon,
-  ChartBarIcon,
   AcademicCapIcon,
   VideoCameraIcon,
 } from '@heroicons/react/24/outline';

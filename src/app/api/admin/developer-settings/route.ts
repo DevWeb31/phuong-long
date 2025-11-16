@@ -79,6 +79,7 @@ export async function POST(request: Request) {
 
     const { data, error } = await supabase
       .from('developer_settings')
+      // @ts-expect-error - developer_settings table not yet in database types
       .upsert({
         key,
         value: jsonValue,
