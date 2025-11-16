@@ -10,7 +10,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Button } from '@/components/common';
 
 interface SiteSetting {
   id: string;
