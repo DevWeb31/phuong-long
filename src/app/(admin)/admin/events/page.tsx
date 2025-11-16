@@ -146,11 +146,6 @@ export default function AdminEventsPage() {
       }),
     },
     {
-      key: 'location',
-      label: 'Lieu',
-      sortable: true,
-    },
-    {
       key: 'max_attendees',
       label: 'Places max',
       sortable: true,
@@ -160,16 +155,6 @@ export default function AdminEventsPage() {
         </Badge>
       ) : (
         <span className="text-gray-400 dark:text-gray-400">Illimité</span>
-      ),
-    },
-    {
-      key: 'active',
-      label: 'Statut',
-      sortable: true,
-      render: (value) => (
-        <Badge variant={value ? 'success' : 'default'} size="sm">
-          {value ? 'Actif' : 'Terminé'}
-        </Badge>
       ),
     },
   ];
