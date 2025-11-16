@@ -76,12 +76,13 @@ export default function AdminBlogPage() {
               alt={row.title}
               className="w-full h-full object-cover"
               onError={(e) => {
-                (e.target as HTMLImageElement).style.display = 'none';
-                const fallbackDiv = document.createElement('div');
-                fallbackDiv.className = 'w-6 h-6 text-gray-400 dark:text-gray-600';
-                fallbackDiv.innerHTML = '📝';
-                (e.target as HTMLImageElement).parentElement!.innerHTML = '';
-                (e.target as HTMLImageElement).parentElement!.appendChild(fallbackDiv);
+                const img = e.target as HTMLImageElement;
+                const parent = img.parentElement;
+                if (parent) {
+                  parent.innerHTML = '<span class="text-2xl">📝</span>';
+                } else {
+                  img.style.display = 'none';
+                }
               }}
             />
           ) : (
