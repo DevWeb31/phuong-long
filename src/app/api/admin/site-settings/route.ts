@@ -81,7 +81,6 @@ export async function POST(request: Request) {
       updateData.type = type;
     }
 
-    // @ts-expect-error - Supabase upsert type incompatibility
     const { data, error } = await supabase
       .from('site_settings')
       .upsert(updateData, {
