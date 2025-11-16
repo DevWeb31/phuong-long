@@ -11,6 +11,7 @@
 
 import { useState, useEffect } from 'react';
 import { DataTable, DataTableColumn } from '@/components/admin';
+import { UserFormModal } from '@/components/admin/UserFormModal';
 import { Badge } from '@/components/common';
 
 interface User {
@@ -22,6 +23,12 @@ interface User {
   status: 'active' | 'inactive' | 'suspended';
   last_login: string | null;
   created_at: string;
+  user_roles?: Array<{
+    role_id: string;
+    role_name: string;
+    club_id: string | null;
+    club_name: string | null;
+  }>;
 }
 
 const roleLabels: Record<string, string> = {
@@ -52,8 +59,12 @@ const statusColors: Record<string, 'success' | 'default' | 'danger'> = {
 
 export default function AdminUsersPage() {
   const [users, setUsers] = useState<User[]>([]);
+  const [clubs, setClubs] = useState<Array<{ id: string; name: string; city: string }>>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     async function fetchUsers() {
@@ -78,6 +89,7 @@ export default function AdminUsersPage() {
             status: 'active' as const, // Par défaut actif, à adapter selon vos besoins
             last_login: user.last_sign_in_at || null,
             created_at: user.created_at,
+            user_roles: user.user_roles || [],
           };
         });
 
@@ -90,7 +102,20 @@ export default function AdminUsersPage() {
       }
     }
 
+    async function fetchClubs() {
+      try {
+        const response = await fetch('/api/admin/clubs');
+        if (response.ok) {
+          const data = await response.json();
+          setClubs(data);
+        }
+      } catch (err) {
+        console.error('Error fetching clubs:', err);
+      }
+    }
+
     fetchUsers();
+    fetchClubs();
   }, []);
 
   const columns: DataTableColumn<User>[] = [
@@ -157,8 +182,60 @@ export default function AdminUsersPage() {
   ];
 
   const handleEdit = (user: User) => {
-    console.log('Edit user:', user);
-    // TODO: Rediriger vers /admin/users/[id]/edit
+    setSelectedUser(user);
+    setIsFormOpen(true);
+  };
+
+  const handleSubmit = async (userData: {
+    role_id: string | null;
+    club_id: string | null;
+    username?: string;
+    bio?: string;
+    avatar_url?: string;
+  }) => {
+    if (!selectedUser) return;
+
+    try {
+      setIsSubmitting(true);
+      const response = await fetch(`/api/admin/users/${selectedUser.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(userData),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Erreur lors de la mise à jour');
+      }
+
+      // Recharger la liste des utilisateurs
+      const usersResponse = await fetch('/api/admin/users');
+      if (usersResponse.ok) {
+        const data = await usersResponse.json();
+        const transformedUsers: User[] = data.map((user: any) => {
+          return {
+            id: user.id,
+            full_name: user.full_name || user.email?.split('@')[0] || 'Utilisateur',
+            email: user.email || '',
+            role: user.primary_role || 'user',
+            club: user.club || null,
+            status: 'active' as const,
+            last_login: user.last_sign_in_at || null,
+            created_at: user.created_at,
+            user_roles: user.user_roles || [],
+          };
+        });
+        setUsers(transformedUsers);
+      }
+
+      setIsFormOpen(false);
+      setSelectedUser(null);
+    } catch (error) {
+      console.error('Error updating user:', error);
+      alert(error instanceof Error ? error.message : 'Une erreur est survenue');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleDelete = (user: User) => {
@@ -228,6 +305,19 @@ export default function AdminUsersPage() {
         onView={handleView}
         searchPlaceholder="Rechercher un utilisateur..."
         emptyMessage="Aucun utilisateur trouvé"
+      />
+
+      {/* User Form Modal */}
+      <UserFormModal
+        isOpen={isFormOpen}
+        onClose={() => {
+          setIsFormOpen(false);
+          setSelectedUser(null);
+        }}
+        onSubmit={handleSubmit}
+        user={selectedUser}
+        clubs={clubs}
+        isLoading={isSubmitting}
       />
     </div>
   );
