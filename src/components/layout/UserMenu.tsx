@@ -32,20 +32,21 @@ export function UserMenu() {
   const dropdownRef = useRef<HTMLDivElement>(null);
   const checkedRef = useRef(false);
 
-  // Vérifier le rôle admin une seule fois
+  // Vérifier le rôle admin ou developer une seule fois
   useEffect(() => {
     if (!user || checkedRef.current) return;
 
     const checkAdmin = async () => {
       try {
         const supabase = createClient();
-        const { data } = await supabase
+        const { data: userRoles } = await supabase
           .from('user_roles')
           .select('role_id, roles(name)')
-          .eq('user_id', user.id)
-          .maybeSingle();
+          .eq('user_id', user.id);
 
-        setIsAdmin(!!(data && (data as any).roles?.name === 'admin'));
+        // Vérifier si l'utilisateur a le rôle admin OU developer
+        const roles = (userRoles as any[])?.map(ur => ur.roles?.name).filter(Boolean) || [];
+        setIsAdmin(roles.includes('admin') || roles.includes('developer'));
         checkedRef.current = true;
       } catch {
         setIsAdmin(false);
@@ -94,7 +95,6 @@ export function UserMenu() {
   }
 
   const userName = user.user_metadata?.full_name || user.email?.split('@')[0] || 'Utilisateur';
-  const userInitials = userName.substring(0, 2).toUpperCase();
 
   return (
     <div className="relative" ref={dropdownRef}>
@@ -102,27 +102,15 @@ export function UserMenu() {
         onClick={() => setIsOpen(!isOpen)}
         className={cn(
           'flex items-center gap-2 p-1.5 rounded-lg transition-all duration-200',
-          isOpen ? 'bg-gray-50 dark:bg-gray-900' : 'hover:bg-gray-50'
+          isOpen ? 'bg-gray-50 dark:bg-gray-800' : 'hover:bg-gray-50 dark:hover:bg-gray-800'
         )}
         aria-label="Menu utilisateur"
         aria-expanded={isOpen}
       >
-        {/* Avatar */}
-        <div className={cn(
-          'w-10 h-10 bg-gradient-to-br from-primary to-primary-dark',
-          'rounded-full flex items-center justify-center',
-          'text-white font-semibold text-sm',
-          'ring-2 ring-white shadow-md',
-          'transition-transform duration-200',
-          isOpen && 'scale-110'
-        )}>
-          {userInitials}
-        </div>
-
         {/* User Info */}
         <div className="hidden md:block text-left pr-1">
-          <div className="text-sm font-medium dark:text-gray-100">{userName}</div>
-          <div className="text-xs dark:text-gray-500">Mon compte</div>
+          <div className="text-sm font-medium text-gray-900 dark:text-gray-100">{userName}</div>
+          <div className="text-xs text-gray-500 dark:text-gray-400">Mon compte</div>
         </div>
 
         {/* Chevron */}
@@ -143,15 +131,10 @@ export function UserMenu() {
             'overflow-hidden'
           )}>
             {/* User Info in Dropdown */}
-            <div className="px-4 py-3 bg-gradient-to-br from-gray-50 to-white border-b dark:border-gray-800">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-gradient-to-br from-primary to-primary-dark rounded-full flex items-center justify-center text-white font-semibold">
-                  {userInitials}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="text-sm font-semibold dark:text-gray-100 truncate">{userName}</div>
-                  <div className="text-xs dark:text-gray-500 truncate">{user.email}</div>
-                </div>
+            <div className="px-4 py-3 bg-gradient-to-br from-gray-50 to-white dark:from-gray-800 dark:to-gray-800 border-b dark:border-gray-700">
+              <div className="flex flex-col">
+                <div className="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">{userName}</div>
+                <div className="text-xs text-gray-500 dark:text-gray-400 truncate">{user.email}</div>
               </div>
             </div>
 
@@ -202,6 +185,8 @@ export function UserMenu() {
                   <div className="border-t dark:border-gray-800 my-2" />
                   <Link
                     href="/admin"
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className={cn(
                       'flex items-center gap-3 px-4 py-2.5 text-sm font-semibold',
                       'text-primary hover:bg-gradient-to-r hover:from-primary/10 hover:to-primary/5',

@@ -13,18 +13,19 @@ export async function checkAdminRole(userId: string): Promise<boolean> {
   try {
     const supabase = await createServerClient();
     
-    const { data: userRole, error } = await supabase
+    const { data: userRoles, error } = await supabase
       .from('user_roles')
       .select('role_id, roles(name)')
-      .eq('user_id', userId)
-      .maybeSingle();
+      .eq('user_id', userId);
 
     if (error) {
       console.error('Error checking admin role:', error);
       return false;
     }
 
-    return !!(userRole && (userRole as any).roles?.name === 'admin');
+    // Vérifier si l'utilisateur a le rôle admin OU developer
+    const roles = (userRoles as any[])?.map(ur => ur.roles?.name).filter(Boolean) || [];
+    return roles.includes('admin') || roles.includes('developer');
   } catch (error) {
     console.error('Exception checking admin role:', error);
     return false;
@@ -75,6 +76,15 @@ export async function hasRole(userId: string, roleName: string): Promise<boolean
 
 export async function checkStudentRole(userId: string): Promise<boolean> {
   return hasRole(userId, 'student');
+}
+
+export async function checkDeveloperRole(userId: string): Promise<boolean> {
+  return hasRole(userId, 'developer');
+}
+
+export async function checkAdminOrDeveloperRole(userId: string): Promise<boolean> {
+  const roles = await getUserRoles(userId);
+  return roles.includes('admin') || roles.includes('developer');
 }
 
 export async function getStudentClubId(userId: string): Promise<string | null> {

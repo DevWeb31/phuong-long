@@ -66,7 +66,7 @@ export default function ContactPage() {
   return (
     <>
       {/* Hero Section with Parallax */}
-      <section className="relative bg-gradient-to-br from-primary via-primary-dark to-[#B91C1C] py-12 lg:py-16 overflow-hidden">
+      <section className="relative bg-gradient-to-br from-primary via-primary-dark to-[#E6110A] py-12 lg:py-16 overflow-hidden">
         {/* Parallax Background */}
         <ParallaxBackground>
           <div className="absolute inset-0" style={{
@@ -204,7 +204,7 @@ export default function ContactPage() {
                           value={formData.name}
                           onChange={handleChange}
                           required
-                          className="w-full px-4 py-2 border dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                          className="w-full px-4 py-2 border dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
                           placeholder="Jean Dupont"
                         />
                       </div>
@@ -221,7 +221,7 @@ export default function ContactPage() {
                           value={formData.email}
                           onChange={handleChange}
                           required
-                          className="w-full px-4 py-2 border dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                          className="w-full px-4 py-2 border dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
                           placeholder="jean.dupont@example.com"
                         />
                       </div>
@@ -237,7 +237,7 @@ export default function ContactPage() {
                           name="phone"
                           value={formData.phone}
                           onChange={handleChange}
-                          className="w-full px-4 py-2 border dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                          className="w-full px-4 py-2 border dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
                           placeholder="06 12 34 56 78"
                         />
                       </div>
@@ -252,7 +252,7 @@ export default function ContactPage() {
                           name="club"
                           value={formData.club}
                           onChange={handleChange}
-                          className="w-full px-4 py-2 border dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                          className="w-full px-4 py-2 border dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
                         >
                           <option value="">-- Sélectionnez un club --</option>
                           <option value="marseille">Marseille Centre</option>
@@ -276,7 +276,7 @@ export default function ContactPage() {
                           value={formData.subject}
                           onChange={handleChange}
                           required
-                          className="w-full px-4 py-2 border dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                          className="w-full px-4 py-2 border dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
                           placeholder="Demande d'informations"
                         />
                       </div>
@@ -293,7 +293,7 @@ export default function ContactPage() {
                           onChange={handleChange}
                           required
                           rows={6}
-                          className="w-full px-4 py-2 border dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent resize-none"
+                          className="w-full px-4 py-2 border dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent resize-none"
                           placeholder="Votre message..."
                         />
                       </div>
@@ -339,12 +339,14 @@ export default function ContactPage() {
             <p className="text-lg dark:text-gray-500 mb-8">
               La réponse à votre question s'y trouve peut-être déjà !
             </p>
-            <Link href="/faq">
-              <Button size="lg" variant="ghost" className="flex items-center gap-2">
-                <HelpCircle className="w-4 h-4" />
-                Voir la FAQ
-              </Button>
-            </Link>
+            <div className="flex justify-center">
+              <Link href="/faq">
+                <Button size="lg" variant="ghost" className="flex items-center gap-2">
+                  <HelpCircle className="w-4 h-4" />
+                  Voir la FAQ
+                </Button>
+              </Link>
+            </div>
           </div>
         </Container>
       </section>

@@ -284,6 +284,50 @@ export interface Database {
           updated_at?: string;
         };
       };
+      hero_slides: {
+        Row: {
+          id: string;
+          title: string;
+          subtitle: string | null;
+          description: string | null;
+          youtube_video_id: string;
+          cta_text: string | null;
+          cta_link: string | null;
+          overlay_opacity: number;
+          active: boolean;
+          display_order: number;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          title: string;
+          subtitle?: string | null;
+          description?: string | null;
+          youtube_video_id: string;
+          cta_text?: string | null;
+          cta_link?: string | null;
+          overlay_opacity?: number;
+          active?: boolean;
+          display_order?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          title?: string;
+          subtitle?: string | null;
+          description?: string | null;
+          youtube_video_id?: string;
+          cta_text?: string | null;
+          cta_link?: string | null;
+          overlay_opacity?: number;
+          active?: boolean;
+          display_order?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
     };
     Views: {
       [_ in never]: never;

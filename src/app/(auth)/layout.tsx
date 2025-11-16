@@ -10,6 +10,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Container } from '@/components/common';
+import { ThemeToggle } from '@/components/layout/ThemeToggle';
 
 export const metadata: Metadata = {
   title: {
@@ -28,16 +29,19 @@ export default function AuthLayout({
       {/* Simple Header */}
       <header className="bg-white dark:bg-gray-900 border-b dark:border-gray-800 py-4">
         <Container>
-          <Link href="/" className="flex items-center group w-fit">
-            <picture>
-              <source srcSet="/logo.webp" type="image/webp" />
-              <img
-                src="/logo.png"
-                alt="Phuong Long Vo Dao"
-                className="h-12 w-auto object-contain group-hover:scale-105 transition-transform"
-              />
-            </picture>
-          </Link>
+          <div className="flex items-center justify-between">
+            <Link href="/" className="flex items-center group w-fit">
+              <picture>
+                <source srcSet="/logo.webp" type="image/webp" />
+                <img
+                  src="/logo.png"
+                  alt="Phuong Long Vo Dao"
+                  className="h-12 w-auto object-contain group-hover:scale-105 transition-transform"
+                />
+              </picture>
+            </Link>
+            <ThemeToggle />
+          </div>
         </Container>
       </header>
 

@@ -136,6 +136,11 @@ export function CoachFormModal({ isOpen, onClose, onSubmit, coach, isLoading = f
       return;
     }
     
+    // Limiter la biographie à 120 caractères
+    if (name === 'bio' && value.length > 120) {
+      return;
+    }
+    
     setFormData(prev => ({
       ...prev,
       [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value,
@@ -288,9 +293,19 @@ export function CoachFormModal({ isOpen, onClose, onSubmit, coach, isLoading = f
             value={formData.bio || ''}
             onChange={handleChange}
             rows={4}
+            maxLength={120}
             className="w-full px-4 py-2.5 border dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all resize-none"
             placeholder="Parcours, expérience, philosophie..."
           />
+          <div className="flex justify-end mt-1">
+            <span className={`text-xs ${
+              (formData.bio || '').length >= 100 
+                ? 'text-amber-500' 
+                : 'text-slate-500 dark:text-slate-400'
+            }`}>
+              {(formData.bio || '').length} / 120 caractères
+            </span>
+          </div>
         </div>
 
         {/* Spécialités */}

@@ -39,7 +39,7 @@ export default async function ClubsPage() {
   return (
     <>
       {/* Hero with Parallax */}
-      <section className="relative bg-gradient-to-br from-primary via-primary-dark to-[#B91C1C] py-12 lg:py-16 overflow-hidden">
+      <section className="relative bg-gradient-to-br from-primary via-primary-dark to-[#E6110A] py-12 lg:py-16 overflow-hidden">
         {/* Parallax Background */}
         <ParallaxBackground>
           <div className="absolute inset-0" style={{
@@ -236,7 +236,7 @@ export default async function ClubsPage() {
               </p>
             </ScrollReveal>
             <ScrollReveal direction="fade" delay={300}>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
               <Link href="/contact" className="group/cta">
                 <Button size="lg" className="bg-gradient-to-r from-primary to-primary-dark text-white hover:from-primary-dark hover:to-primary shadow-xl shadow-primary/30 hover:shadow-primary/50 hover:shadow-2xl min-w-[200px] font-semibold flex items-center justify-center gap-2 transition-all duration-300 hover:scale-105 hover:-translate-y-1">
                   <Mail className="w-4 h-4 group-hover/cta:rotate-12 transition-transform duration-300" />

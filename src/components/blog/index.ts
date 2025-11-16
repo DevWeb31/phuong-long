@@ -19,4 +19,5 @@ export { BlogTableOfContents } from './BlogTableOfContents';
 export { BlogReadingProgress } from './BlogReadingProgress';
 export { BlogArticleContent } from './BlogArticleContent';
 export { BlogTagFilter } from './BlogTagFilter';
+export { BlogScrollToTop } from './BlogScrollToTop';
 

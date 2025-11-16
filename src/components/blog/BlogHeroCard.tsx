@@ -51,8 +51,12 @@ export function BlogHeroCard({ post }: BlogHeroCardProps) {
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
               
               {/* Badge "Nouveau" */}
-              <div className="absolute top-4 left-4">
-                <Badge variant="primary" size="sm" className="bg-primary/90 backdrop-blur-sm">
+              <div className="absolute top-4 left-4 z-10">
+                <Badge 
+                  variant="primary" 
+                  size="sm" 
+                  className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-md text-primary dark:text-primary-light font-bold shadow-lg border border-primary/20"
+                >
                   ✨ Nouveau
                 </Badge>
               </div>

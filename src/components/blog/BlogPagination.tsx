@@ -123,7 +123,7 @@ export function BlogPagination({
               key={pageNumber}
               href={buildUrl(pageNumber)}
               className={`
-                min-w-[2.5rem] px-3 py-2 text-sm font-medium rounded-lg transition-all
+                inline-flex items-center justify-center min-w-[2.5rem] h-10 px-3 py-2 text-sm font-medium rounded-lg transition-all
                 ${
                   isActive
                     ? 'bg-primary text-white shadow-lg shadow-primary/30'

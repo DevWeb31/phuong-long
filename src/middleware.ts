@@ -93,20 +93,19 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(url);
     }
 
-    // Vérifier le rôle admin (jointure avec table roles)
+    // Vérifier le rôle admin ou developer (jointure avec table roles)
     try {
-      const { data: userRole, error: roleError } = await supabase
+      const { data: userRoles, error: roleError } = await supabase
         .from('user_roles')
         .select('role_id, roles(name)')
-        .eq('user_id', user.id)
-        .maybeSingle();
+        .eq('user_id', user.id);
 
-      // Vérifier si l'utilisateur a le rôle admin
-      const isAdmin = userRole && 
-        (userRole as any).roles?.name === 'admin';
+      // Vérifier si l'utilisateur a le rôle admin OU developer
+      const roles = (userRoles as any[])?.map(ur => ur.roles?.name).filter(Boolean) || [];
+      const isAdminOrDeveloper = roles.includes('admin') || roles.includes('developer');
 
-      // Si pas de rôle admin, rediriger vers le dashboard user
-      if (roleError || !isAdmin) {
+      // Si pas de rôle admin ou developer, rediriger vers le dashboard user
+      if (roleError || !isAdminOrDeveloper) {
         const url = request.nextUrl.clone();
         url.pathname = '/dashboard';
         url.searchParams.set('error', 'unauthorized');
@@ -123,6 +122,46 @@ export async function middleware(request: NextRequest) {
     }
   }
 
+  // Protéger les routes /shop/* si la boutique est masquée
+  if (request.nextUrl.pathname.startsWith('/shop')) {
+    try {
+      // Vérifier si l'utilisateur est développeur
+      let isDeveloper = false;
+      if (user) {
+        const { data: userRoles } = await supabase
+          .from('user_roles')
+          .select('role_id, roles!inner(name)')
+          .eq('user_id', user.id);
+        
+        const roles = (userRoles as any[])?.map(ur => ur.roles?.name).filter(Boolean) || [];
+        isDeveloper = roles.includes('developer');
+      }
+
+      // Si développeur, toujours autoriser l'accès
+      if (!isDeveloper) {
+        // Vérifier le paramètre shop.hidden
+        const { data: shopSetting, error: shopError } = await supabase
+          .from('developer_settings')
+          .select('value')
+          .eq('key', 'shop.hidden')
+          .maybeSingle();
+
+        // Si la boutique est masquée, rediriger vers la page d'accueil
+        // Vérifier si value est true (booléen) ou "true" (string JSON)
+        const isHidden = shopSetting?.value === true || shopSetting?.value === 'true' || shopSetting?.value === '"true"';
+        
+        if (isHidden) {
+          const url = request.nextUrl.clone();
+          url.pathname = '/';
+          return NextResponse.redirect(url);
+        }
+      }
+    } catch (error) {
+      // En cas d'erreur (table n'existe pas encore, etc.), autoriser l'accès
+      console.error('Error checking shop visibility:', error);
+    }
+  }
+
   // Rediriger les utilisateurs connectés qui vont sur /signin ou /signup
   if (user && (request.nextUrl.pathname === '/signin' || request.nextUrl.pathname === '/signup')) {
     return NextResponse.redirect(new URL('/dashboard', request.url));
@@ -132,6 +171,6 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/dashboard/:path*', '/admin/:path*', '/signin', '/signup'],
+  matcher: ['/dashboard/:path*', '/admin/:path*', '/shop/:path*', '/signin', '/signup'],
 };
 

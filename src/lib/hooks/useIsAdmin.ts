@@ -47,13 +47,14 @@ export function useIsAdmin() {
         
         const supabase = createClient();
         
-        const { data: userRole } = await supabase
+        const { data: userRoles } = await supabase
           .from('user_roles')
           .select('role_id, roles(name)')
-          .eq('user_id', user.id)
-          .maybeSingle();
+          .eq('user_id', user.id);
 
-        setIsAdmin(!!(userRole && (userRole as any).roles?.name === 'admin'));
+        // Vérifier si l'utilisateur a le rôle admin OU developer
+        const roles = (userRoles as any[])?.map(ur => ur.roles?.name).filter(Boolean) || [];
+        setIsAdmin(roles.includes('admin') || roles.includes('developer'));
         hasCheckedRef.current = true;
       } catch (error) {
         console.error('Error checking admin role:', error);

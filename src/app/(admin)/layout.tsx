@@ -11,6 +11,9 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Container } from '@/components/common';
 import { LogoutButton } from '@/components/layout';
+import { DeveloperNavLink } from '@/components/admin/DeveloperNavLink';
+import { ShopNavLink } from '@/components/admin/ShopNavLink';
+import { AnalyticsNavLink } from '@/components/admin/AnalyticsNavLink';
 import {
   HomeIcon,
   BuildingOfficeIcon,
@@ -21,6 +24,7 @@ import {
   Cog6ToothIcon,
   ChartBarIcon,
   AcademicCapIcon,
+  VideoCameraIcon,
 } from '@heroicons/react/24/outline';
 
 export const metadata: Metadata = {
@@ -34,11 +38,10 @@ const navigation = [
   { name: 'Dashboard', href: '/admin', icon: HomeIcon },
   { name: 'Clubs', href: '/admin/clubs', icon: BuildingOfficeIcon },
   { name: 'Professeurs', href: '/admin/coaches', icon: AcademicCapIcon },
+  { name: 'Carousel Hero', href: '/admin/hero-slides', icon: VideoCameraIcon },
   { name: 'Événements', href: '/admin/events', icon: CalendarIcon },
   { name: 'Blog', href: '/admin/blog', icon: NewspaperIcon },
   { name: 'Utilisateurs', href: '/admin/users', icon: UsersIcon },
-  { name: 'Boutique', href: '/admin/shop', icon: ShoppingBagIcon },
-  { name: 'Analytics', href: '/admin/analytics', icon: ChartBarIcon },
   { name: 'Paramètres', href: '/admin/settings', icon: Cog6ToothIcon },
 ];
 
@@ -105,6 +108,17 @@ export default function AdminLayout({
                 </Link>
               );
             })}
+
+            {/* Boutique - Conditionnel selon paramètre développeur */}
+            <ShopNavLink />
+
+            {/* Analytics - Conditionnel selon paramètre développeur */}
+            <AnalyticsNavLink />
+
+            {/* Separator */}
+            <div className="pt-4 mt-4 border-t dark:border-gray-800">
+              <DeveloperNavLink />
+            </div>
 
             {/* Separator */}
             <div className="pt-4 mt-4 border-t dark:border-gray-800">

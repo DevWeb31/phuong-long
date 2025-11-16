@@ -152,7 +152,7 @@ export default function SignUpPage() {
                   value={formData.fullName}
                   onChange={handleChange}
                   required
-                  className="block w-full pl-10 pr-3 py-2 border dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                  className="block w-full pl-10 pr-3 py-2 border dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
                   placeholder="Jean Dupont"
                 />
               </div>
@@ -174,7 +174,7 @@ export default function SignUpPage() {
                   value={formData.email}
                   onChange={handleChange}
                   required
-                  className="block w-full pl-10 pr-3 py-2 border dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                  className="block w-full pl-10 pr-3 py-2 border dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
                   placeholder="votre@email.com"
                 />
               </div>
@@ -197,7 +197,7 @@ export default function SignUpPage() {
                   onChange={handleChange}
                   required
                   minLength={8}
-                  className="block w-full pl-10 pr-3 py-2 border dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                  className="block w-full pl-10 pr-3 py-2 border dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
                   placeholder="••••••••"
                 />
               </div>
@@ -222,7 +222,7 @@ export default function SignUpPage() {
                   value={formData.confirmPassword}
                   onChange={handleChange}
                   required
-                  className="block w-full pl-10 pr-3 py-2 border dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                  className="block w-full pl-10 pr-3 py-2 border dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
                   placeholder="••••••••"
                 />
               </div>

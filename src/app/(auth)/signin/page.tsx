@@ -76,7 +76,7 @@ export default function SignInPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  className="block w-full pl-10 pr-3 py-2 border dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                  className="block w-full pl-10 pr-3 py-2 border dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
                   placeholder="votre@email.com"
                 />
               </div>
@@ -97,7 +97,7 @@ export default function SignInPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  className="block w-full pl-10 pr-3 py-2 border dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                  className="block w-full pl-10 pr-3 py-2 border dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
                   placeholder="••••••••"
                 />
               </div>
@@ -149,7 +149,7 @@ export default function SignInPage() {
 
           {/* Sign Up Link */}
           <Link href="/signup">
-            <Button variant="ghost" size="lg" className="w-full flex items-center justify-center gap-2">
+            <Button variant="secondary" size="lg" className="w-full flex items-center justify-center gap-2">
               <Sparkles className="w-4 h-4" />
               Créer un compte
             </Button>

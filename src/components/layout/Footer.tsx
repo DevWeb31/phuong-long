@@ -12,6 +12,7 @@ import { Container } from '@/components/common';
 import { Facebook, Instagram, Youtube, Mail } from 'lucide-react';
 import { createServerClient } from '@/lib/supabase/server';
 import type { Club } from '@/lib/types';
+import { FooterShopSection } from './FooterShopSection';
 
 const navigation = {
   ressources: [
@@ -54,11 +55,47 @@ export async function Footer() {
   
   const typedClubs = (clubs || []) as unknown as Pick<Club, 'id' | 'name' | 'slug' | 'city'>[];
 
+  // Vérifier si la boutique est masquée
+  let isShopHidden = false;
+  try {
+    const { data: shopSetting } = await supabase
+      .from('developer_settings')
+      .select('value')
+      .eq('key', 'shop.hidden')
+      .maybeSingle();
+    
+    // Vérifier si value est true (booléen) ou "true" (string JSON)
+    isShopHidden = shopSetting?.value === true || shopSetting?.value === 'true' || shopSetting?.value === '"true"';
+  } catch (error) {
+    // En cas d'erreur (table n'existe pas encore, etc.), considérer que la boutique n'est pas masquée
+    console.error('Error checking shop visibility in footer:', error);
+    isShopHidden = false;
+  }
+
+  // Vérifier si l'utilisateur est développeur
+  let isDeveloper = false;
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      const { data: userRoles } = await supabase
+        .from('user_roles')
+        .select('role_id, roles!inner(name)')
+        .eq('user_id', user.id);
+      
+      const roles = (userRoles as any[])?.map(ur => ur.roles?.name).filter(Boolean) || [];
+      isDeveloper = roles.includes('developer');
+    }
+  } catch (error) {
+    // En cas d'erreur, considérer que l'utilisateur n'est pas développeur
+    console.error('Error checking developer role in footer:', error);
+    isDeveloper = false;
+  }
+
   return (
     <footer className="bg-gradient-to-b from-slate-50 to-white dark:from-slate-900 dark:to-slate-950 border-t border-slate-200 dark:border-slate-800">
       <Container>
         <div className="py-16 lg:py-20">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 lg:gap-12">
+          <div className={`grid grid-cols-2 gap-8 lg:gap-12 ${isShopHidden && !isDeveloper ? 'md:grid-cols-3' : 'md:grid-cols-4'}`}>
             {/* Clubs */}
             <div>
               <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 uppercase tracking-wider mb-1">
@@ -97,24 +134,14 @@ export async function Footer() {
               </ul>
             </div>
 
-            {/* Boutique */}
-            <div>
-              <h3 className="text-sm font-semibold dark:text-gray-100 uppercase tracking-wider">
-                Boutique
-              </h3>
-              <ul className="mt-4 space-y-3">
-                {navigation.boutique.map((item) => (
-                  <li key={item.name}>
-                    <Link
-                      href={item.href}
-                      className="text-base dark:text-gray-500 hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
-                    >
-                      {item.name}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
+            {/* Boutique - Conditionnel */}
+            {(!isShopHidden || isDeveloper) && (
+              <FooterShopSection 
+                navigation={navigation.boutique}
+                isShopHidden={isShopHidden}
+                isDeveloper={isDeveloper}
+              />
+            )}
 
             {/* Légal */}
             <div>

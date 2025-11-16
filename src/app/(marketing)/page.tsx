@@ -9,11 +9,12 @@
 
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { Container, Button, Card, CardHeader, CardTitle, CardDescription, CardContent, Badge, ParallaxBackground, ScrollReveal } from '@/components/common';
+import { Container, Button, Card, CardHeader, CardTitle, CardDescription, CardContent, Badge, ScrollReveal } from '@/components/common';
 import { createServerClient } from '@/lib/supabase/server';
 import type { Club, Event } from '@/lib/types';
 import { BoltIcon, TrophyIcon, UserGroupIcon, ShieldCheckIcon, UsersIcon, MapPinIcon } from '@heroicons/react/24/outline';
-import { HeroContent } from '@/components/marketing/HeroContent';
+import { HeroCarousel, type HeroSlide } from '@/components/marketing/HeroCarousel';
+import { AnimatedCounter } from '@/components/marketing/AnimatedCounter';
 import { Sparkles, Mail, Shield } from 'lucide-react';
 
 export const metadata: Metadata = {
@@ -23,6 +24,15 @@ export const metadata: Metadata = {
 
 export default async function HomePage() {
   const supabase = await createServerClient();
+  
+  // Récupérer les slides du carousel hero
+  const { data: heroSlides } = await supabase
+    .from('hero_slides')
+    .select('*')
+    .eq('active', true)
+    .order('display_order');
+  
+  const typedHeroSlides = (heroSlides || []) as HeroSlide[];
   
   // Récupérer les clubs actifs
   const { data: clubs } = await supabase
@@ -46,22 +56,27 @@ export default async function HomePage() {
 
   return (
     <>
-      {/* Hero Section - Moderne & Premium */}
-      <section className="relative bg-gradient-to-br from-primary via-primary-dark to-[#B91C1C] py-20 lg:py-24 overflow-hidden">
-        {/* Parallax Background */}
-        <ParallaxBackground>
-          <div className="absolute inset-0" style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
-          }} />
-        </ParallaxBackground>
-        
-        {/* Gradient Overlay pour profondeur */}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-transparent to-black/30" />
-
-        <Container className="relative z-10">
-          <HeroContent />
-        </Container>
-      </section>
+      {/* Hero Carousel avec vidéo YouTube */}
+      {typedHeroSlides.length > 0 ? (
+        <HeroCarousel slides={typedHeroSlides} autoPlayInterval={5000} />
+      ) : (
+        // Fallback si aucun slide n'est configuré
+        <section className="relative bg-gradient-to-br from-primary via-primary-dark to-[#B91C1C] py-20 lg:py-24 overflow-hidden">
+          <Container className="relative z-10">
+            <div className="max-w-5xl mx-auto text-center text-white">
+              <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold mb-6 tracking-tight leading-[1.1]">
+                <span className="text-white">Phuong Long</span>
+                <span className="block text-transparent bg-clip-text bg-gradient-to-r from-accent via-amber-400 to-accent mt-3">
+                  Vo Dao
+                </span>
+              </h1>
+              <p className="text-xl md:text-2xl text-white/95 mb-6 font-medium max-w-2xl mx-auto leading-relaxed">
+                L'art martial vietnamien traditionnel
+              </p>
+            </div>
+          </Container>
+        </section>
+      )}
 
       {/* Features Section */}
       <section className="py-20 lg:py-28 bg-white dark:bg-slate-900 relative overflow-hidden">
@@ -262,7 +277,7 @@ export default async function HomePage() {
             <ScrollReveal direction="fade" delay={400}>
               <div className="text-center mt-10">
                 <Link href="/events">
-                  <Button size="lg" variant="ghost">
+                  <Button size="lg" variant="primary">
                     Tous les Événements
                   </Button>
                 </Link>
@@ -313,13 +328,13 @@ export default async function HomePage() {
             <ScrollReveal direction="fade" delay={300}>
               <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
                 <Link href="/clubs">
-                  <Button size="lg" className="bg-white text-slate-900 hover:bg-slate-50 hover:shadow-xl hover:shadow-white/20 transition-all min-w-[200px] font-semibold flex items-center justify-center gap-2">
+                  <Button size="lg" variant="primary" className="min-w-[200px] font-semibold flex items-center justify-center gap-2">
                     <Shield className="w-4 h-4" />
                     Choisir un Club
                   </Button>
                 </Link>
                 <Link href="/contact">
-                  <Button size="lg" className="bg-primary text-white hover:bg-primary-dark border-2 border-primary hover:shadow-xl hover:shadow-primary/30 transition-all min-w-[200px] font-semibold flex items-center justify-center gap-2">
+                  <Button size="lg" variant="primary" className="min-w-[200px] font-semibold flex items-center justify-center gap-2">
                     <Mail className="w-4 h-4" />
                     Nous Contacter
                   </Button>
@@ -334,19 +349,25 @@ export default async function HomePage() {
                   <div className="w-10 h-10 bg-accent/10 rounded-full flex items-center justify-center">
                     <ShieldCheckIcon className="w-5 h-5 text-accent" />
                   </div>
-                  <span>40 ans d'expérience</span>
+                  <span>
+                    <AnimatedCounter end={40} suffix=" ans d'expérience" className="text-accent font-bold" />
+                  </span>
                 </div>
                 <div className="flex items-center gap-2.5">
                   <div className="w-10 h-10 bg-accent/10 rounded-full flex items-center justify-center">
                     <UsersIcon className="w-5 h-5 text-accent" />
                   </div>
-                  <span>500+ pratiquants</span>
+                  <span>
+                    <AnimatedCounter end={500} suffix="+ pratiquants" className="text-accent font-bold" />
+                  </span>
                 </div>
                 <div className="flex items-center gap-2.5">
                   <div className="w-10 h-10 bg-accent/10 rounded-full flex items-center justify-center">
                     <MapPinIcon className="w-5 h-5 text-accent" />
                   </div>
-                  <span>5 villes</span>
+                  <span>
+                    <AnimatedCounter end={5} suffix=" villes" className="text-accent font-bold" />
+                  </span>
                 </div>
               </div>
             </ScrollReveal>

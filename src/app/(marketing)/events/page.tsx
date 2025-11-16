@@ -71,7 +71,7 @@ export default async function EventsPage() {
   return (
     <>
       {/* Hero with Parallax */}
-      <section className="relative bg-gradient-to-br from-primary via-primary-dark to-[#B91C1C] py-12 lg:py-16 overflow-hidden">
+      <section className="relative bg-gradient-to-br from-primary via-primary-dark to-[#E6110A] py-12 lg:py-16 overflow-hidden">
         {/* Parallax Background */}
         <ParallaxBackground>
           <div className="absolute inset-0" style={{
@@ -160,7 +160,7 @@ export default async function EventsPage() {
       <EventsList events={typedEvents} clubs={clubsWithEvents} />
 
       {/* CTA */}
-      <section className="relative py-24 lg:py-32 bg-gradient-to-br from-gray-900 to-gray-800 overflow-hidden">
+      <section className="relative py-16 lg:py-20 bg-gradient-to-br from-gray-900 to-gray-800 overflow-hidden">
         {/* Background decoration */}
         <div className="absolute inset-0 opacity-10">
           <div className="absolute inset-0" style={{
@@ -176,9 +176,9 @@ export default async function EventsPage() {
             <p className="text-xl md:text-2xl text-slate-300 mb-12 max-w-3xl mx-auto leading-relaxed animate-slide-up">
               Vous êtes coach ou responsable de club ? Proposez votre événement.
             </p>
-            <div className="animate-scale-in">
+            <div className="animate-scale-in flex justify-center">
               <Link href="/contact">
-                <Button size="lg" className="bg-white text-slate-900 hover:bg-slate-50 shadow-2xl shadow-black/20 hover:shadow-white/40 min-w-[240px] py-4 px-8 font-semibold flex items-center justify-center gap-2">
+                <Button variant="primary" size="lg" className="shadow-2xl shadow-black/20 hover:shadow-primary/40 min-w-[240px] py-4 px-8 font-semibold flex items-center justify-center gap-2">
                   <Mail className="w-4 h-4" />
                   Nous Contacter
                 </Button>

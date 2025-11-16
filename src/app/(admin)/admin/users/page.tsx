@@ -9,105 +9,33 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { DataTable, DataTableColumn } from '@/components/admin';
 import { Badge } from '@/components/common';
 
 interface User {
   id: string;
-  full_name: string;
+  full_name: string | null;
   email: string;
-  role: 'user' | 'coach' | 'admin';
+  role: string;
   club: string | null;
   status: 'active' | 'inactive' | 'suspended';
   last_login: string | null;
   created_at: string;
 }
 
-// Données de démonstration
-const mockUsers: User[] = [
-  {
-    id: '1',
-    full_name: 'Jean Dupont',
-    email: 'jean.dupont@example.com',
-    role: 'admin',
-    club: null,
-    status: 'active',
-    last_login: '2025-11-04T15:30:00',
-    created_at: '2023-01-15',
-  },
-  {
-    id: '2',
-    full_name: 'Sarah Martin',
-    email: 'sarah.martin@example.com',
-    role: 'coach',
-    club: 'Marseille Centre',
-    status: 'active',
-    last_login: '2025-11-03T18:45:00',
-    created_at: '2023-03-20',
-  },
-  {
-    id: '3',
-    full_name: 'Pierre Leroy',
-    email: 'pierre.leroy@example.com',
-    role: 'user',
-    club: 'Paris Bastille',
-    status: 'active',
-    last_login: '2025-11-04T10:20:00',
-    created_at: '2024-06-10',
-  },
-  {
-    id: '4',
-    full_name: 'Marie Dubois',
-    email: 'marie.dubois@example.com',
-    role: 'user',
-    club: 'Nice Promenade',
-    status: 'active',
-    last_login: '2025-10-28T14:15:00',
-    created_at: '2024-08-05',
-  },
-  {
-    id: '5',
-    full_name: 'Thomas Bernard',
-    email: 'thomas.bernard@example.com',
-    role: 'coach',
-    club: 'Strasbourg Centre',
-    status: 'active',
-    last_login: '2025-11-01T09:30:00',
-    created_at: '2022-11-12',
-  },
-  {
-    id: '6',
-    full_name: 'Sophie Laurent',
-    email: 'sophie.laurent@example.com',
-    role: 'user',
-    club: 'Créteil Université',
-    status: 'inactive',
-    last_login: '2025-08-15T16:00:00',
-    created_at: '2023-09-01',
-  },
-  {
-    id: '7',
-    full_name: 'Lucas Petit',
-    email: 'lucas.petit@example.com',
-    role: 'user',
-    club: null,
-    status: 'suspended',
-    last_login: '2025-09-20T12:00:00',
-    created_at: '2024-02-14',
-  },
-];
-
 const roleLabels: Record<string, string> = {
   user: 'Utilisateur',
   coach: 'Coach',
   admin: 'Administrateur',
+  moderator: 'Modérateur',
 };
 
 const roleColors: Record<string, 'default' | 'primary' | 'warning'> = {
   user: 'default',
   coach: 'primary',
   admin: 'warning',
+  moderator: 'primary',
 };
 
 const statusLabels: Record<string, string> = {
@@ -123,14 +51,54 @@ const statusColors: Record<string, 'success' | 'default' | 'danger'> = {
 };
 
 export default function AdminUsersPage() {
-  const [users] = useState<User[]>(mockUsers);
+  const [users, setUsers] = useState<User[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function fetchUsers() {
+      try {
+        setLoading(true);
+        const response = await fetch('/api/admin/users');
+        
+        if (!response.ok) {
+          throw new Error('Erreur lors du chargement des utilisateurs');
+        }
+
+        const data = await response.json();
+        
+        // Transformer les données de l'API en format attendu par le composant
+        const transformedUsers: User[] = data.map((user: any) => {
+          return {
+            id: user.id,
+            full_name: user.full_name || user.email?.split('@')[0] || 'Utilisateur',
+            email: user.email || '',
+            role: user.primary_role || 'user',
+            club: user.club || null,
+            status: 'active' as const, // Par défaut actif, à adapter selon vos besoins
+            last_login: user.last_sign_in_at || null,
+            created_at: user.created_at,
+          };
+        });
+
+        setUsers(transformedUsers);
+      } catch (err) {
+        console.error('Error fetching users:', err);
+        setError(err instanceof Error ? err.message : 'Erreur inconnue');
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchUsers();
+  }, []);
 
   const columns: DataTableColumn<User>[] = [
     {
       key: 'full_name',
       label: 'Nom',
       sortable: true,
-      render: (value) => <span className="font-medium text-gray-900 dark:text-gray-100">{value}</span>,
+      render: (value) => <span className="font-medium text-gray-900 dark:text-gray-100">{value || 'N/A'}</span>,
     },
     {
       key: 'email',
@@ -204,6 +172,42 @@ export default function AdminUsersPage() {
     console.log('View user:', user);
     // TODO: Ouvrir modal ou page détails utilisateur
   };
+
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-3xl font-bold dark:text-gray-100 mb-2">Gestion des Utilisateurs</h1>
+          <p className="text-gray-600 dark:text-gray-500">
+            Gérez les utilisateurs, rôles et permissions de la plateforme
+          </p>
+        </div>
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+            <p className="text-gray-600 dark:text-gray-400">Chargement des utilisateurs...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-3xl font-bold dark:text-gray-100 mb-2">Gestion des Utilisateurs</h1>
+          <p className="text-gray-600 dark:text-gray-500">
+            Gérez les utilisateurs, rôles et permissions de la plateforme
+          </p>
+        </div>
+        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-6">
+          <p className="text-red-800 dark:text-red-200 font-semibold">Erreur</p>
+          <p className="text-red-600 dark:text-red-300 mt-2">{error}</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

@@ -13,7 +13,7 @@ import { Container, Badge, ParallaxBackground } from '@/components/common';
 import { createServerClient } from '@/lib/supabase/server';
 import type { BlogPost } from '@/lib/types/database';
 import { BlogHeroContent } from '@/components/marketing/BlogHeroContent';
-import { BlogGrid, BlogPagination, BlogSearchBar, BlogTagFilter, BlogHeroCard } from '@/components/blog';
+import { BlogGrid, BlogPagination, BlogSearchBar, BlogTagFilter, BlogHeroCard, BlogScrollToTop } from '@/components/blog';
 
 // Type étendu pour les pages blog (inclut tags)
 type BlogPostWithTags = BlogPost & { tags?: string[] };
@@ -96,8 +96,9 @@ export default async function BlogPage({ searchParams }: Props) {
 
   return (
     <>
+      <BlogScrollToTop />
       {/* Header Section with Parallax */}
-      <section className="relative bg-gradient-to-br from-primary via-primary-dark to-[#B91C1C] py-12 lg:py-16 overflow-hidden">
+      <section className="relative bg-gradient-to-br from-primary via-primary-dark to-[#E6110A] py-12 lg:py-16 overflow-hidden">
         <ParallaxBackground>
           <div className="absolute inset-0" style={{
             backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
@@ -138,7 +139,7 @@ export default async function BlogPage({ searchParams }: Props) {
               </div>
             ) : (
               <div>
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+                <h2 id="blog-articles-title" className="text-2xl font-bold text-gray-900 dark:text-white scroll-mt-24">
                   {selectedTag ? `Articles : ${selectedTag}` : 'Tous les articles'}
                 </h2>
                 {selectedTag && (

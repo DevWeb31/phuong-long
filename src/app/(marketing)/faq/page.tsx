@@ -232,7 +232,7 @@ export default function FAQPage() {
             <p className="text-lg dark:text-gray-500 mb-8">
               N'hésitez pas à nous contacter directement, nous vous répondrons avec plaisir !
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
               <Link href="/contact">
                 <Button size="lg" variant="primary" className="flex items-center gap-2">
                   <Mail className="w-4 h-4" />
@@ -240,7 +240,7 @@ export default function FAQPage() {
                 </Button>
               </Link>
               <Link href="/clubs">
-                <Button size="lg" variant="ghost" className="flex items-center gap-2">
+                <Button size="lg" variant="secondary" className="flex items-center gap-2">
                   <MapPin className="w-4 h-4" />
                   Trouver un Club
                 </Button>

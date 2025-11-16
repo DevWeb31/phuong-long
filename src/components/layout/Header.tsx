@@ -20,13 +20,14 @@ import { CartButton } from './CartButton';
 import { ThemeToggle } from './ThemeToggle';
 import { MegaMenu, MegaMenuSection, shopMegaMenu } from './MegaMenu';
 import { cn } from '@/lib/utils/cn';
+import { createClient } from '@/lib/supabase/client';
 import { 
-  Home, 
   Users, 
   Calendar, 
   BookOpen, 
   ShoppingBag, 
   Mail,
+  History,
   Menu,
   X,
   ChevronDown,
@@ -46,12 +47,12 @@ interface NavItem {
 }
 
 const navigation: NavItem[] = [
-  { name: 'Accueil', href: '/', icon: Home },
   { name: 'Clubs', href: '/clubs', icon: Users, hasMegaMenu: true },
   { name: 'Événements', href: '/events', icon: Calendar },
   { name: 'Blog', href: '/blog', icon: BookOpen },
   { name: 'Boutique', href: '/shop', icon: ShoppingBag, hasMegaMenu: true },
   { name: 'Contact', href: '/contact', icon: Mail },
+  { name: 'Notre histoire', href: '/notre-histoire', icon: History },
 ];
 
 interface Club {
@@ -68,8 +69,48 @@ export function Header() {
   const [activeMegaMenu, setActiveMegaMenu] = useState<string | null>(null);
   const [hoveredItem, setHoveredItem] = useState<string | null>(null);
   const [clubs, setClubs] = useState<Club[]>([]);
+  const [isShopHidden, setIsShopHidden] = useState(false);
+  const [isDeveloper, setIsDeveloper] = useState(false);
   const pathname = usePathname();
   const megaMenuTimeout = useRef<NodeJS.Timeout>();
+
+  // Vérifier si la boutique est masquée
+  useEffect(() => {
+    const checkShopVisibility = async () => {
+      try {
+        const supabase = createClient();
+        const { data: { user } } = await supabase.auth.getUser();
+        
+        if (user) {
+          // Vérifier si l'utilisateur est développeur
+          const { data: userRoles } = await supabase
+            .from('user_roles')
+            .select('role_id, roles!inner(name)')
+            .eq('user_id', user.id);
+
+          const roles = (userRoles as any[])?.map(ur => ur.roles?.name) || [];
+          setIsDeveloper(roles.includes('developer'));
+
+          // Si développeur, vérifier quand même si la boutique est masquée (pour affichage visuel)
+          // Ne pas masquer pour les développeurs, mais garder l'info pour le style
+        }
+
+        // Vérifier le paramètre shop.hidden
+        const response = await fetch('/api/developer-settings/public');
+        if (response.ok) {
+          const settings = await response.json();
+          const shopHiddenValue = settings['shop.hidden'];
+          // Vérifier si value est true (booléen) ou "true" (string JSON)
+          setIsShopHidden(shopHiddenValue === true || shopHiddenValue === 'true' || shopHiddenValue === '"true"');
+        }
+      } catch (error) {
+        console.error('Error checking shop visibility:', error);
+        setIsShopHidden(false);
+      }
+    };
+
+    checkShopVisibility();
+  }, []);
 
   // Charger les clubs depuis l'API
   useEffect(() => {
@@ -192,13 +233,22 @@ export function Header() {
     return [];
   };
 
+  // Filtrer la navigation pour masquer la boutique si nécessaire
+  const filteredNavigation = navigation.filter(item => {
+    if (item.name === 'Boutique' && isShopHidden && !isDeveloper) {
+      return false;
+    }
+    return true;
+  });
+
   return (
-    <header 
-      className={cn(
+    <>
+      <header 
+        className={cn(
         'sticky top-0 z-50 transition-all duration-300',
         scrolled 
-          ? 'bg-white/95 dark:bg-gray-950/95 backdrop-blur-xl border-b border-gray-200 dark:border-gray-800 border-gray-800 shadow-lg' 
-          : 'bg-white/80 dark:bg-gray-950/80 backdrop-blur-lg border-b border-gray-200/60 dark:border-gray-800/60 shadow-sm'
+          ? 'bg-white/70 dark:bg-gray-950/70 backdrop-blur-xl border-b border-gray-200 dark:border-gray-800 border-gray-800 shadow-lg' 
+          : 'bg-white/60 dark:bg-gray-950/60 backdrop-blur-lg border-b border-gray-200/60 dark:border-gray-800/60 shadow-sm'
       )}
     >
       <Container>
@@ -226,36 +276,47 @@ export function Header() {
 
           {/* Desktop Navigation */}
           <nav className="hidden lg:flex items-center gap-1" onMouseLeave={handleMouseLeave}>
-            {navigation.map((item) => {
+            {filteredNavigation.map((item) => {
               const Icon = item.icon;
               const active = isActive(item.href);
               const isHovered = hoveredItem === item.name;
               const hasMega = item.hasMegaMenu;
               
+              // Vérifier si c'est la boutique et si elle est masquée pour les développeurs
+              const isShopItem = item.name === 'Boutique';
+              const isShopHiddenForDev = isShopItem && isShopHidden && isDeveloper;
+              
               return (
                 <div
                   key={item.href}
-                  className="relative"
+                  className="relative group"
                   onMouseEnter={() => handleMouseEnter(item.name)}
                 >
                   <Link
                     href={item.href}
                     className={cn(
                       'group relative flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200',
-                    active
-                      ? 'text-primary bg-gradient-to-r from-primary/10 to-transparent'
-                      : 'text-slate-900 dark:text-gray-300 hover:text-primary hover:bg-gradient-to-r hover:from-gray-50 dark:hover:from-gray-800 hover:to-transparent',
-                    isHovered && 'bg-gradient-to-r from-gray-50 dark:from-gray-800 to-transparent'
+                      isShopHiddenForDev
+                        ? 'text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-700 dark:hover:text-red-300'
+                        : active
+                          ? 'text-primary bg-gradient-to-r from-primary/10 to-transparent'
+                          : 'text-slate-900 dark:text-gray-300 hover:text-primary hover:bg-gradient-to-r hover:from-gray-50 dark:hover:from-gray-800 hover:to-transparent',
+                      isHovered && !isShopHiddenForDev && 'bg-gradient-to-r from-gray-50 dark:from-gray-800 to-transparent'
                     )}
+                    title={isShopHiddenForDev ? '⚠️ La boutique est actuellement masquée pour les autres utilisateurs' : undefined}
                   >
                     <Icon 
                       className={cn(
                         'w-4 h-4 transition-all duration-200',
-                        active ? 'scale-110' : 'group-hover:scale-110',
-                        isHovered && 'scale-110 text-primary'
+                        isShopHiddenForDev
+                          ? 'text-red-600 dark:text-red-400'
+                          : active 
+                            ? 'scale-110' 
+                            : 'group-hover:scale-110',
+                        isHovered && !isShopHiddenForDev && 'scale-110 text-primary'
                       )} 
                     />
-                    <span>{item.name}</span>
+                    <span className={isShopHiddenForDev ? 'text-red-600 dark:text-red-400' : ''}>{item.name}</span>
                     
                     {hasMega && (
                       <ChevronDown 
@@ -267,7 +328,7 @@ export function Header() {
                     )}
                     
                     {/* Indicateur actif avec effet shimmer */}
-                    {active && (
+                    {active && !isShopHiddenForDev && (
                       <span 
                         className={cn(
                           'absolute bottom-0 left-1/2 -translate-x-1/2 w-8 h-0.5 rounded-full',
@@ -277,6 +338,14 @@ export function Header() {
                       />
                     )}
                   </Link>
+                  
+                  {/* Tooltip personnalisé pour développeur si boutique masquée */}
+                  {isShopHiddenForDev && (
+                    <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 px-3 py-2 bg-gray-900 dark:bg-gray-800 text-white text-xs rounded-lg shadow-lg opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity duration-200 whitespace-nowrap z-50">
+                      ⚠️ La boutique est masquée pour les autres utilisateurs
+                      <div className="absolute left-1/2 -translate-x-1/2 top-full border-4 border-transparent border-t-gray-900 dark:border-t-gray-800"></div>
+                    </div>
+                  )}
                 </div>
               );
             })}
@@ -304,9 +373,25 @@ export function Header() {
           {/* Desktop Actions */}
           <div className="hidden lg:flex items-center gap-3">
             <ThemeToggle />
-            <div className="w-px h-8 bg-gray-200 dark:bg-gray-700" />
+            {/* Séparateur avant panier - masqué si boutique masquée et pas développeur */}
+            {!(isShopHidden && !isDeveloper) && (
+              <div className={cn(
+                "w-px h-8",
+                isShopHidden && isDeveloper
+                  ? "bg-red-300 dark:bg-red-700"
+                  : "bg-gray-200 dark:bg-gray-700"
+              )} />
+            )}
             <CartButton />
-            <div className="w-px h-8 bg-gray-200 dark:bg-gray-700" />
+            {/* Séparateur après panier - masqué si boutique masquée et pas développeur */}
+            {!(isShopHidden && !isDeveloper) && (
+              <div className={cn(
+                "w-px h-8",
+                isShopHidden && isDeveloper
+                  ? "bg-red-300 dark:bg-red-700"
+                  : "bg-gray-200 dark:bg-gray-700"
+              )} />
+            )}
             <UserMenu />
           </div>
 
@@ -337,86 +422,112 @@ export function Header() {
           </div>
         </div>
 
-        {/* Mobile menu - Animation fluide */}
-        <div
-          className={cn(
-            'lg:hidden overflow-hidden transition-all duration-300 ease-in-out',
-            mobileMenuOpen 
-              ? 'max-h-screen opacity-100' 
-              : 'max-h-0 opacity-0'
-          )}
-        >
-          <div className="py-4 border-t dark:border-gray-800">
-            <nav className="flex flex-col space-y-1">
-              {navigation.map((item, idx) => {
-                const Icon = item.icon;
-                const active = isActive(item.href);
-                
-                return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    className={cn(
-                      'flex items-center gap-3 px-4 py-3 rounded-lg text-base font-medium transition-all duration-200',
-                      active
-                        ? 'bg-gradient-to-r from-primary/10 to-transparent text-primary translate-x-1'
-                        : 'text-slate-900 dark:text-gray-300 hover:bg-gradient-to-r hover:from-gray-50 dark:hover:from-gray-800 hover:to-transparent hover:translate-x-1'
-                    )}
-                    onClick={() => setMobileMenuOpen(false)}
-                    style={{
-                      animationDelay: mobileMenuOpen ? `${idx * 50}ms` : '0ms'
-                    }}
-                  >
-                    <div className={cn(
-                      'p-1.5 rounded-lg transition-all',
-                      active ? 'bg-primary/10' : 'bg-gray-100 dark:bg-gray-800 bg-gray-800'
-                    )}>
-                      <Icon className={cn(
-                        'w-5 h-5 transition-transform',
-                        active && 'scale-110 text-primary'
-                      )} />
-                    </div>
-                    <span className="flex-1">{item.name}</span>
-                    
-                    {active && (
-                      <div className="w-2 h-2 rounded-full bg-gradient-to-r from-primary to-primary-dark animate-pulse shadow-lg shadow-primary/50" />
-                    )}
-                  </Link>
-                );
-              })}
-            </nav>
-            
-            {/* Mobile Auth Actions */}
-            <div className="mt-4 pt-4 border-t dark:border-gray-800 space-y-3">
-              <Link
-                href="/signin"
-                className="block px-4 py-2.5 text-center font-medium dark:text-gray-300 hover:text-primary hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg transition-all"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                Connexion
-              </Link>
-              <Link
-                href="/signup"
-                className="flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-primary to-primary-dark text-white rounded-lg font-semibold hover:shadow-lg hover:shadow-primary/30 hover:scale-105 transition-all"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                <Shield className="w-4 h-4" />
-                <span>Essai Gratuit</span>
-              </Link>
-            </div>
-          </div>
-        </div>
       </Container>
+      </header>
 
-      {/* Overlay mobile menu */}
+      {/* Mobile menu overlay - Outside header for proper z-index */}
       {mobileMenuOpen && (
-        <div 
-          className="fixed inset-0 bg-black/30 backdrop-blur-md z-40 lg:hidden animate-in fade-in duration-200"
+        <div
+          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
           onClick={() => setMobileMenuOpen(false)}
           aria-hidden="true"
         />
       )}
-    </header>
+
+      {/* Mobile menu - Slide from left - Outside header for proper z-index */}
+      <div
+        className={cn(
+          'lg:hidden fixed top-0 left-0 h-full w-80 max-w-[85vw] bg-white dark:bg-gray-900 shadow-2xl z-50 transform transition-transform duration-300 ease-in-out overflow-y-auto',
+          mobileMenuOpen 
+            ? 'translate-x-0' 
+            : '-translate-x-full'
+        )}
+      >
+        {/* Mobile menu header */}
+        <div className="flex items-center justify-between p-4 border-b dark:border-gray-800 bg-white dark:bg-gray-900 sticky top-0 z-10">
+          <h2 className="text-lg font-bold dark:text-gray-100">Menu</h2>
+          <button
+            type="button"
+            onClick={() => setMobileMenuOpen(false)}
+            className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-400"
+            aria-label="Fermer le menu"
+          >
+            <X className="h-6 w-6" />
+          </button>
+        </div>
+
+        <div className="p-4">
+          <nav className="flex flex-col space-y-1">
+            {filteredNavigation.map((item, idx) => {
+              const Icon = item.icon;
+              const active = isActive(item.href);
+              
+              // Vérifier si c'est la boutique et si elle est masquée pour les développeurs
+              const isShopItem = item.name === 'Boutique';
+              const isShopHiddenForDev = isShopItem && isShopHidden && isDeveloper;
+              
+              return (
+                <div key={item.href} className="relative">
+                  <Link
+                    href={item.href}
+                    className={cn(
+                      'flex items-center gap-3 px-4 py-3 rounded-lg text-base font-medium transition-all duration-200',
+                      isShopHiddenForDev
+                        ? 'text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20'
+                        : active
+                          ? 'bg-gradient-to-r from-primary/10 to-transparent text-primary'
+                          : 'text-slate-900 dark:text-gray-300 hover:bg-gradient-to-r hover:from-gray-50 dark:hover:from-gray-800 hover:to-transparent'
+                    )}
+                    onClick={() => setMobileMenuOpen(false)}
+                    title={isShopHiddenForDev ? '⚠️ La boutique est actuellement masquée pour les autres utilisateurs' : undefined}
+                  >
+                    <div className={cn(
+                      'p-1.5 rounded-lg transition-all',
+                      isShopHiddenForDev
+                        ? 'bg-red-100 dark:bg-red-900/30'
+                        : active 
+                          ? 'bg-primary/10' 
+                          : 'bg-gray-100 dark:bg-gray-800'
+                    )}>
+                      <Icon className={cn(
+                        'w-5 h-5 transition-transform',
+                        isShopHiddenForDev
+                          ? 'text-red-600 dark:text-red-400'
+                          : active && 'scale-110 text-primary'
+                      )} />
+                    </div>
+                    <span className={cn('flex-1', isShopHiddenForDev && 'text-red-600 dark:text-red-400')}>{item.name}</span>
+                    
+                    {active && !isShopHiddenForDev && (
+                      <div className="w-2 h-2 rounded-full bg-gradient-to-r from-primary to-primary-dark animate-pulse shadow-lg shadow-primary/50" />
+                    )}
+                  </Link>
+                </div>
+              );
+            })}
+          </nav>
+          
+          {/* Mobile Auth Actions */}
+          <div className="mt-6 pt-6 border-t dark:border-gray-800 space-y-3">
+            <Link
+              href="/signin"
+              className="block px-4 py-2.5 text-center font-medium dark:text-gray-300 hover:text-primary hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg transition-all"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              Connexion
+            </Link>
+            <Link
+              href="/signup"
+              className="flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-primary to-primary-dark text-white rounded-lg font-semibold hover:shadow-lg hover:shadow-primary/30 hover:scale-105 transition-all"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              <Shield className="w-4 h-4" />
+              <span>Essai Gratuit</span>
+            </Link>
+          </div>
+        </div>
+      </div>
+    </>
   );
 }
 
