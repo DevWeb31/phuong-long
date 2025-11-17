@@ -30,12 +30,8 @@ import {
   PhotoIcon,
   SparklesIcon,
   ListBulletIcon,
-  BoldIcon,
-  ItalicIcon,
-  CodeBracketIcon,
   Bars3Icon,
-  ListBulletIcon as ListIcon,
-  QuoteIcon
+  ChatBubbleLeftRightIcon
 } from '@heroicons/react/24/outline';
 import { BlogTableOfContents } from '@/components/blog/BlogTableOfContents';
 import { BlogArticleContent } from '@/components/blog/BlogArticleContent';
@@ -862,26 +858,26 @@ export function BlogFormModal({ isOpen, onClose, onSubmit, post, isLoading = fal
                   <button
                     type="button"
                     onClick={() => insertMarkdown('**', '**', 'texte en gras')}
-                    className="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                    className="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors font-bold"
                     title="Gras (Ctrl+B)"
                   >
-                    <BoldIcon className="w-4 h-4" />
+                    <span className="text-sm">B</span>
                   </button>
                   <button
                     type="button"
                     onClick={() => insertMarkdown('*', '*', 'texte en italique')}
-                    className="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                    className="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors italic"
                     title="Italique (Ctrl+I)"
                   >
-                    <ItalicIcon className="w-4 h-4" />
+                    <span className="text-sm">I</span>
                   </button>
                   <button
                     type="button"
                     onClick={() => insertMarkdown('`', '`', 'code')}
-                    className="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                    className="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors font-mono text-xs"
                     title="Code inline"
                   >
-                    <CodeBracketIcon className="w-4 h-4" />
+                    &lt;/&gt;
                   </button>
                 </div>
 
@@ -921,7 +917,7 @@ export function BlogFormModal({ isOpen, onClose, onSubmit, post, isLoading = fal
                     className="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
                     title="Liste à puces"
                   >
-                    <ListIcon className="w-4 h-4" />
+                    <ListBulletIcon className="w-4 h-4" />
                   </button>
                   <button
                     type="button"
@@ -929,7 +925,7 @@ export function BlogFormModal({ isOpen, onClose, onSubmit, post, isLoading = fal
                     className="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
                     title="Liste numérotée"
                   >
-                    <ListBulletIcon className="w-4 h-4" />
+                    <span className="text-xs font-mono">1.</span>
                   </button>
                 </div>
 
@@ -969,7 +965,7 @@ export function BlogFormModal({ isOpen, onClose, onSubmit, post, isLoading = fal
                     className="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
                     title="Citation"
                   >
-                    <QuoteIcon className="w-4 h-4" />
+                    <ChatBubbleLeftRightIcon className="w-4 h-4" />
                   </button>
                   <button
                     type="button"
