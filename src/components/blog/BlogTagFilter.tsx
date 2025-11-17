@@ -88,12 +88,12 @@ export function BlogTagFilter({ availableTags }: BlogTagFilterProps) {
         <>
           {/* Overlay pour fermer */}
           <div
-            className="fixed inset-0 z-10"
+            className="fixed inset-0 z-40"
             onClick={() => setIsOpen(false)}
           />
           
           {/* Menu dropdown */}
-          <div className="absolute right-0 mt-2 w-64 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 z-20 max-h-96 overflow-y-auto">
+          <div className="absolute right-0 mt-2 w-64 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 z-50 max-h-96 overflow-y-auto">
             <div className="p-3">
               {/* Header */}
               <div className="flex items-center justify-between mb-3 pb-3 border-b border-gray-200 dark:border-gray-700">
