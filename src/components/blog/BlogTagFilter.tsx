@@ -10,6 +10,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { FunnelIcon, XMarkIcon, ChevronDownIcon } from '@heroicons/react/24/outline';
 
@@ -25,8 +26,14 @@ export function BlogTagFilter({ availableTags }: BlogTagFilterProps) {
   const searchParams = useSearchParams();
   const selectedTag = searchParams.get('tag');
   const [isOpen, setIsOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // S'assurer que le composant est monté côté client pour le portail
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const handleTagClick = (tag: string) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -112,19 +119,19 @@ export function BlogTagFilter({ availableTags }: BlogTagFilterProps) {
         <ChevronDownIcon className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
       </button>
 
-      {/* Dropdown */}
-      {isOpen && (
+      {/* Dropdown - Rendu via portail pour éviter les problèmes de z-index */}
+      {mounted && isOpen && createPortal(
         <>
           {/* Overlay pour fermer */}
           <div
-            className="fixed inset-0 z-[100]"
+            className="fixed inset-0 z-[9998]"
             onClick={() => setIsOpen(false)}
           />
           
           {/* Menu dropdown - Fixed positioning pour être au-dessus de tout */}
           <div 
             ref={dropdownRef}
-            className="fixed w-64 bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 z-[101] max-h-96 overflow-y-auto"
+            className="fixed w-64 bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 z-[9999] max-h-96 overflow-y-auto"
           >
             <div className="p-3">
               {/* Header */}
@@ -172,7 +179,8 @@ export function BlogTagFilter({ availableTags }: BlogTagFilterProps) {
               </div>
             </div>
           </div>
-        </>
+        </>,
+        document.body
       )}
 
       {/* Badge du filtre actif (affiché à côté du bouton) */}
