@@ -61,7 +61,7 @@ export function BlogTagFilter({ availableTags }: BlogTagFilterProps) {
     if (isOpen && buttonRef.current) {
       const rect = buttonRef.current.getBoundingClientRect();
       setDropdownPosition({
-        top: rect.bottom + window.scrollY + 8,
+        top: rect.bottom + 8, // Pas besoin de window.scrollY avec fixed
         right: window.innerWidth - rect.right,
       });
     }
