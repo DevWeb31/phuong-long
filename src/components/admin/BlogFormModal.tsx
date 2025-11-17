@@ -17,7 +17,7 @@
 
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { Modal } from './Modal';
 import { Button } from '@/components/common';
 import { 
@@ -29,7 +29,13 @@ import {
   LinkIcon,
   PhotoIcon,
   SparklesIcon,
-  ListBulletIcon
+  ListBulletIcon,
+  BoldIcon,
+  ItalicIcon,
+  CodeBracketIcon,
+  Bars3Icon,
+  ListBulletIcon as ListIcon,
+  QuoteIcon
 } from '@heroicons/react/24/outline';
 import { BlogTableOfContents } from '@/components/blog/BlogTableOfContents';
 import { BlogArticleContent } from '@/components/blog/BlogArticleContent';
@@ -192,6 +198,7 @@ export function BlogFormModal({ isOpen, onClose, onSubmit, post, isLoading = fal
   const [tagSuggestions, setTagSuggestions] = useState<string[]>([]);
   const [showTagSuggestions, setShowTagSuggestions] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   // Charger les tags existants depuis l'API
   useEffect(() => {
@@ -355,6 +362,56 @@ export function BlogFormModal({ isOpen, onClose, onSubmit, post, isLoading = fal
       .replace(/^-+|-+$/g, '');
     
     setFormData(prev => ({ ...prev, slug }));
+  };
+
+  // Fonctions pour insérer du Markdown dans le textarea
+  const insertMarkdown = (before: string, after: string = '', placeholder: string = '') => {
+    const textarea = textareaRef.current;
+    if (!textarea) return;
+
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const text = formData.content || '';
+    const selectedText = text.substring(start, end);
+    const replacement = selectedText || placeholder;
+
+    const newText = 
+      text.substring(0, start) + 
+      before + replacement + after + 
+      text.substring(end);
+
+    setFormData(prev => ({ ...prev, content: newText }));
+
+    // Repositionner le curseur
+    setTimeout(() => {
+      const newPosition = start + before.length + replacement.length + after.length;
+      textarea.focus();
+      textarea.setSelectionRange(newPosition, newPosition);
+    }, 0);
+  };
+
+  const insertMarkdownBlock = (markdown: string, newLineBefore: boolean = true, newLineAfter: boolean = true) => {
+    const textarea = textareaRef.current;
+    if (!textarea) return;
+
+    const start = textarea.selectionStart;
+    const text = formData.content || '';
+    const beforeText = text.substring(0, start);
+    const afterText = text.substring(start);
+    
+    const newLine = '\n';
+    const prefix = newLineBefore && !beforeText.endsWith('\n') ? newLine : '';
+    const suffix = newLineAfter ? newLine : '';
+
+    const newText = beforeText + prefix + markdown + suffix + afterText;
+    setFormData(prev => ({ ...prev, content: newText }));
+
+    // Repositionner le curseur après le bloc inséré
+    setTimeout(() => {
+      const newPosition = start + prefix.length + markdown.length + suffix.length;
+      textarea.focus();
+      textarea.setSelectionRange(newPosition, newPosition);
+    }, 0);
   };
 
   // Fonction pour gérer l'upload d'image
@@ -797,21 +854,201 @@ export function BlogFormModal({ isOpen, onClose, onSubmit, post, isLoading = fal
               <label htmlFor="content" className="block text-sm font-semibold dark:text-gray-300 mb-2">
                 Contenu (Markdown) <span className="text-red-500">*</span>
               </label>
-              <div className="border dark:border-gray-700 rounded-xl overflow-hidden">
+              
+              {/* Barre d'outils Markdown */}
+              <div className="border dark:border-gray-700 border-b-0 rounded-t-xl bg-gray-50 dark:bg-gray-800/50 p-2 flex flex-wrap items-center gap-1">
+                {/* Formatage de texte */}
+                <div className="flex items-center gap-1 border-r dark:border-gray-700 pr-2 mr-2">
+                  <button
+                    type="button"
+                    onClick={() => insertMarkdown('**', '**', 'texte en gras')}
+                    className="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                    title="Gras (Ctrl+B)"
+                  >
+                    <BoldIcon className="w-4 h-4" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => insertMarkdown('*', '*', 'texte en italique')}
+                    className="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                    title="Italique (Ctrl+I)"
+                  >
+                    <ItalicIcon className="w-4 h-4" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => insertMarkdown('`', '`', 'code')}
+                    className="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                    title="Code inline"
+                  >
+                    <CodeBracketIcon className="w-4 h-4" />
+                  </button>
+                </div>
+
+                {/* Titres */}
+                <div className="flex items-center gap-1 border-r dark:border-gray-700 pr-2 mr-2">
+                  <button
+                    type="button"
+                    onClick={() => insertMarkdownBlock('# ', '', true)}
+                    className="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors text-xs font-bold"
+                    title="Titre 1"
+                  >
+                    H1
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => insertMarkdownBlock('## ', '', true)}
+                    className="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors text-xs font-semibold"
+                    title="Titre 2"
+                  >
+                    H2
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => insertMarkdownBlock('### ', '', true)}
+                    className="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors text-xs"
+                    title="Titre 3"
+                  >
+                    H3
+                  </button>
+                </div>
+
+                {/* Listes */}
+                <div className="flex items-center gap-1 border-r dark:border-gray-700 pr-2 mr-2">
+                  <button
+                    type="button"
+                    onClick={() => insertMarkdownBlock('- ', '', true)}
+                    className="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                    title="Liste à puces"
+                  >
+                    <ListIcon className="w-4 h-4" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => insertMarkdownBlock('1. ', '', true)}
+                    className="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                    title="Liste numérotée"
+                  >
+                    <ListBulletIcon className="w-4 h-4" />
+                  </button>
+                </div>
+
+                {/* Autres éléments */}
+                <div className="flex items-center gap-1 border-r dark:border-gray-700 pr-2 mr-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const url = prompt('URL du lien:', 'https://');
+                      const text = prompt('Texte du lien:', 'lien');
+                      if (url && text) {
+                        insertMarkdown(`[${text}](`, ')', url);
+                      }
+                    }}
+                    className="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                    title="Lien"
+                  >
+                    <LinkIcon className="w-4 h-4" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const url = prompt('URL de l\'image:', 'https://');
+                      const alt = prompt('Texte alternatif:', '');
+                      if (url) {
+                        insertMarkdownBlock(`![${alt || ''}](${url})`, true, true);
+                      }
+                    }}
+                    className="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                    title="Image"
+                  >
+                    <PhotoIcon className="w-4 h-4" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => insertMarkdownBlock('> ', '', true)}
+                    className="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                    title="Citation"
+                  >
+                    <QuoteIcon className="w-4 h-4" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => insertMarkdownBlock('---', true, true)}
+                    className="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                    title="Ligne horizontale"
+                  >
+                    <Bars3Icon className="w-4 h-4" />
+                  </button>
+                </div>
+
+                {/* Aide */}
+                <div className="ml-auto">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const help = `# Guide Markdown
+
+## Formatage
+- **Gras** : **texte**
+- *Italique* : *texte*
+- \`Code\` : \`code\`
+
+## Titres
+# Titre 1
+## Titre 2
+### Titre 3
+
+## Listes
+- Liste à puces
+- Item 2
+
+1. Liste numérotée
+2. Item 2
+
+## Liens et Images
+[Texte du lien](https://url.com)
+![Alt texte](https://url-image.com)
+
+## Citation
+> Citation
+
+## Ligne horizontale
+---`;
+                      insertMarkdownBlock(help, true, true);
+                    }}
+                    className="px-3 py-1.5 text-xs rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
+                    title="Insérer un guide Markdown"
+                  >
+                    📖 Guide
+                  </button>
+                </div>
+              </div>
+
+              {/* Zone d'édition */}
+              <div className="border dark:border-gray-700 rounded-b-xl overflow-hidden bg-white dark:bg-gray-900">
                 <textarea
+                  ref={textareaRef}
                   id="content"
                   name="content"
                   value={formData.content || ''}
                   onChange={handleChange}
                   required
                   rows={20}
-                  className="w-full px-4 py-3 border-0 focus:ring-2 focus:ring-primary focus:outline-none resize-none font-mono text-sm"
+                  className="w-full px-4 py-3 border-0 focus:ring-2 focus:ring-primary focus:outline-none resize-none font-mono text-sm leading-relaxed bg-transparent text-gray-900 dark:text-gray-100"
                   placeholder="# Titre de l'article&#10;&#10;## Sous-titre&#10;&#10;Contenu en **markdown**..."
+                  style={{ minHeight: '400px' }}
                 />
               </div>
+
+              {/* Informations et actions */}
               <div className="mt-2 flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
                 <div className="flex items-center gap-4">
                   <span>💡 Astuce : Utilisez ## pour créer des sections (table des matières)</span>
+                  {formData.content && (
+                    <span className="text-gray-400 dark:text-gray-500">
+                      {formData.content.split('\n').length} lignes
+                    </span>
+                  )}
                 </div>
                 <button
                   type="button"
