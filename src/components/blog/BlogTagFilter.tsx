@@ -9,7 +9,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { FunnelIcon, XMarkIcon, ChevronDownIcon } from '@heroicons/react/24/outline';
 
@@ -25,6 +25,8 @@ export function BlogTagFilter({ availableTags }: BlogTagFilterProps) {
   const searchParams = useSearchParams();
   const selectedTag = searchParams.get('tag');
   const [isOpen, setIsOpen] = useState(false);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const [dropdownPosition, setDropdownPosition] = useState({ top: 0, right: 0 });
 
   const handleTagClick = (tag: string) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -54,14 +56,26 @@ export function BlogTagFilter({ availableTags }: BlogTagFilterProps) {
     router.replace(`/blog${queryString ? `?${queryString}` : ''}`);
   };
 
+  // Calculer la position du dropdown quand il s'ouvre
+  useEffect(() => {
+    if (isOpen && buttonRef.current) {
+      const rect = buttonRef.current.getBoundingClientRect();
+      setDropdownPosition({
+        top: rect.bottom + window.scrollY + 8,
+        right: window.innerWidth - rect.right,
+      });
+    }
+  }, [isOpen]);
+
   if (availableTags.length === 0) {
     return null;
   }
 
   return (
-    <div className="relative inline-block z-50">
+    <div className="relative inline-block">
       {/* Bouton trigger */}
       <button
+        ref={buttonRef}
         onClick={() => setIsOpen(!isOpen)}
         className={`
           inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all
@@ -88,12 +102,18 @@ export function BlogTagFilter({ availableTags }: BlogTagFilterProps) {
         <>
           {/* Overlay pour fermer */}
           <div
-            className="fixed inset-0 z-40"
+            className="fixed inset-0 z-[100]"
             onClick={() => setIsOpen(false)}
           />
           
-          {/* Menu dropdown */}
-          <div className="absolute right-0 mt-2 w-64 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 z-50 max-h-96 overflow-y-auto">
+          {/* Menu dropdown - Fixed positioning pour être au-dessus de tout */}
+          <div 
+            className="fixed w-64 bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 z-[101] max-h-96 overflow-y-auto"
+            style={{
+              top: `${dropdownPosition.top}px`,
+              right: `${dropdownPosition.right}px`,
+            }}
+          >
             <div className="p-3">
               {/* Header */}
               <div className="flex items-center justify-between mb-3 pb-3 border-b border-gray-200 dark:border-gray-700">
