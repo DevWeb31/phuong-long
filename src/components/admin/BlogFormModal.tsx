@@ -252,6 +252,18 @@ export function BlogFormModal({ isOpen, onClose, onSubmit, post, isLoading = fal
     }
   }, [readingTime, formData.content]);
 
+  // Fermer la modale de prévisualisation avec Escape
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && showPreviewModal) {
+        setShowPreviewModal(false);
+      }
+    };
+
+    window.addEventListener('keydown', handleEscape);
+    return () => window.removeEventListener('keydown', handleEscape);
+  }, [showPreviewModal]);
+
   // Générer le HTML pour la prévisualisation
   const previewHtml = useMemo(() => {
     if (!formData.content) return '';
