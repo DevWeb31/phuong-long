@@ -65,7 +65,7 @@ export async function PATCH(
             role_id: body.role_id,
             club_id: body.club_id || null,
             granted_by: user.id,
-          });
+          } as any);
 
         if (insertRoleError) {
           console.error('Error inserting user role:', insertRoleError);
@@ -94,7 +94,7 @@ export async function PATCH(
           id: userId,
           ...profileUpdates,
           updated_at: new Date().toISOString(),
-        }, {
+        } as any, {
           onConflict: 'id',
         });
 
@@ -121,21 +121,24 @@ export async function PATCH(
       `)
       .eq('user_id', userId);
 
+    const profile = updatedProfile as { full_name?: string; username?: string; avatar_url?: string; bio?: string } | null;
+    const roles = updatedRoles as Array<{ roles?: { name: string }; clubs?: { name: string } }> | null;
+    
     return NextResponse.json({
       id: userId,
       email: authUser.user.email,
-      full_name: updatedProfile?.full_name || null,
-      username: updatedProfile?.username || null,
-      avatar_url: updatedProfile?.avatar_url || null,
-      bio: updatedProfile?.bio || null,
-      user_roles: updatedRoles?.map((ur: any) => ({
+      full_name: profile?.full_name || null,
+      username: profile?.username || null,
+      avatar_url: profile?.avatar_url || null,
+      bio: profile?.bio || null,
+      user_roles: roles?.map((ur: any) => ({
         role_id: ur.role_id,
         role_name: ur.roles?.name,
         club_id: ur.club_id,
         club_name: ur.clubs?.name,
       })) || [],
-      primary_role: updatedRoles?.[0]?.roles?.name || 'user',
-      club: updatedRoles?.[0]?.clubs?.name || null,
+      primary_role: roles?.[0]?.roles?.name || 'user',
+      club: roles?.[0]?.clubs?.name || null,
     });
   } catch (error) {
     console.error('Error updating user:', error);

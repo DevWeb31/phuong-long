@@ -87,6 +87,7 @@ export function BlogTagFilter({ availableTags }: BlogTagFilterProps) {
         window.removeEventListener('resize', updatePosition);
       };
     }
+    return undefined;
   }, [isOpen]);
 
   if (availableTags.length === 0) {

@@ -188,7 +188,6 @@ export function BlogFormModal({ isOpen, onClose, onSubmit, post, isLoading = fal
   });
   
   const [tagsInput, setTagsInput] = useState('');
-  const [showPreview, setShowPreview] = useState(false);
   const [activeTab, setActiveTab] = useState<'edit' | 'preview'>('edit');
   const [availableTags, setAvailableTags] = useState<string[]>([]);
   const [tagSuggestions, setTagSuggestions] = useState<string[]>([]);
@@ -235,7 +234,6 @@ export function BlogFormModal({ isOpen, onClose, onSubmit, post, isLoading = fal
       });
       setTagsInput('');
     }
-    setShowPreview(false);
     setActiveTab('edit');
   }, [post, isOpen]);
 
@@ -898,7 +896,7 @@ export function BlogFormModal({ isOpen, onClose, onSubmit, post, isLoading = fal
                 <div className="flex items-center gap-1 border-r dark:border-gray-700 pr-2 mr-2">
                   <button
                     type="button"
-                    onClick={() => insertMarkdownBlock('# ', '', true)}
+                    onClick={() => insertMarkdownBlock('# ', false, true)}
                     className="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors text-xs font-bold"
                     title="Titre 1"
                   >
@@ -906,7 +904,7 @@ export function BlogFormModal({ isOpen, onClose, onSubmit, post, isLoading = fal
                   </button>
                   <button
                     type="button"
-                    onClick={() => insertMarkdownBlock('## ', '', true)}
+                    onClick={() => insertMarkdownBlock('## ', false, true)}
                     className="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors text-xs font-semibold"
                     title="Titre 2"
                   >
@@ -914,7 +912,7 @@ export function BlogFormModal({ isOpen, onClose, onSubmit, post, isLoading = fal
                   </button>
                   <button
                     type="button"
-                    onClick={() => insertMarkdownBlock('### ', '', true)}
+                    onClick={() => insertMarkdownBlock('### ', false, true)}
                     className="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors text-xs"
                     title="Titre 3"
                   >
@@ -926,7 +924,7 @@ export function BlogFormModal({ isOpen, onClose, onSubmit, post, isLoading = fal
                 <div className="flex items-center gap-1 border-r dark:border-gray-700 pr-2 mr-2">
                   <button
                     type="button"
-                    onClick={() => insertMarkdownBlock('- ', '', true)}
+                    onClick={() => insertMarkdownBlock('- ', false, true)}
                     className="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
                     title="Liste à puces"
                   >
@@ -934,7 +932,7 @@ export function BlogFormModal({ isOpen, onClose, onSubmit, post, isLoading = fal
                   </button>
                   <button
                     type="button"
-                    onClick={() => insertMarkdownBlock('1. ', '', true)}
+                    onClick={() => insertMarkdownBlock('1. ', false, true)}
                     className="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
                     title="Liste numérotée"
                   >
@@ -974,7 +972,7 @@ export function BlogFormModal({ isOpen, onClose, onSubmit, post, isLoading = fal
                   </button>
                   <button
                     type="button"
-                    onClick={() => insertMarkdownBlock('> ', '', true)}
+                    onClick={() => insertMarkdownBlock('> ', false, true)}
                     className="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
                     title="Citation"
                   >

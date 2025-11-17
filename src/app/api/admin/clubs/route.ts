@@ -38,7 +38,7 @@ export async function GET() {
 
     // Compter les membres pour chaque club
     const clubsWithMembers = await Promise.all(
-      (clubs || []).map(async (club) => {
+      (clubs || []).map(async (club: { id: string; [key: string]: unknown }) => {
         // Compter les utilisateurs ayant un rôle associé à ce club
         const { count, error: countError } = await supabase
           .from('user_roles')
