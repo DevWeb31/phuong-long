@@ -59,7 +59,7 @@ export function BlogTagFilter({ availableTags }: BlogTagFilterProps) {
   }
 
   return (
-    <div className="relative inline-block">
+    <div className="relative inline-block z-50">
       {/* Bouton trigger */}
       <button
         onClick={() => setIsOpen(!isOpen)}
