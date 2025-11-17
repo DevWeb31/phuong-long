@@ -26,7 +26,7 @@ export function BlogTagFilter({ availableTags }: BlogTagFilterProps) {
   const selectedTag = searchParams.get('tag');
   const [isOpen, setIsOpen] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
-  const [dropdownPosition, setDropdownPosition] = useState({ top: 0, right: 0 });
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   const handleTagClick = (tag: string) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -56,14 +56,29 @@ export function BlogTagFilter({ availableTags }: BlogTagFilterProps) {
     router.replace(`/blog${queryString ? `?${queryString}` : ''}`);
   };
 
-  // Calculer la position du dropdown quand il s'ouvre
+  // Calculer et mettre à jour la position du dropdown quand il s'ouvre
   useEffect(() => {
     if (isOpen && buttonRef.current) {
-      const rect = buttonRef.current.getBoundingClientRect();
-      setDropdownPosition({
-        top: rect.bottom + 8, // Pas besoin de window.scrollY avec fixed
-        right: window.innerWidth - rect.right,
+      const updatePosition = () => {
+        if (buttonRef.current && dropdownRef.current) {
+          const rect = buttonRef.current.getBoundingClientRect();
+          dropdownRef.current.style.top = `${rect.bottom + 8}px`;
+          dropdownRef.current.style.right = `${window.innerWidth - rect.right}px`;
+        }
+      };
+
+      // Utiliser requestAnimationFrame pour s'assurer que le DOM est rendu
+      requestAnimationFrame(() => {
+        updatePosition();
       });
+
+      window.addEventListener('scroll', updatePosition, true);
+      window.addEventListener('resize', updatePosition);
+
+      return () => {
+        window.removeEventListener('scroll', updatePosition, true);
+        window.removeEventListener('resize', updatePosition);
+      };
     }
   }, [isOpen]);
 
@@ -108,11 +123,8 @@ export function BlogTagFilter({ availableTags }: BlogTagFilterProps) {
           
           {/* Menu dropdown - Fixed positioning pour être au-dessus de tout */}
           <div 
+            ref={dropdownRef}
             className="fixed w-64 bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 z-[101] max-h-96 overflow-y-auto"
-            style={{
-              top: `${dropdownPosition.top}px`,
-              right: `${dropdownPosition.right}px`,
-            }}
           >
             <div className="p-3">
               {/* Header */}
