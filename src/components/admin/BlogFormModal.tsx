@@ -194,6 +194,7 @@ export function BlogFormModal({ isOpen, onClose, onSubmit, post, isLoading = fal
   const [tagSuggestions, setTagSuggestions] = useState<string[]>([]);
   const [showTagSuggestions, setShowTagSuggestions] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
+  const [showPreviewModal, setShowPreviewModal] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   // Charger les tags existants depuis l'API
@@ -1048,27 +1049,16 @@ export function BlogFormModal({ isOpen, onClose, onSubmit, post, isLoading = fal
                 </div>
                 <button
                   type="button"
-                  onClick={() => setShowPreview(!showPreview)}
+                  onClick={() => setShowPreviewModal(true)}
                   className="flex items-center gap-1 text-primary hover:underline"
+                  disabled={!formData.content}
                 >
-                  {showPreview ? <EyeSlashIcon className="w-4 h-4" /> : <EyeIcon className="w-4 h-4" />}
-                  {showPreview ? 'Masquer' : 'Afficher'} la prévisualisation
+                  <EyeIcon className="w-4 h-4" />
+                  Afficher la prévisualisation
                 </button>
               </div>
             </div>
 
-            {/* Prévisualisation inline */}
-            {showPreview && formData.content && (
-              <div className="border dark:border-gray-700 rounded-xl p-6 bg-gray-50 dark:bg-gray-800">
-                <div className="flex items-center gap-2 mb-4">
-                  <EyeIcon className="w-5 h-5 text-primary" />
-                  <h3 className="font-semibold dark:text-gray-300">Aperçu</h3>
-                </div>
-                <div className="prose dark:prose-invert max-w-none">
-                  <BlogArticleContent content={previewHtml} />
-                </div>
-              </div>
-            )}
           </div>
         ) : (
           /* Mode Prévisualisation */
@@ -1100,6 +1090,113 @@ export function BlogFormModal({ isOpen, onClose, onSubmit, post, isLoading = fal
           </div>
         )}
       </form>
+
+      {/* Modal de prévisualisation plein écran */}
+      {showPreviewModal && (
+        <div className="fixed inset-0 z-[9999] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4" onClick={(e) => {
+          if (e.target === e.currentTarget) {
+            setShowPreviewModal(false);
+          }
+        }}>
+          <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full h-full max-w-7xl max-h-[95vh] flex flex-col overflow-hidden">
+            {/* Header */}
+            <div className="flex items-center justify-between p-6 border-b dark:border-gray-800">
+              <div className="flex items-center gap-3">
+                <EyeIcon className="w-6 h-6 text-primary" />
+                <h2 className="text-2xl font-bold dark:text-gray-100">Prévisualisation de l'article</h2>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowPreviewModal(false)}
+                className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                title="Fermer"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            {/* Content */}
+            <div className="flex-1 overflow-y-auto p-6">
+              {formData.content ? (
+                <div className="max-w-4xl mx-auto">
+                  {/* En-tête de l'article */}
+                  {formData.title && (
+                    <div className="mb-8">
+                      <h1 className="text-4xl md:text-5xl font-bold dark:text-gray-100 mb-4">
+                        {formData.title}
+                      </h1>
+                      {formData.excerpt && (
+                        <p className="text-xl text-gray-600 dark:text-gray-400 leading-relaxed">
+                          {formData.excerpt}
+                        </p>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Image de couverture */}
+                  {formData.cover_image_url && (
+                    <div className="mb-8 rounded-xl overflow-hidden">
+                      <img
+                        src={formData.cover_image_url}
+                        alt={formData.title || 'Image de couverture'}
+                        className="w-full h-auto object-cover"
+                      />
+                    </div>
+                  )}
+
+                  {/* Table des matières */}
+                  {formData.content && (
+                    <div className="mb-8 border dark:border-gray-800 rounded-xl p-6 bg-gray-50 dark:bg-gray-800">
+                      <div className="flex items-center gap-2 mb-4">
+                        <ListBulletIcon className="w-5 h-5 text-primary" />
+                        <h3 className="font-semibold dark:text-gray-300">Table des matières</h3>
+                      </div>
+                      <BlogTableOfContents content={previewHtml} />
+                    </div>
+                  )}
+
+                  {/* Contenu de l'article */}
+                  <div className="prose dark:prose-invert prose-lg max-w-none">
+                    <BlogArticleContent content={previewHtml} />
+                  </div>
+                </div>
+              ) : (
+                <div className="flex items-center justify-center h-full text-gray-500 dark:text-gray-400">
+                  <div className="text-center">
+                    <EyeSlashIcon className="w-16 h-16 mx-auto mb-4 opacity-50" />
+                    <p className="text-lg">Aucun contenu à prévisualiser</p>
+                    <p className="text-sm mt-2">Rédigez votre article pour voir la prévisualisation</p>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Footer */}
+            <div className="p-6 border-t dark:border-gray-800 flex items-center justify-between bg-gray-50 dark:bg-gray-800/50">
+              <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
+                {readingTime > 0 && (
+                  <div className="flex items-center gap-1.5">
+                    <ClockIcon className="w-4 h-4" />
+                    <span>{readingTime} min de lecture</span>
+                  </div>
+                )}
+                {formData.content && (
+                  <div className="flex items-center gap-1.5">
+                    <span>
+                      {formData.content.replace(/<[^>]*>/g, '').split(/\s+/).filter(w => w.length > 0).length} mots
+                    </span>
+                  </div>
+                )}
+              </div>
+              <Button variant="primary" onClick={() => setShowPreviewModal(false)}>
+                Fermer
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </Modal>
   );
 }
