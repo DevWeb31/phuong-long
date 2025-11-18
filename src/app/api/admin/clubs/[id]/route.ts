@@ -38,8 +38,11 @@ export async function PATCH(request: Request, { params }: RouteParams) {
 
     const body = await request.json();
 
+    // Filtrer les champs qui ne sont pas dans le schéma de la table ou qui sont gérés automatiquement
+    const { members_count, created_at, updated_at, id: _id, ...clubData } = body;
+
     // @ts-ignore - Supabase update type incompatibility
-    const { data, error } = await supabase.from('clubs').update(body).eq('id', id).select().single();
+    const { data, error } = await supabase.from('clubs').update(clubData).eq('id', id).select().single();
 
     if (error) {
       console.error('Supabase error:', error);

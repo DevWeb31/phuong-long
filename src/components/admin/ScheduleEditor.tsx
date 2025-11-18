@@ -209,7 +209,7 @@ export function ScheduleEditor({ value, onChange, clubId: _clubId }: ScheduleEdi
                           value={session.time}
                           onChange={(e) => updateSession(day.key, index, 'time', e.target.value)}
                           placeholder="18:00-19:00"
-                          className="w-full px-3 py-2 text-sm border dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                          className="w-full px-3 py-2 text-sm border dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500"
                         />
                       </div>
 
@@ -223,7 +223,7 @@ export function ScheduleEditor({ value, onChange, clubId: _clubId }: ScheduleEdi
                           value={session.type || ''}
                           onChange={(e) => updateSession(day.key, index, 'type', e.target.value)}
                           placeholder="Adultes, Enfants 8-12 ans..."
-                          className="w-full px-3 py-2 text-sm border dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                          className="w-full px-3 py-2 text-sm border dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500"
                         />
                       </div>
 
@@ -235,7 +235,7 @@ export function ScheduleEditor({ value, onChange, clubId: _clubId }: ScheduleEdi
                         <select
                           value={session.level || ''}
                           onChange={(e) => updateSession(day.key, index, 'level', e.target.value)}
-                          className="w-full px-3 py-2 text-sm border dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                          className="w-full px-3 py-2 text-sm border dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 [&>option]:bg-white [&>option]:dark:bg-gray-800 [&>option]:text-gray-900 [&>option]:dark:text-gray-100"
                         >
                           <option value="">-- Sélectionner --</option>
                           <option value="Débutant">Débutant</option>

@@ -82,8 +82,11 @@ export async function POST(request: Request) {
 
     const body = await request.json();
 
+    // Filtrer les champs qui ne sont pas dans le schéma de la table
+    const { members_count, created_at, updated_at, ...clubData } = body;
+
     // @ts-ignore - Supabase insert type incompatibility
-    const { data, error } = await supabase.from('clubs').insert([body]).select().single();
+    const { data, error } = await supabase.from('clubs').insert([clubData]).select().single();
 
     if (error) throw error;
 

@@ -28,6 +28,7 @@ export interface DataTableColumn<T> {
   sortable?: boolean;
   render?: (value: any, row: T) => React.ReactNode;
   width?: string;
+  align?: 'left' | 'center' | 'right';
 }
 
 export interface DataTableAction<T> {
@@ -193,37 +194,40 @@ export function DataTable<T extends { id: string | number }>({
         <table className="min-w-full divide-y dark:divide-gray-800">
           <thead className="bg-gray-50 dark:bg-gray-900">
             <tr>
-              {columns.map((column) => (
-                <th
-                  key={String(column.key)}
-                  className={`px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-500 uppercase tracking-wider ${
-                    column.sortable ? 'cursor-pointer select-none hover:bg-gray-100' : ''
-                  } ${column.width || ''}`}
-                  onClick={() => column.sortable && handleSort(column)}
-                >
-                  <div className="flex items-center gap-2">
-                    {column.label}
-                    {column.sortable && (
-                      <div className="flex flex-col">
-                        <ChevronUpIcon
-                          className={`w-3 h-3 ${
-                            sortColumn === column.key && sortDirection === 'asc'
-                              ? 'text-primary'
-                              : 'text-gray-400'
-                          }`}
-                        />
-                        <ChevronDownIcon
-                          className={`w-3 h-3 -mt-1 ${
-                            sortColumn === column.key && sortDirection === 'desc'
-                              ? 'text-primary'
-                              : 'text-gray-400'
-                          }`}
-                        />
-                      </div>
-                    )}
-                  </div>
-                </th>
-              ))}
+              {columns.map((column) => {
+                const alignClass = column.align === 'center' ? 'text-center' : column.align === 'right' ? 'text-right' : 'text-left';
+                return (
+                  <th
+                    key={String(column.key)}
+                    className={`px-6 py-3 ${alignClass} text-xs font-medium text-gray-500 dark:text-gray-500 uppercase tracking-wider ${
+                      column.sortable ? 'cursor-pointer select-none hover:bg-gray-100' : ''
+                    } ${column.width || ''}`}
+                    onClick={() => column.sortable && handleSort(column)}
+                  >
+                    <div className={`flex items-center gap-2 ${column.align === 'center' ? 'justify-center' : column.align === 'right' ? 'justify-end' : 'justify-start'}`}>
+                      {column.label}
+                      {column.sortable && (
+                        <div className="flex flex-col">
+                          <ChevronUpIcon
+                            className={`w-3 h-3 ${
+                              sortColumn === column.key && sortDirection === 'asc'
+                                ? 'text-primary'
+                                : 'text-gray-400'
+                            }`}
+                          />
+                          <ChevronDownIcon
+                            className={`w-3 h-3 -mt-1 ${
+                              sortColumn === column.key && sortDirection === 'desc'
+                                ? 'text-primary'
+                                : 'text-gray-400'
+                            }`}
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </th>
+                );
+              })}
               {allActions.length > 0 && (
                 <th className="px-6 py-3 text-right font-medium dark:text-gray-500 uppercase tracking-wider">
                   Actions
@@ -258,8 +262,9 @@ export function DataTable<T extends { id: string | number }>({
                 <tr key={row.id} className="hover:bg-gray-50 dark:bg-gray-900 transition-colors">
                   {columns.map((column) => {
                     const value = row[column.key as keyof T];
+                    const alignClass = column.align === 'center' ? 'text-center' : column.align === 'right' ? 'text-right' : 'text-left';
                     return (
-                      <td key={String(column.key)} className="px-6 py-4 whitespace-nowrap">
+                      <td key={String(column.key)} className={`px-6 py-4 whitespace-nowrap ${alignClass}`}>
                         {column.render ? column.render(value, row) : String(value)}
                       </td>
                     );

@@ -92,13 +92,10 @@ export default function AdminClubsPage() {
       key: 'members_count',
       label: 'Membres',
       sortable: true,
+      align: 'center',
       render: (value) => {
         const count = value ?? 0;
-        return (
-          <Badge variant="primary" size="sm">
-            {count} {count === 1 ? 'membre' : 'membres'}
-          </Badge>
-        );
+        return <span className="text-gray-900 dark:text-gray-100">{count}</span>;
       },
     },
   ];
