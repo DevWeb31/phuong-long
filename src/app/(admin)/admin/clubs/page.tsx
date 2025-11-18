@@ -12,7 +12,7 @@
 import { useState, useEffect } from 'react';
 import { DataTable, DataTableColumn, ConfirmModal } from '@/components/admin';
 import { ClubFormModal } from '@/components/admin/ClubFormModal';
-import { Badge, Button } from '@/components/common';
+import { Button } from '@/components/common';
 import { Shield } from 'lucide-react';
 
 interface Club {

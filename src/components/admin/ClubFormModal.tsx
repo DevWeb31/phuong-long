@@ -236,7 +236,10 @@ export function ClubFormModal({ isOpen, onClose, onSubmit, club, isLoading = fal
     setCompletedSteps(prev => new Set([...prev, currentStep]));
     const currentIndex = STEPS.findIndex(s => s.id === currentStep);
     if (currentIndex < STEPS.length - 1) {
-      setCurrentStep(STEPS[currentIndex + 1].id);
+      const nextStep = STEPS[currentIndex + 1];
+      if (nextStep) {
+        setCurrentStep(nextStep.id);
+      }
       // Scroll vers le haut de la modale
       const modalContent = document.querySelector('[class*="max-h-[calc(100vh-200px)]"]');
       if (modalContent) {
@@ -248,7 +251,10 @@ export function ClubFormModal({ isOpen, onClose, onSubmit, club, isLoading = fal
   const handlePrevious = () => {
     const currentIndex = STEPS.findIndex(s => s.id === currentStep);
     if (currentIndex > 0) {
-      setCurrentStep(STEPS[currentIndex - 1].id);
+      const previousStep = STEPS[currentIndex - 1];
+      if (previousStep) {
+        setCurrentStep(previousStep.id);
+      }
     }
   };
 
@@ -291,7 +297,8 @@ export function ClubFormModal({ isOpen, onClose, onSubmit, club, isLoading = fal
     // Pour avancer, toutes les étapes précédentes doivent être complètes
     if (targetIndex > currentIndex) {
       for (let i = 0; i < targetIndex; i++) {
-        if (!isStepCompleted(STEPS[i].id) && !validateStep(STEPS[i].id).isValid) {
+        const step = STEPS[i];
+        if (step && !isStepCompleted(step.id) && !validateStep(step.id).isValid) {
           return false;
         }
       }
@@ -497,7 +504,6 @@ export function ClubFormModal({ isOpen, onClose, onSubmit, club, isLoading = fal
             {STEPS.map((step, index) => {
               const isActive = currentStep === step.id;
               const isCompleted = isStepCompleted(step.id);
-              const isValid = isStepValid(step.id);
               const canGo = canGoToStep(step.id);
               
               return (
