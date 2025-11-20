@@ -12,8 +12,8 @@
 import { useState, useEffect } from 'react';
 import { DataTable, DataTableColumn, ConfirmModal } from '@/components/admin';
 import { HeroSlideFormModal } from '@/components/admin/HeroSlideFormModal';
-import { Badge, Button } from '@/components/common';
-import { Play, Video } from 'lucide-react';
+import { Badge } from '@/components/common';
+import { Play } from 'lucide-react';
 import type { HeroSlide } from '@/components/marketing/HeroCarousel';
 
 export default function AdminHeroSlidesPage() {
@@ -183,21 +183,6 @@ export default function AdminHeroSlidesPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100">
-            Carousel Hero
-          </h1>
-          <p className="text-slate-600 dark:text-slate-400 mt-1">
-            Gérez les slides du carousel hero avec vidéo YouTube en fond
-          </p>
-        </div>
-        <Button onClick={handleCreate} variant="primary">
-          <Video className="w-4 h-4 mr-2" />
-          Nouveau Slide
-        </Button>
-      </div>
-
       <DataTable
         columns={columns}
         data={slides}
@@ -205,6 +190,8 @@ export default function AdminHeroSlidesPage() {
         onEdit={handleEdit}
         onDelete={handleDelete}
         emptyMessage="Aucun slide pour le moment"
+        newItemLabel="Nouveau Slide"
+        onNewItemClick={handleCreate}
       />
 
       <HeroSlideFormModal

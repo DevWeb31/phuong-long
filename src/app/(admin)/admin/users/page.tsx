@@ -85,12 +85,14 @@ export default function AdminUsersPage() {
             full_name: user.full_name || user.email?.split('@')[0] || 'Utilisateur',
             email: user.email || '',
             role: user.primary_role || 'user',
-            club: user.club || null,
+            club: user.club_city || user.club || null, // Utiliser club_city si disponible
             status: 'active' as const, // Par défaut actif, à adapter selon vos besoins
             last_login: user.last_sign_in_at || null,
             created_at: user.created_at,
             user_roles: user.user_roles || [],
-          };
+            // Ajouter club_city pour l'affichage
+            club_city: user.club_city || null,
+          } as User & { club_city?: string | null };
         });
 
         setUsers(transformedUsers);
@@ -124,12 +126,6 @@ export default function AdminUsersPage() {
       label: 'Nom',
       sortable: true,
       render: (value) => <span className="font-medium text-gray-900 dark:text-gray-100">{value || 'N/A'}</span>,
-    },
-    {
-      key: 'email',
-      label: 'Email',
-      sortable: true,
-      render: (value) => <span className="text-gray-600 dark:text-gray-500">{value}</span>,
     },
     {
       key: 'role',
@@ -218,12 +214,14 @@ export default function AdminUsersPage() {
             full_name: user.full_name || user.email?.split('@')[0] || 'Utilisateur',
             email: user.email || '',
             role: user.primary_role || 'user',
-            club: user.club || null,
+            club: user.club_city || user.club || null, // Utiliser club_city si disponible
             status: 'active' as const,
             last_login: user.last_sign_in_at || null,
             created_at: user.created_at,
             user_roles: user.user_roles || [],
-          };
+            // Ajouter club_city pour l'affichage
+            club_city: user.club_city || null,
+          } as User & { club_city?: string | null };
         });
         setUsers(transformedUsers);
       }
@@ -250,56 +248,18 @@ export default function AdminUsersPage() {
     // TODO: Ouvrir modal ou page détails utilisateur
   };
 
-  if (loading) {
-    return (
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold dark:text-gray-100 mb-2">Gestion des Utilisateurs</h1>
-          <p className="text-gray-600 dark:text-gray-500">
-            Gérez les utilisateurs, rôles et permissions de la plateforme
-          </p>
-        </div>
-        <div className="flex items-center justify-center min-h-[400px]">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-            <p className="text-gray-600 dark:text-gray-400">Chargement des utilisateurs...</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold dark:text-gray-100 mb-2">Gestion des Utilisateurs</h1>
-          <p className="text-gray-600 dark:text-gray-500">
-            Gérez les utilisateurs, rôles et permissions de la plateforme
-          </p>
-        </div>
+  return (
+    <div className="space-y-6">
+      {error && (
         <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-6">
           <p className="text-red-800 dark:text-red-200 font-semibold">Erreur</p>
           <p className="text-red-600 dark:text-red-300 mt-2">{error}</p>
         </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold dark:text-gray-100 mb-2">Gestion des Utilisateurs</h1>
-        <p className="text-gray-600 dark:text-gray-500">
-          Gérez les utilisateurs, rôles et permissions de la plateforme
-        </p>
-      </div>
-
-      {/* DataTable */}
+      )}
       <DataTable
         data={users}
         columns={columns}
+        isLoading={loading}
         onEdit={handleEdit}
         onDelete={handleDelete}
         onView={handleView}

@@ -9,13 +9,15 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Fragment } from 'react';
 import { Modal } from './Modal';
 import { Button } from '@/components/common';
 import { ScheduleEditor } from './ScheduleEditor';
 import { PricingEditor } from './PricingEditor';
 import { LocationMapPicker } from './LocationMapPicker';
-import { Image as ImageIcon, Map as MapIcon, Calendar as CalendarIcon, Euro, Lightbulb, Facebook, Instagram, Youtube, CheckCircle2, Info, AlertCircle, XCircle } from 'lucide-react';
+import { CityAutocomplete } from './CityAutocomplete';
+import { CoverImageUploader } from './CoverImageUploader';
+import { Image as ImageIcon, Map as MapIcon, Calendar as CalendarIcon, Euro, Facebook, Instagram, Youtube, CheckCircle2, Info, AlertCircle, XCircle } from 'lucide-react';
 
 export interface CourseSession {
   time: string;
@@ -58,7 +60,7 @@ interface ClubFormModalProps {
   isLoading?: boolean;
 }
 
-type Step = 'info' | 'location' | 'schedule' | 'pricing' | 'social';
+type Step = 'info' | 'cover' | 'location' | 'schedule' | 'pricing' | 'social';
 
 interface StepConfig {
   id: Step;
@@ -68,6 +70,7 @@ interface StepConfig {
 
 const STEPS: StepConfig[] = [
   { id: 'info', label: 'Informations', icon: <Info className="w-4 h-4" /> },
+  { id: 'cover', label: 'Image de couverture', icon: <ImageIcon className="w-4 h-4" /> },
   { id: 'location', label: 'Localisation', icon: <MapIcon className="w-4 h-4" /> },
   { id: 'schedule', label: 'Horaires', icon: <CalendarIcon className="w-4 h-4" /> },
   { id: 'pricing', label: 'Tarifs', icon: <Euro className="w-4 h-4" /> },
@@ -79,6 +82,7 @@ export function ClubFormModal({ isOpen, onClose, onSubmit, club, isLoading = fal
   const [completedSteps, setCompletedSteps] = useState<Set<Step>>(new Set());
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
   const [showValidationErrors, setShowValidationErrors] = useState(false);
+  const [originalCoverImageUrl, setOriginalCoverImageUrl] = useState<string | null>(null);
   const [formData, setFormData] = useState<Partial<Club>>({
     name: '',
     slug: '',
@@ -111,6 +115,8 @@ export function ClubFormModal({ isOpen, onClose, onSubmit, club, isLoading = fal
           youtube: '',
         },
       });
+      // Mémoriser l'URL de l'image originale pour pouvoir la supprimer si nécessaire
+      setOriginalCoverImageUrl(club.cover_image_url || null);
     } else {
       setFormData({
         name: '',
@@ -133,6 +139,7 @@ export function ClubFormModal({ isOpen, onClose, onSubmit, club, isLoading = fal
         },
         active: true,
       });
+      setOriginalCoverImageUrl(null);
     }
     // Réinitialiser à la première étape quand on ouvre la modale
     if (isOpen) {
@@ -148,14 +155,21 @@ export function ClubFormModal({ isOpen, onClose, onSubmit, club, isLoading = fal
     switch (step) {
       case 'info':
         if (!formData.name?.trim()) errors.name = 'Le nom du club est obligatoire';
+        else if (formData.name.length > 50) errors.name = 'Le nom du club ne doit pas dépasser 50 caractères';
         if (!formData.slug?.trim()) errors.slug = 'Le slug est obligatoire';
         else if (!/^[a-z0-9-]+$/.test(formData.slug)) errors.slug = 'Le slug doit contenir uniquement des lettres minuscules, chiffres et tirets';
         if (!formData.city?.trim()) errors.city = 'La ville est obligatoire';
         if (!formData.address?.trim()) errors.address = 'L\'adresse est obligatoire';
         if (!formData.postal_code?.trim()) errors.postal_code = 'Le code postal est obligatoire';
         else if (!/^\d{5}$/.test(formData.postal_code)) errors.postal_code = 'Le code postal doit contenir 5 chiffres';
+        if (formData.phone && formData.phone.replace(/\D/g, '').length !== 10) {
+          errors.phone = 'Le numéro de téléphone doit contenir 10 chiffres';
+        }
         if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
           errors.email = 'Format d\'email invalide';
+        }
+        if (formData.description && formData.description.length > 400) {
+          errors.description = 'La description ne doit pas dépasser 400 caractères';
         }
         break;
       case 'location':
@@ -266,17 +280,10 @@ export function ClubFormModal({ isOpen, onClose, onSubmit, club, isLoading = fal
     return validateStep(step).isValid;
   };
   
-  // Calculer le pourcentage de progression
-  const getProgressPercentage = (): number => {
-    const totalSteps = STEPS.length;
-    const completedCount = completedSteps.size + (isStepValid(currentStep) ? 1 : 0);
-    return Math.round((completedCount / totalSteps) * 100);
-  };
-  
   // Compter les champs remplis pour l'étape info
   const getInfoFieldsProgress = (): { filled: number; total: number } => {
     const requiredFields = ['name', 'slug', 'city', 'address', 'postal_code'];
-    const optionalFields = ['phone', 'email', 'description', 'cover_image_url'];
+    const optionalFields = ['phone', 'email', 'description'];
     const allFields = [...requiredFields, ...optionalFields];
     
     const filled = allFields.filter(field => {
@@ -365,18 +372,66 @@ export function ClubFormModal({ isOpen, onClose, onSubmit, club, isLoading = fal
       Object.entries(cleanedSocialMedia).filter(([_, v]) => v !== undefined && v !== '')
     ) : undefined;
     
+    // Si cover_image_url est vide ou null, envoyer null explicitement pour supprimer l'image
+    const coverImageUrl = formData.cover_image_url?.trim();
+    const finalCoverImageUrl = coverImageUrl && coverImageUrl.length > 0 ? coverImageUrl : null;
+    
+    // Supprimer l'ancienne image du storage si elle existe et que l'image a été supprimée
+    if (originalCoverImageUrl && !finalCoverImageUrl && originalCoverImageUrl.includes('/storage/v1/object/public/clubs/')) {
+      try {
+        console.log('🗑️ Suppression de l\'ancienne image lors de la sauvegarde:', originalCoverImageUrl);
+        const deleteResponse = await fetch('/api/admin/delete-image', {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            imageUrl: originalCoverImageUrl,
+          }),
+        });
+
+        if (deleteResponse.ok) {
+          console.log('✅ Ancienne image supprimée du storage avec succès');
+        } else {
+          const errorData = await deleteResponse.json();
+          console.warn('⚠️ Erreur lors de la suppression de l\'ancienne image:', errorData);
+          // Ne pas bloquer la sauvegarde si la suppression échoue
+        }
+      } catch (error) {
+        console.warn('⚠️ Erreur lors de la suppression de l\'ancienne image:', error);
+        // Ne pas bloquer la sauvegarde si la suppression échoue
+      }
+    }
+    
     const cleanedData: Partial<Club> = {
       ...formData,
-      cover_image_url: formData.cover_image_url || undefined,
-      description: formData.description || undefined,
-      phone: formData.phone || undefined,
-      email: formData.email || undefined,
+      cover_image_url: finalCoverImageUrl || undefined,
+      description: formData.description?.trim() || undefined,
+      phone: formData.phone?.trim() || undefined,
+      email: formData.email?.trim() || undefined,
       social_media: cleanedSocialMediaFiltered && Object.keys(cleanedSocialMediaFiltered).length > 0 
         ? cleanedSocialMediaFiltered as { facebook?: string; instagram?: string; youtube?: string }
         : undefined,
     };
     
+    console.log('📤 Envoi des données du club:', { 
+      ...cleanedData, 
+      cover_image_url: finalCoverImageUrl === null ? 'NULL (suppression)' : finalCoverImageUrl 
+    });
+    
     await onSubmit(cleanedData);
+    
+    // Mettre à jour l'URL originale après la sauvegarde
+    if (finalCoverImageUrl) {
+      setOriginalCoverImageUrl(finalCoverImageUrl);
+    } else {
+      setOriginalCoverImageUrl(null);
+    }
+  };
+
+  const handleSubmitAndClose = async () => {
+    await handleSubmit();
+    onClose();
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -409,7 +464,7 @@ export function ClubFormModal({ isOpen, onClose, onSubmit, club, isLoading = fal
 
   // Auto-générer le slug depuis le nom
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const name = e.target.value;
+    const name = e.target.value.slice(0, 50); // Limiter à 50 caractères
     const slug = name
       .toLowerCase()
       .normalize('NFD')
@@ -418,6 +473,33 @@ export function ClubFormModal({ isOpen, onClose, onSubmit, club, isLoading = fal
       .replace(/^-+|-+$/g, '');
     
     setFormData(prev => ({ ...prev, name, slug }));
+  };
+
+  // Formater le téléphone au format "01 02 03 04 05" (chiffres uniquement)
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    // Ne garder que les chiffres
+    const digitsOnly = value.replace(/\D/g, '');
+    // Limiter à 10 chiffres (format français)
+    const limitedDigits = digitsOnly.slice(0, 10);
+    // Formater au format "01 02 03 04 05"
+    let formatted = '';
+    for (let i = 0; i < limitedDigits.length; i++) {
+      if (i > 0 && i % 2 === 0) {
+        formatted += ' ';
+      }
+      formatted += limitedDigits[i];
+    }
+    
+    setFormData(prev => ({ ...prev, phone: formatted }));
+    // Effacer l'erreur de validation si elle existe
+    if (validationErrors.phone) {
+      setValidationErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors.phone;
+        return newErrors;
+      });
+    }
   };
 
   const currentStepIndex = STEPS.findIndex(s => s.id === currentStep);
@@ -438,9 +520,9 @@ export function ClubFormModal({ isOpen, onClose, onSubmit, club, isLoading = fal
                 variant="ghost" 
                 onClick={handlePrevious} 
                 disabled={isLoading}
-                className="w-full sm:w-auto"
+                className="w-full sm:w-auto text-gray-900 dark:text-gray-100"
               >
-                <span className="hidden sm:inline">← </span>Précédent
+                Précédent
               </Button>
             )}
           </div>
@@ -449,10 +531,22 @@ export function ClubFormModal({ isOpen, onClose, onSubmit, club, isLoading = fal
               variant="ghost" 
               onClick={onClose} 
               disabled={isLoading}
-              className="flex-1 sm:flex-initial"
+              className="flex-1 sm:flex-initial text-gray-900 dark:text-gray-100"
             >
               Annuler
             </Button>
+            {/* Bouton "Mettre à jour et fermer" uniquement en mode modification et pas sur la dernière étape */}
+            {club && !isLastStep && (
+              <Button 
+                variant="secondary" 
+                onClick={handleSubmitAndClose} 
+                isLoading={isLoading}
+                disabled={!validateStep(currentStep).isValid}
+                className="flex-1 sm:flex-initial"
+              >
+                Mettre à jour et fermer
+              </Button>
+            )}
             {isLastStep ? (
               <Button 
                 variant="primary" 
@@ -470,32 +564,13 @@ export function ClubFormModal({ isOpen, onClose, onSubmit, club, isLoading = fal
                 disabled={!validateStep(currentStep).isValid}
                 className="flex-1 sm:flex-initial"
               >
-                Suivant<span className="hidden sm:inline"> →</span>
-                <span className="hidden lg:inline ml-2 text-xs opacity-75">(Ctrl+Entrée)</span>
+                Suivant
               </Button>
             )}
           </div>
         </div>
       }
     >
-      {/* Progress Bar */}
-      <div className="mb-4 sm:mb-6">
-        <div className="flex items-center justify-between mb-2">
-          <span className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">
-            Progression globale
-          </span>
-          <span className="text-xs sm:text-sm font-bold text-primary">
-            {getProgressPercentage()}%
-          </span>
-        </div>
-        <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 sm:h-2.5 overflow-hidden">
-          <div 
-            className="bg-gradient-to-r from-primary to-primary-dark h-2 sm:h-2.5 rounded-full transition-all duration-500 ease-out"
-            style={{ width: `${getProgressPercentage()}%` }}
-          />
-        </div>
-      </div>
-
       {/* Steps Navigation */}
       <div className="mb-6 sm:mb-8">
         {/* Mobile: Steps vertical scrollable */}
@@ -515,7 +590,7 @@ export function ClubFormModal({ isOpen, onClose, onSubmit, club, isLoading = fal
                   className={`
                     flex items-center gap-2 px-3 py-2 rounded-lg transition-all duration-200 flex-shrink-0
                     ${isActive 
-                      ? 'bg-primary text-white shadow-md' 
+                      ? 'bg-green-600 text-white shadow-md' 
                       : canGo 
                         ? 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300' 
                         : 'bg-gray-50 dark:bg-gray-900 text-gray-400 dark:text-gray-600 opacity-50'
@@ -525,7 +600,7 @@ export function ClubFormModal({ isOpen, onClose, onSubmit, club, isLoading = fal
                   <div className={`
                     w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold
                     ${isActive || isCompleted 
-                      ? 'bg-white text-primary' 
+                      ? isActive ? 'bg-white text-green-600' : 'bg-white text-primary' 
                       : 'bg-gray-300 dark:bg-gray-600 text-gray-600 dark:text-gray-300'
                     }
                   `}>
@@ -539,7 +614,7 @@ export function ClubFormModal({ isOpen, onClose, onSubmit, club, isLoading = fal
         </div>
         
         {/* Desktop: Steps horizontal */}
-        <div className="hidden sm:flex items-center justify-between">
+        <div className="hidden sm:flex items-center justify-evenly w-full">
           {STEPS.map((step, index) => {
             const isActive = currentStep === step.id;
             const isCompleted = isStepCompleted(step.id);
@@ -547,13 +622,13 @@ export function ClubFormModal({ isOpen, onClose, onSubmit, club, isLoading = fal
             const canGo = canGoToStep(step.id);
             
             return (
-              <div key={step.id} className="flex items-center flex-1">
+              <Fragment key={step.id}>
                 <button
                   type="button"
                   onClick={() => canGo && handleStepChange(step.id)}
                   disabled={!canGo || isLoading}
                   className={`
-                    flex flex-col items-center gap-2 flex-1 relative
+                    flex flex-col items-center gap-2 relative flex-shrink-0
                     ${isActive ? 'cursor-default' : canGo ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'}
                     transition-all duration-200
                   `}
@@ -561,9 +636,9 @@ export function ClubFormModal({ isOpen, onClose, onSubmit, club, isLoading = fal
                   {/* Step Circle */}
                   <div className={`
                     w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center
-                    border-2 transition-all duration-200
+                    border-2 transition-all duration-200 relative
                     ${isActive 
-                      ? 'border-primary bg-primary text-white' 
+                      ? 'border-green-600 bg-green-600 text-white' 
                       : isCompleted 
                         ? 'border-primary bg-primary text-white' 
                         : isValid && !isCompleted
@@ -576,13 +651,26 @@ export function ClubFormModal({ isOpen, onClose, onSubmit, club, isLoading = fal
                     ) : (
                       <div className="w-4 h-4 sm:w-4 sm:h-4">{step.icon}</div>
                     )}
+                    
+                    {/* Step Number */}
+                    <span className={`
+                      absolute -top-1 -right-1 w-4 h-4 sm:w-5 sm:h-5 rounded-full text-[10px] sm:text-xs flex items-center justify-center font-bold
+                      ${isActive
+                        ? 'bg-green-600 text-white'
+                        : isCompleted
+                          ? 'bg-primary text-white'
+                          : 'bg-gray-300 dark:bg-gray-600 text-gray-600 dark:text-gray-300'
+                      }
+                    `}>
+                      {index + 1}
+                    </span>
                   </div>
                   
                   {/* Step Label */}
                   <span className={`
-                    text-[10px] sm:text-xs font-semibold text-center leading-tight
+                    text-[10px] sm:text-xs font-semibold text-center leading-tight max-w-[80px] sm:max-w-[100px]
                     ${isActive 
-                      ? 'text-primary dark:text-primary-light' 
+                      ? 'text-green-600 dark:text-green-500' 
                       : isCompleted 
                         ? 'text-primary dark:text-primary-light'
                         : 'text-gray-500 dark:text-gray-400'
@@ -590,30 +678,21 @@ export function ClubFormModal({ isOpen, onClose, onSubmit, club, isLoading = fal
                   `}>
                     {step.label}
                   </span>
-                  
-                  {/* Step Number */}
-                  <span className={`
-                    absolute -top-1 -right-1 w-4 h-4 sm:w-5 sm:h-5 rounded-full text-[10px] sm:text-xs flex items-center justify-center font-bold
-                    ${isActive || isCompleted
-                      ? 'bg-primary text-white'
-                      : 'bg-gray-300 dark:bg-gray-600 text-gray-600 dark:text-gray-300'
-                    }
-                  `}>
-                    {index + 1}
-                  </span>
                 </button>
                 
                 {/* Connector Line */}
                 {index < STEPS.length - 1 && (
                   <div className={`
-                    h-0.5 flex-1 mx-1 sm:mx-2 transition-all duration-200 hidden sm:block
-                    ${isCompleted || (index < currentStepIndex)
-                      ? 'bg-primary'
-                      : 'bg-gray-300 dark:bg-gray-600'
+                    h-0.5 flex-1 max-w-[60px] sm:max-w-[80px] mx-2 sm:mx-3 transition-all duration-200
+                    ${isActive || (index < currentStepIndex && isCompleted)
+                      ? 'bg-green-600'
+                      : isCompleted || (index < currentStepIndex)
+                        ? 'bg-primary'
+                        : 'bg-gray-300 dark:bg-gray-600'
                     }
                   `} />
                 )}
-              </div>
+              </Fragment>
             );
           })}
         </div>
@@ -667,13 +746,17 @@ export function ClubFormModal({ isOpen, onClose, onSubmit, club, isLoading = fal
                   value={formData.name}
                   onChange={handleNameChange}
                   required
-                  className={`w-full px-4 py-2.5 border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all bg-white dark:bg-gray-800 ${
+                  maxLength={50}
+                  className={`w-full px-4 py-2.5 border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 ${
                     showValidationErrors && validationErrors.name
                       ? 'border-red-500 dark:border-red-500 focus:ring-red-500'
                       : 'dark:border-gray-700'
                   }`}
                   placeholder="Ex: Marseille Centre"
                 />
+                <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                  {formData.name?.length || 0}/50 caractères
+                </p>
                 {showValidationErrors && validationErrors.name && (
                   <p className="mt-1.5 text-xs text-red-600 dark:text-red-400 flex items-center gap-1">
                     <XCircle className="w-3 h-3" />
@@ -692,155 +775,23 @@ export function ClubFormModal({ isOpen, onClose, onSubmit, club, isLoading = fal
                   id="slug"
                   name="slug"
                   value={formData.slug}
-                  onChange={handleChange}
+                  readOnly
                   required
-                  className={`w-full px-4 py-2.5 border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all bg-white dark:bg-gray-800 ${
+                  className={`w-full px-4 py-2.5 border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all bg-gray-50 dark:bg-gray-800/50 text-gray-900 dark:text-gray-100 cursor-not-allowed ${
                     showValidationErrors && validationErrors.slug
                       ? 'border-red-500 dark:border-red-500 focus:ring-red-500'
                       : 'dark:border-gray-700'
                   }`}
                   placeholder="marseille-centre"
                 />
+                <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                  Généré automatiquement depuis le nom du club
+                </p>
                 {showValidationErrors && validationErrors.slug && (
                   <p className="mt-1.5 text-xs text-red-600 dark:text-red-400 flex items-center gap-1">
                     <XCircle className="w-3 h-3" />
                     {validationErrors.slug}
                   </p>
-                )}
-              </div>
-
-              {/* Ville */}
-              <div>
-                <label htmlFor="city" className="block text-sm font-semibold dark:text-gray-300 mb-2">
-                  Ville <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  id="city"
-                  name="city"
-                  value={formData.city}
-                  onChange={handleChange}
-                  required
-                  className={`w-full px-4 py-2.5 border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all bg-white dark:bg-gray-800 ${
-                    showValidationErrors && validationErrors.city
-                      ? 'border-red-500 dark:border-red-500 focus:ring-red-500'
-                      : 'dark:border-gray-700'
-                  }`}
-                  placeholder="Marseille"
-                />
-                {showValidationErrors && validationErrors.city && (
-                  <p className="mt-1.5 text-xs text-red-600 dark:text-red-400 flex items-center gap-1">
-                    <XCircle className="w-3 h-3" />
-                    {validationErrors.city}
-                  </p>
-                )}
-              </div>
-
-              {/* Code postal */}
-              <div>
-                <label htmlFor="postal_code" className="block text-sm font-semibold dark:text-gray-300 mb-2">
-                  Code postal <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  id="postal_code"
-                  name="postal_code"
-                  value={formData.postal_code}
-                  onChange={handleChange}
-                  required
-                  maxLength={5}
-                  className={`w-full px-4 py-2.5 border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all bg-white dark:bg-gray-800 ${
-                    showValidationErrors && validationErrors.postal_code
-                      ? 'border-red-500 dark:border-red-500 focus:ring-red-500'
-                      : 'dark:border-gray-700'
-                  }`}
-                  placeholder="13001"
-                />
-                {showValidationErrors && validationErrors.postal_code && (
-                  <p className="mt-1.5 text-xs text-red-600 dark:text-red-400 flex items-center gap-1">
-                    <XCircle className="w-3 h-3" />
-                    {validationErrors.postal_code}
-                  </p>
-                )}
-              </div>
-
-              {/* Téléphone */}
-              <div>
-                <label htmlFor="phone" className="block text-sm font-semibold dark:text-gray-300 mb-2">
-                  Téléphone
-                </label>
-                <input
-                  type="tel"
-                  id="phone"
-                  name="phone"
-                  value={formData.phone || ''}
-                  onChange={handleChange}
-                  className="w-full px-4 py-2.5 border dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all bg-white dark:bg-gray-800"
-                  placeholder="06 12 34 56 78"
-                />
-              </div>
-
-              {/* Email */}
-              <div>
-                <label htmlFor="email" className="block text-sm font-semibold dark:text-gray-300 mb-2">
-                  Email
-                </label>
-                <input
-                  type="email"
-                  id="email"
-                  name="email"
-                  value={formData.email || ''}
-                  onChange={handleChange}
-                  className={`w-full px-4 py-2.5 border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all bg-white dark:bg-gray-800 ${
-                    showValidationErrors && validationErrors.email
-                      ? 'border-red-500 dark:border-red-500 focus:ring-red-500'
-                      : 'dark:border-gray-700'
-                  }`}
-                  placeholder="club@phuonglong.fr"
-                />
-                {showValidationErrors && validationErrors.email && (
-                  <p className="mt-1.5 text-xs text-red-600 dark:text-red-400 flex items-center gap-1">
-                    <XCircle className="w-3 h-3" />
-                    {validationErrors.email}
-                  </p>
-                )}
-              </div>
-
-              {/* Image de couverture */}
-              <div className="sm:col-span-2">
-                <label htmlFor="cover_image_url" className="block text-sm font-semibold dark:text-gray-300 mb-2 flex items-center gap-2">
-                  <ImageIcon className="w-4 h-4 text-primary" />
-                  Image de couverture (URL)
-                </label>
-                <input
-                  type="url"
-                  id="cover_image_url"
-                  name="cover_image_url"
-                  value={formData.cover_image_url || ''}
-                  onChange={handleChange}
-                  className="w-full px-4 py-2.5 border dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all bg-white dark:bg-gray-800"
-                  placeholder="https://example.com/club-image.jpg"
-                />
-                <p className="mt-1.5 text-xs dark:text-gray-500 flex items-start gap-1.5">
-                  <Lightbulb className="w-3 h-3 flex-shrink-0 mt-0.5" />
-                  <span>Conseil : Utilisez une image 16:9 (ex: 1200x675px) pour un meilleur rendu</span>
-                </p>
-                
-                {/* Preview */}
-                {formData.cover_image_url && (
-                  <div className="mt-4">
-                    <p className="text-xs font-semibold dark:text-gray-300 mb-2">Aperçu :</p>
-                    <div className="relative aspect-video w-full max-w-md rounded-xl overflow-hidden border-2 dark:border-gray-800">
-                      <img
-                        src={formData.cover_image_url}
-                        alt="Aperçu"
-                        className="w-full h-full object-cover"
-                        onError={(e) => {
-                          (e.target as HTMLImageElement).src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="300"%3E%3Crect fill="%23f3f4f6" width="400" height="300"/%3E%3Ctext x="50%25" y="50%25" dominant-baseline="middle" text-anchor="middle" fill="%239ca3af" font-family="sans-serif" font-size="18"%3EImage invalide%3C/text%3E%3C/svg%3E';
-                        }}
-                      />
-                    </div>
-                  </div>
                 )}
               </div>
             </div>
@@ -857,7 +808,7 @@ export function ClubFormModal({ isOpen, onClose, onSubmit, club, isLoading = fal
                 value={formData.address}
                 onChange={handleChange}
                 required
-                className={`w-full px-4 py-2.5 border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all bg-white dark:bg-gray-800 ${
+                className={`w-full px-4 py-2.5 border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 ${
                   showValidationErrors && validationErrors.address
                     ? 'border-red-500 dark:border-red-500 focus:ring-red-500'
                     : 'dark:border-gray-700'
@@ -872,6 +823,128 @@ export function ClubFormModal({ isOpen, onClose, onSubmit, club, isLoading = fal
               )}
             </div>
 
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+              {/* Ville */}
+              <div>
+                <label htmlFor="city" className="block text-sm font-semibold dark:text-gray-300 mb-2">
+                  Ville <span className="text-red-500">*</span>
+                </label>
+                <CityAutocomplete
+                  value={formData.city || ''}
+                  onChange={(city, postalCode) => {
+                    console.log('ClubFormModal - onChange:', { city, postalCode });
+                    setFormData(prev => {
+                      const newData = {
+                        ...prev,
+                        city,
+                        postal_code: postalCode,
+                      };
+                      console.log('ClubFormModal - new formData:', newData);
+                      return newData;
+                    });
+                    // Effacer les erreurs de validation si elles existent
+                    if (validationErrors.city || validationErrors.postal_code) {
+                      setValidationErrors(prev => {
+                        const newErrors = { ...prev };
+                        delete newErrors.city;
+                        delete newErrors.postal_code;
+                        return newErrors;
+                      });
+                    }
+                  }}
+                  error={showValidationErrors ? validationErrors.city : undefined}
+                  required
+                />
+              </div>
+
+              {/* Code postal */}
+              <div>
+                <label htmlFor="postal_code" className="block text-sm font-semibold dark:text-gray-300 mb-2">
+                  Code postal <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  id="postal_code"
+                  name="postal_code"
+                  key={`postal_code-${formData.postal_code || 'empty'}`}
+                  value={formData.postal_code || ''}
+                  readOnly
+                  required
+                  maxLength={5}
+                  className={`w-full px-4 py-2.5 border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all bg-gray-50 dark:bg-gray-800/50 text-gray-900 dark:text-gray-100 cursor-not-allowed ${
+                    showValidationErrors && validationErrors.postal_code
+                      ? 'border-red-500 dark:border-red-500 focus:ring-red-500'
+                      : 'dark:border-gray-700'
+                  }`}
+                  placeholder="Sélectionnez une ville..."
+                />
+                <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                  Auto-complété lors de la sélection de la ville
+                </p>
+                {showValidationErrors && validationErrors.postal_code && (
+                  <p className="mt-1.5 text-xs text-red-600 dark:text-red-400 flex items-center gap-1">
+                    <XCircle className="w-3 h-3" />
+                    {validationErrors.postal_code}
+                  </p>
+                )}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+              {/* Téléphone */}
+              <div>
+                <label htmlFor="phone" className="block text-sm font-semibold dark:text-gray-300 mb-2">
+                  Téléphone
+                </label>
+                <input
+                  type="tel"
+                  id="phone"
+                  name="phone"
+                  value={formData.phone || ''}
+                  onChange={handlePhoneChange}
+                  maxLength={14}
+                  className={`w-full px-4 py-2.5 border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 ${
+                    showValidationErrors && validationErrors.phone
+                      ? 'border-red-500 dark:border-red-500 focus:ring-red-500'
+                      : 'dark:border-gray-700'
+                  }`}
+                  placeholder="01 02 03 04 05"
+                />
+                {showValidationErrors && validationErrors.phone && (
+                  <p className="mt-1.5 text-xs text-red-600 dark:text-red-400 flex items-center gap-1">
+                    <XCircle className="w-3 h-3" />
+                    {validationErrors.phone}
+                  </p>
+                )}
+              </div>
+
+              {/* Email */}
+              <div>
+                <label htmlFor="email" className="block text-sm font-semibold dark:text-gray-300 mb-2">
+                  Email
+                </label>
+                <input
+                  type="email"
+                  id="email"
+                  name="email"
+                  value={formData.email || ''}
+                  onChange={handleChange}
+                  className={`w-full px-4 py-2.5 border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 ${
+                    showValidationErrors && validationErrors.email
+                      ? 'border-red-500 dark:border-red-500 focus:ring-red-500'
+                      : 'dark:border-gray-700'
+                  }`}
+                  placeholder="club@phuonglong.fr"
+                />
+                {showValidationErrors && validationErrors.email && (
+                  <p className="mt-1.5 text-xs text-red-600 dark:text-red-400 flex items-center gap-1">
+                    <XCircle className="w-3 h-3" />
+                    {validationErrors.email}
+                  </p>
+                )}
+              </div>
+            </div>
+
             {/* Description */}
             <div>
               <label htmlFor="description" className="block text-sm font-semibold dark:text-gray-300 mb-2">
@@ -883,14 +956,91 @@ export function ClubFormModal({ isOpen, onClose, onSubmit, club, isLoading = fal
                 value={formData.description || ''}
                 onChange={handleChange}
                 rows={4}
-                className="w-full px-4 py-2.5 border dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all resize-none bg-white dark:bg-gray-800"
+                maxLength={400}
+                className={`w-full px-4 py-2.5 border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all resize-none bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 ${
+                  showValidationErrors && validationErrors.description
+                    ? 'border-red-500 dark:border-red-500 focus:ring-red-500'
+                    : 'dark:border-gray-700'
+                }`}
                 placeholder="Décrivez le club..."
+              />
+              <div className="flex items-center justify-between mt-1">
+                <p className="text-xs text-gray-500 dark:text-gray-400">
+                  {(formData.description || '').length}/400 caractères
+                </p>
+                {showValidationErrors && validationErrors.description && (
+                  <p className="text-xs text-red-600 dark:text-red-400 flex items-center gap-1">
+                    <XCircle className="w-3 h-3" />
+                    {validationErrors.description}
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Step 2: Image de couverture */}
+        {currentStep === 'cover' && (
+          <div className="space-y-4 sm:space-y-6 animate-fade-in">
+            <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3 sm:p-4">
+              <p className="text-xs sm:text-sm text-blue-800 dark:text-blue-200 flex items-start gap-2">
+                <ImageIcon className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                <span>Ajoutez une image de couverture pour votre club. Cette image sera affichée sur la page du club et dans les listes.</span>
+              </p>
+            </div>
+
+            {/* Message d'erreur global */}
+            {showValidationErrors && Object.keys(validationErrors).length > 0 && (
+              <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-3 sm:p-4">
+                <div className="flex items-start gap-2">
+                  <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs sm:text-sm font-semibold text-red-800 dark:text-red-200 mb-1">
+                      Veuillez corriger les erreurs suivantes :
+                    </p>
+                    <ul className="text-xs sm:text-sm text-red-700 dark:text-red-300 list-disc list-inside space-y-1">
+                      {Object.entries(validationErrors).map(([field, message]) => (
+                        <li key={field}>{message}</li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Image de couverture */}
+            <div>
+              <label className="block text-sm font-semibold dark:text-gray-300 mb-2 flex items-center gap-2">
+                <ImageIcon className="w-4 h-4 text-primary" />
+                Image de couverture
+              </label>
+              <CoverImageUploader
+                value={formData.cover_image_url || ''}
+                onChange={(url) => {
+                  setFormData(prev => ({
+                    ...prev,
+                    cover_image_url: url,
+                  }));
+                  // Mettre à jour l'URL originale si une nouvelle image est uploadée
+                  if (url && url.includes('/storage/v1/object/public/clubs/')) {
+                    setOriginalCoverImageUrl(url);
+                  }
+                  // Effacer l'erreur de validation si elle existe
+                  if (validationErrors.cover_image_url) {
+                    setValidationErrors(prev => {
+                      const newErrors = { ...prev };
+                      delete newErrors.cover_image_url;
+                      return newErrors;
+                    });
+                  }
+                }}
+                error={showValidationErrors ? validationErrors.cover_image_url : undefined}
               />
             </div>
           </div>
         )}
 
-        {/* Step 2: Localisation */}
+        {/* Step 3: Localisation */}
         {currentStep === 'location' && (
           <div className="space-y-4 sm:space-y-6 animate-fade-in">
             <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3 sm:p-4">
@@ -1011,7 +1161,7 @@ export function ClubFormModal({ isOpen, onClose, onSubmit, club, isLoading = fal
           </div>
         )}
 
-        {/* Step 3: Horaires */}
+        {/* Step 4: Horaires */}
         {currentStep === 'schedule' && (
           <div className="space-y-4 sm:space-y-6 animate-fade-in">
             <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3 sm:p-4">
@@ -1029,7 +1179,7 @@ export function ClubFormModal({ isOpen, onClose, onSubmit, club, isLoading = fal
           </div>
         )}
 
-        {/* Step 4: Tarifs */}
+        {/* Step 5: Tarifs */}
         {currentStep === 'pricing' && (
           <div className="space-y-4 sm:space-y-6 animate-fade-in">
             <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3 sm:p-4">
@@ -1046,7 +1196,7 @@ export function ClubFormModal({ isOpen, onClose, onSubmit, club, isLoading = fal
           </div>
         )}
 
-        {/* Step 5: Réseaux sociaux & Statut */}
+        {/* Step 6: Réseaux sociaux & Statut */}
         {currentStep === 'social' && (
           <div className="space-y-4 sm:space-y-6 animate-fade-in">
             <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3 sm:p-4">

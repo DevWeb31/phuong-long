@@ -12,7 +12,7 @@
 import { useState, useEffect } from 'react';
 import { DataTable, DataTableColumn, ConfirmModal } from '@/components/admin';
 import { BlogFormModal } from '@/components/admin/BlogFormModal';
-import { Badge, Button } from '@/components/common';
+import { Badge } from '@/components/common';
 
 interface BlogPost {
   id: string;
@@ -95,7 +95,21 @@ export default function AdminBlogPage() {
       key: 'title',
       label: 'Titre',
       sortable: true,
-      render: (value) => <span className="font-medium text-gray-900 dark:text-gray-100">{value}</span>,
+      render: (value) => {
+        const title = value as string;
+        const truncatedTitle = title.length > 30 ? `${title.slice(0, 30)}...` : title;
+        return (
+          <div className="relative group">
+            <span className="font-medium text-gray-900 dark:text-gray-100">{truncatedTitle}</span>
+            {title.length > 30 && (
+              <div className="absolute left-0 bottom-full mb-2 px-3 py-2 bg-gray-900 dark:bg-gray-800 text-white text-sm rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-10 max-w-xs whitespace-normal">
+                {title}
+                <div className="absolute left-4 top-full w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900 dark:border-t-gray-800"></div>
+              </div>
+            )}
+          </div>
+        );
+      },
       width: 'min-w-[250px]',
     },
     {
@@ -124,18 +138,6 @@ export default function AdminBlogPage() {
             </Badge>
           )}
         </div>
-      ),
-    },
-    {
-      key: 'views_count',
-      label: 'Vues',
-      sortable: true,
-      render: (value) => value ? (
-        <span className="text-gray-700 dark:text-gray-300 font-medium">
-          {value.toLocaleString('fr-FR')}
-        </span>
-      ) : (
-        <span className="text-gray-400 dark:text-gray-400">0</span>
       ),
     },
     {
@@ -221,34 +223,18 @@ export default function AdminBlogPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold dark:text-gray-100 mb-2">Gestion du Blog</h1>
-          <p className="text-gray-600 dark:text-gray-500">
-            Gérez les articles, brouillons et publications du blog
-          </p>
-        </div>
-        <Button variant="primary" onClick={handleCreateNew}>
-          ➕ Nouvel Article
-        </Button>
-      </div>
-
-      {isLoading ? (
-        <div className="text-center py-12">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 dark:border-gray-800"></div>
-          <p className="mt-4 text-gray-600 dark:text-gray-500">Chargement...</p>
-        </div>
-      ) : (
-        <DataTable
-          data={posts}
-          columns={columns}
-          onEdit={handleEdit}
-          onDelete={handleDelete}
-          onView={handleView}
-          searchPlaceholder="Rechercher un article..."
-          emptyMessage="Aucun article trouvé"
-        />
-      )}
+      <DataTable
+        data={posts}
+        columns={columns}
+        isLoading={isLoading}
+        onEdit={handleEdit}
+        onDelete={handleDelete}
+        onView={handleView}
+        searchPlaceholder="Rechercher un article..."
+        emptyMessage="Aucun article trouvé"
+        newItemLabel="Nouvel Article"
+        onNewItemClick={handleCreateNew}
+      />
 
       <BlogFormModal
         isOpen={isFormOpen}

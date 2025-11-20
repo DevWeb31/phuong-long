@@ -9,7 +9,7 @@
 
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/common';
 import { 
@@ -52,7 +52,10 @@ interface DataTableProps<T> {
   emptyMessage?: string;
   newItemLabel?: string;
   newItemHref?: string;
+  onNewItemClick?: () => void;
   isLoading?: boolean;
+  defaultSortColumn?: keyof T | string;
+  defaultSortDirection?: 'asc' | 'desc';
 }
 
 export function DataTable<T extends { id: string | number }>({
@@ -64,16 +67,61 @@ export function DataTable<T extends { id: string | number }>({
   onView,
   searchable = true,
   searchPlaceholder = 'Rechercher...',
-  itemsPerPage = 10,
+  itemsPerPage = 8,
   emptyMessage = 'Aucune donnée disponible',
   newItemLabel,
   newItemHref,
+  onNewItemClick,
   isLoading = false,
+  defaultSortColumn,
+  defaultSortDirection = 'asc',
 }: DataTableProps<T>) {
   const [searchTerm, setSearchTerm] = useState('');
-  const [sortColumn, setSortColumn] = useState<keyof T | string | null>(null);
-  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+  const [sortColumn, setSortColumn] = useState<keyof T | string | null>(defaultSortColumn || null);
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>(defaultSortDirection);
   const [currentPage, setCurrentPage] = useState(1);
+  const [isCardMode, setIsCardMode] = useState(false);
+  const [tableHeight, setTableHeight] = useState<number | null>(null);
+  const [calculatedItemsPerPage, setCalculatedItemsPerPage] = useState<number | null>(null);
+
+  // Détecter la largeur de la fenêtre et calculer la hauteur du tableau
+  useEffect(() => {
+    const handleResize = () => {
+      setIsCardMode(window.innerWidth < 1050);
+      
+      // Calculer la hauteur disponible pour le tableau
+      // Prendre en compte le header admin, le padding, la recherche, la pagination
+      if (window.innerWidth >= 1050) {
+        const headerHeight = 64; // Header admin
+        const searchHeight = 80; // Zone de recherche (avec marges)
+        const paginationHeight = 80; // Pagination (avec marges)
+        const padding = 48; // Padding général (py-6 = 24px top + 24px bottom)
+        const spaceY = 32; // Espace entre les éléments (space-y-4 = 16px * 2)
+        const availableHeight = window.innerHeight - headerHeight - searchHeight - paginationHeight - padding - spaceY;
+        const calculatedHeight = Math.max(400, availableHeight);
+        setTableHeight(calculatedHeight);
+        
+        // Calculer le nombre de lignes qui peuvent tenir dans cette hauteur
+        // Hauteur d'une ligne de tableau : ~56px (py-4 = 16px top + 16px bottom + contenu)
+        // Hauteur du header : ~48px (py-3)
+        const rowHeight = 56;
+        const headerHeight_table = 48;
+        const maxRows = Math.floor((calculatedHeight - headerHeight_table) / rowHeight);
+        // Toujours afficher au moins 5 lignes, maximum 8 lignes par page
+        const optimalRows = Math.max(5, Math.min(maxRows, 8));
+        setCalculatedItemsPerPage(optimalRows);
+      } else {
+        setTableHeight(null);
+        setCalculatedItemsPerPage(null);
+      }
+    };
+
+    // Initialiser au montage
+    handleResize();
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   // Filtrer les données
   const filteredData = useMemo(() => {
@@ -102,10 +150,35 @@ export function DataTable<T extends { id: string | number }>({
     });
   }, [filteredData, sortColumn, sortDirection]);
 
-  // Pagination
-  const totalPages = Math.ceil(sortedData.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
+  // Pagination - utiliser calculatedItemsPerPage si disponible
+  const effectiveItemsPerPage = calculatedItemsPerPage !== null ? calculatedItemsPerPage : itemsPerPage;
+  const totalPages = sortedData.length > 0 ? Math.ceil(sortedData.length / effectiveItemsPerPage) : 0;
+  
+  // Réinitialiser à la page 1 quand on filtre ou trie
+  const prevSearchTermRef = useRef(searchTerm);
+  const prevSortRef = useRef({ column: sortColumn, direction: sortDirection });
+  
+  useEffect(() => {
+    const searchChanged = prevSearchTermRef.current !== searchTerm;
+    const sortChanged = prevSortRef.current.column !== sortColumn || prevSortRef.current.direction !== sortDirection;
+    
+    if (searchChanged || sortChanged) {
+      setCurrentPage(1);
+      prevSearchTermRef.current = searchTerm;
+      prevSortRef.current = { column: sortColumn, direction: sortDirection };
+    }
+  }, [searchTerm, sortColumn, sortDirection]);
+  
+  // S'assurer que currentPage ne dépasse pas totalPages
+  useEffect(() => {
+    if (totalPages > 0 && currentPage > totalPages) {
+      setCurrentPage(1);
+    }
+  }, [totalPages]);
+  
+  const safeCurrentPage = totalPages > 0 ? Math.min(Math.max(1, currentPage), totalPages) : 1;
+  const startIndex = (safeCurrentPage - 1) * effectiveItemsPerPage;
+  const endIndex = startIndex + effectiveItemsPerPage;
   const paginatedData = sortedData.slice(startIndex, endIndex);
 
   const handleSort = (column: DataTableColumn<T>) => {
@@ -117,10 +190,14 @@ export function DataTable<T extends { id: string | number }>({
       setSortColumn(column.key);
       setSortDirection('asc');
     }
+    setCurrentPage(1);
   };
 
   const handlePageChange = (page: number) => {
-    setCurrentPage(page);
+    const targetPage = Math.max(1, Math.min(page, totalPages));
+    if (targetPage !== currentPage && totalPages > 0) {
+      setCurrentPage(targetPage);
+    }
   };
 
   // Actions par défaut
@@ -156,9 +233,9 @@ export function DataTable<T extends { id: string | number }>({
   const allActions = [...defaultActions, ...(actions || [])];
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 h-full flex flex-col overflow-hidden">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+      <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between flex-shrink-0">
         {/* Search */}
         {searchable && (
           <div className="relative flex-1 max-w-sm">
@@ -179,63 +256,76 @@ export function DataTable<T extends { id: string | number }>({
         )}
 
         {/* New Item Button */}
-        {newItemHref && newItemLabel && (
-          <Link href={newItemHref}>
-            <Button variant="primary" size="sm">
-              <PlusIcon className="w-4 h-4 mr-2" />
-              {newItemLabel}
-            </Button>
-          </Link>
+        {newItemLabel && (newItemHref || onNewItemClick) && (
+          <>
+            {newItemHref ? (
+              <Link href={newItemHref}>
+                <Button variant="primary" size="sm">
+                  <PlusIcon className="w-4 h-4 mr-2" />
+                  {newItemLabel}
+                </Button>
+              </Link>
+            ) : (
+              <Button variant="primary" size="sm" onClick={onNewItemClick}>
+                <PlusIcon className="w-4 h-4 mr-2" />
+                {newItemLabel}
+              </Button>
+            )}
+          </>
         )}
       </div>
 
       {/* Table - Desktop */}
-      <div className="hidden md:block overflow-x-auto border dark:border-gray-800 rounded-lg">
-        <table className="min-w-full divide-y dark:divide-gray-800">
-          <thead className="bg-gray-50 dark:bg-gray-900">
-            <tr>
-              {columns.map((column) => {
-                const alignClass = column.align === 'center' ? 'text-center' : column.align === 'right' ? 'text-right' : 'text-left';
-                return (
-                  <th
-                    key={String(column.key)}
-                    className={`px-6 py-3 ${alignClass} text-xs font-medium text-gray-500 dark:text-gray-500 uppercase tracking-wider ${
-                      column.sortable ? 'cursor-pointer select-none hover:bg-gray-100' : ''
-                    } ${column.width || ''}`}
-                    onClick={() => column.sortable && handleSort(column)}
-                  >
-                    <div className={`flex items-center gap-2 ${column.align === 'center' ? 'justify-center' : column.align === 'right' ? 'justify-end' : 'justify-start'}`}>
-                      {column.label}
-                      {column.sortable && (
-                        <div className="flex flex-col">
-                          <ChevronUpIcon
-                            className={`w-3 h-3 ${
-                              sortColumn === column.key && sortDirection === 'asc'
-                                ? 'text-primary'
-                                : 'text-gray-400'
-                            }`}
-                          />
-                          <ChevronDownIcon
-                            className={`w-3 h-3 -mt-1 ${
-                              sortColumn === column.key && sortDirection === 'desc'
-                                ? 'text-primary'
-                                : 'text-gray-400'
-                            }`}
-                          />
-                        </div>
-                      )}
-                    </div>
+      <div className={isCardMode ? 'hidden' : 'block border dark:border-gray-800 rounded-lg overflow-hidden flex-1 min-h-0 flex flex-col'}>
+        <div 
+          className="overflow-x-auto flex-1 min-h-0" 
+          style={tableHeight ? { height: `${tableHeight}px` } : undefined}
+        >
+          <table className="min-w-full divide-y dark:divide-gray-800">
+            <thead className="bg-gray-50 dark:bg-gray-900">
+              <tr>
+                {columns.map((column) => {
+                  const alignClass = column.align === 'center' ? 'text-center' : column.align === 'right' ? 'text-right' : 'text-left';
+                  return (
+                    <th
+                      key={String(column.key)}
+                      className={`px-6 py-3 ${alignClass} text-xs font-medium text-gray-500 dark:text-gray-500 uppercase tracking-wider ${
+                        column.sortable ? 'cursor-pointer select-none hover:bg-gray-100 dark:hover:bg-gray-800' : ''
+                      } ${column.width || ''}`}
+                      onClick={() => column.sortable && handleSort(column)}
+                    >
+                      <div className={`flex items-center gap-2 ${column.align === 'center' ? 'justify-center' : column.align === 'right' ? 'justify-end' : 'justify-start'}`}>
+                        {column.label}
+                        {column.sortable && (
+                          <div className="flex flex-col">
+                            <ChevronUpIcon
+                              className={`w-3 h-3 ${
+                                sortColumn === column.key && sortDirection === 'asc'
+                                  ? 'text-primary'
+                                  : 'text-gray-400'
+                              }`}
+                            />
+                            <ChevronDownIcon
+                              className={`w-3 h-3 -mt-1 ${
+                                sortColumn === column.key && sortDirection === 'desc'
+                                  ? 'text-primary'
+                                  : 'text-gray-400'
+                              }`}
+                            />
+                          </div>
+                        )}
+                      </div>
+                    </th>
+                  );
+                })}
+                {allActions.length > 0 && (
+                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-500 uppercase tracking-wider w-24 min-w-[96px] max-w-[120px]">
+                    Actions
                   </th>
-                );
-              })}
-              {allActions.length > 0 && (
-                <th className="px-6 py-3 text-right font-medium dark:text-gray-500 uppercase tracking-wider">
-                  Actions
-                </th>
-              )}
-            </tr>
-          </thead>
-          <tbody className="bg-white dark:bg-gray-900 divide-y dark:divide-gray-800">
+                )}
+              </tr>
+            </thead>
+            <tbody className="bg-white dark:bg-gray-900 divide-y dark:divide-gray-800">
             {isLoading ? (
               <tr>
                 <td
@@ -259,7 +349,7 @@ export function DataTable<T extends { id: string | number }>({
               </tr>
             ) : (
               paginatedData.map((row) => (
-                <tr key={row.id} className="hover:bg-gray-50 dark:bg-gray-900 transition-colors">
+                <tr key={row.id} className="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
                   {columns.map((column) => {
                     const value = row[column.key as keyof T];
                     const alignClass = column.align === 'center' ? 'text-center' : column.align === 'right' ? 'text-right' : 'text-left';
@@ -270,7 +360,7 @@ export function DataTable<T extends { id: string | number }>({
                     );
                   })}
                   {allActions.length > 0 && (
-                    <td className="px-6 py-4 whitespace-nowrap text-right font-medium">
+                    <td className="px-6 py-4 whitespace-nowrap text-right font-medium w-24 min-w-[96px] max-w-[120px]">
                       <div className="flex items-center justify-end gap-2">
                         {allActions.map((action, actionIndex) => {
                           if (action.show && !action.show(row)) return null;
@@ -306,10 +396,11 @@ export function DataTable<T extends { id: string | number }>({
             )}
           </tbody>
         </table>
+        </div>
       </div>
 
-      {/* Cards - Mobile */}
-      <div className="md:hidden space-y-4">
+      {/* Cards - Mobile/Tablette */}
+      <div className={isCardMode ? 'flex-1 min-h-0 overflow-y-auto space-y-4' : 'hidden'}>
         {isLoading ? (
           <div className="text-center py-12 border dark:border-gray-800 rounded-lg">
             <div className="flex items-center justify-center gap-2">
@@ -434,57 +525,69 @@ export function DataTable<T extends { id: string | number }>({
       </div>
 
       {/* Pagination */}
-      {totalPages > 1 && (
-        <div className="flex items-center justify-between">
-          <div className="text-sm dark:text-gray-300">
+      {sortedData.length > 0 && (
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 flex-shrink-0 pt-4">
+          <div className="text-sm text-gray-700 dark:text-gray-300">
             Affichage de <span className="font-medium">{startIndex + 1}</span> à{' '}
             <span className="font-medium">{Math.min(endIndex, sortedData.length)}</span> sur{' '}
-            <span className="font-medium">{sortedData.length}</span> résultats
+            <span className="font-medium">{sortedData.length}</span> résultat{sortedData.length > 1 ? 's' : ''}
+            {totalPages > 1 && (
+              <span className="ml-2 text-gray-500 dark:text-gray-400">
+                (Page {safeCurrentPage} sur {totalPages})
+              </span>
+            )}
           </div>
 
-          <div className="flex gap-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => handlePageChange(currentPage - 1)}
-              disabled={currentPage === 1}
-            >
-              Précédent
-            </Button>
+          {totalPages > 1 && (
+            <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => handlePageChange(safeCurrentPage - 1)}
+                disabled={safeCurrentPage === 1}
+                className="disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Précédent
+              </Button>
 
-            {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-              let pageNumber;
-              if (totalPages <= 5) {
-                pageNumber = i + 1;
-              } else if (currentPage <= 3) {
-                pageNumber = i + 1;
-              } else if (currentPage >= totalPages - 2) {
-                pageNumber = totalPages - 4 + i;
-              } else {
-                pageNumber = currentPage - 2 + i;
-              }
+              <div className="flex gap-1">
+                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                  let pageNumber;
+                  if (totalPages <= 5) {
+                    pageNumber = i + 1;
+                  } else if (safeCurrentPage <= 3) {
+                    pageNumber = i + 1;
+                  } else if (safeCurrentPage >= totalPages - 2) {
+                    pageNumber = totalPages - 4 + i;
+                  } else {
+                    pageNumber = safeCurrentPage - 2 + i;
+                  }
 
-              return (
-                <Button
-                  key={pageNumber}
-                  variant={currentPage === pageNumber ? 'primary' : 'ghost'}
-                  size="sm"
-                  onClick={() => handlePageChange(pageNumber)}
-                >
-                  {pageNumber}
-                </Button>
-              );
-            })}
+                  return (
+                    <Button
+                      key={pageNumber}
+                      variant={safeCurrentPage === pageNumber ? 'primary' : 'ghost'}
+                      size="sm"
+                      onClick={() => handlePageChange(pageNumber)}
+                      className="min-w-[40px]"
+                    >
+                      {pageNumber}
+                    </Button>
+                  );
+                })}
+              </div>
 
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => handlePageChange(currentPage + 1)}
-              disabled={currentPage === totalPages}
-            >
-              Suivant
-            </Button>
-          </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => handlePageChange(safeCurrentPage + 1)}
+                disabled={safeCurrentPage === totalPages}
+                className="disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Suivant
+              </Button>
+            </div>
+          )}
         </div>
       )}
     </div>

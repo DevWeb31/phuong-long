@@ -53,7 +53,7 @@ export async function GET() {
         role_id,
         club_id,
         roles!inner(name),
-        clubs(name)
+        clubs(name, city)
       `)
       .in('user_id', userIds);
 
@@ -84,6 +84,7 @@ export async function GET() {
 
         // Récupérer le club du premier rôle (ou null)
         const clubName = roles[0]?.clubs?.name || null;
+        const clubCity = roles[0]?.clubs?.city || null;
 
         return {
           id: authUser.id,
@@ -99,9 +100,11 @@ export async function GET() {
             role_name: r.roles?.name,
             club_id: r.club_id,
             club_name: r.clubs?.name,
+            club_city: r.clubs?.city,
           })),
           primary_role: roleNames[0] || 'user',
           club: clubName,
+          club_city: clubCity,
         };
       })
       .filter(Boolean)

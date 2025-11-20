@@ -1,16 +1,15 @@
 /**
- * Upload Image API Route
+ * Upload Image From URL API Route
  * 
- * Upload une image recadrée vers Supabase Storage
- * Optimise et convertit automatiquement en WebP
+ * Télécharge une image depuis une URL externe, la convertit en WebP et l'upload vers Supabase Storage
  * 
- * @version 2.0
- * @date 2025-11-06
+ * @version 1.0
+ * @date 2025-01-18
  */
 
 import { createAPIClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
-import { optimizeAvatar } from '@/lib/utils/image-optimizer';
+import { optimizeCover } from '@/lib/utils/image-optimizer';
 
 // Forcer l'utilisation du runtime Node.js (nécessaire pour Sharp)
 export const runtime = 'nodejs';
@@ -44,54 +43,67 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const { image, folder = 'uploads', type = 'avatar' } = body;
+    const { imageUrl, folder = 'clubs', type = 'cover' } = body;
 
-    if (!image || !image.startsWith('data:image/')) {
+    if (!imageUrl || typeof imageUrl !== 'string') {
       return NextResponse.json(
-        { error: 'Image invalide' },
+        { error: 'URL de l\'image requise' },
         { status: 400 }
       );
     }
 
-    // Convertir base64 en buffer
-    const base64Data = image.replace(/^data:image\/\w+;base64,/, '');
-    
-    if (!base64Data || base64Data.length === 0) {
-      return NextResponse.json(
-        { error: 'Données base64 invalides' },
-        { status: 400 }
-      );
-    }
-
-    let originalBuffer: Buffer;
+    // Valider l'URL
     try {
-      originalBuffer = Buffer.from(base64Data, 'base64');
-      if (!originalBuffer || originalBuffer.length === 0) {
-        return NextResponse.json(
-          { error: 'Impossible de convertir les données base64 en buffer' },
-          { status: 400 }
-        );
-      }
-    } catch (error) {
-      console.error('Erreur conversion base64:', error);
+      new URL(imageUrl);
+    } catch {
       return NextResponse.json(
-        { error: 'Erreur lors de la conversion base64' },
+        { error: 'URL invalide' },
+        { status: 400 }
+      );
+    }
+
+    // Télécharger l'image depuis l'URL
+    console.log('📥 Téléchargement de l\'image depuis:', imageUrl);
+    
+    const imageResponse = await fetch(imageUrl, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+      },
+    });
+
+    if (!imageResponse.ok) {
+      return NextResponse.json(
+        { error: `Impossible de télécharger l'image (${imageResponse.status})` },
+        { status: 400 }
+      );
+    }
+
+    // Vérifier que c'est bien une image
+    const contentType = imageResponse.headers.get('content-type');
+    if (!contentType || !contentType.startsWith('image/')) {
+      return NextResponse.json(
+        { error: 'L\'URL ne pointe pas vers une image valide' },
+        { status: 400 }
+      );
+    }
+
+    // Convertir la réponse en buffer
+    const arrayBuffer = await imageResponse.arrayBuffer();
+    const originalBuffer = Buffer.from(arrayBuffer);
+
+    if (!originalBuffer || originalBuffer.length === 0) {
+      return NextResponse.json(
+        { error: 'Impossible de convertir l\'image en buffer' },
         { status: 400 }
       );
     }
 
     // Optimiser l'image selon le type
     let optimizedBuffer: Buffer;
-    let size: number;
 
     try {
-      if (type === 'avatar' || folder === 'coaches') {
-        // Pour les avatars/profils : carré 400x400px
-        size = 400;
-        optimizedBuffer = await optimizeAvatar(originalBuffer, size, 85);
-      } else if (type === 'cover' || folder === 'clubs') {
+      if (type === 'cover' || folder === 'clubs') {
         // Pour les images de couverture de clubs : 16:9 (1200x675px)
-        const { optimizeCover } = await import('@/lib/utils/image-optimizer');
         optimizedBuffer = await optimizeCover(originalBuffer, 1200, 675, 85);
       } else {
         // Pour les autres images : max 1200px avec ratio conservé
@@ -106,11 +118,6 @@ export async function POST(request: Request) {
     } catch (error) {
       console.error('Erreur lors de l\'optimisation:', error);
       const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
-      console.error('Détails de l\'erreur:', {
-        message: errorMessage,
-        stack: error instanceof Error ? error.stack : undefined,
-        bufferSize: originalBuffer.length,
-      });
       return NextResponse.json(
         { 
           error: 'Erreur lors de l\'optimisation de l\'image',
@@ -165,7 +172,7 @@ export async function POST(request: Request) {
       .from(bucketName)
       .getPublicUrl(fileName);
 
-    console.log('✅ Image convertie en WebP et uploadée avec succès:', {
+    console.log('✅ Image téléchargée, convertie en WebP et uploadée avec succès:', {
       fileName,
       url: urlData.publicUrl,
       bucket: bucketName,
@@ -178,7 +185,7 @@ export async function POST(request: Request) {
       path: fileName,
     });
   } catch (error) {
-    console.error('Erreur upload image:', error);
+    console.error('Erreur upload image depuis URL:', error);
     const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
     console.error('Stack trace:', error instanceof Error ? error.stack : undefined);
     return NextResponse.json(

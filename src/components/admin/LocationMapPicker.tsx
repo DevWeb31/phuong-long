@@ -9,8 +9,8 @@
 
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
-import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from 'react-leaflet';
+import { useEffect, useState, useRef } from 'react';
+import { MapContainer, TileLayer, useMapEvents, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { MapPin } from 'lucide-react';
@@ -66,13 +66,56 @@ function MapClickHandler({ onLocationChange }: { onLocationChange: (lat: number,
   return null;
 }
 
-// Composant pour mettre à jour la position de la carte quand les coordonnées changent
-function MapUpdater({ center, zoom }: { center: [number, number]; zoom: number }) {
+// Composant pour initialiser la carte uniquement au montage
+// Ne met JAMAIS à jour la vue après l'initialisation pour préserver le zoom de l'utilisateur
+function MapInitializer({ 
+  center, 
+  initialZoom 
+}: { 
+  center: [number, number]; 
+  initialZoom: number;
+}) {
   const map = useMap();
+  const hasInitializedRef = useRef(false);
   
   useEffect(() => {
-    map.setView(center, zoom, { animate: true, duration: 0.5 });
-  }, [map, center, zoom]);
+    // Initialisation unique : ne s'exécute qu'une seule fois
+    if (!hasInitializedRef.current) {
+      map.setView(center, initialZoom, { animate: false });
+      hasInitializedRef.current = true;
+      
+      // Désactiver le comportement automatique de centrage des marqueurs
+      // Cela empêche la carte de se recentrer quand un marqueur est ajouté/modifié
+      map.options.zoomControl = true;
+    }
+    // Ne jamais mettre à jour après l'initialisation, même si les props changent
+  }, [map, center, initialZoom]);
+  
+  return null;
+}
+
+// Composant Marker personnalisé qui ne déclenche pas de mise à jour de la vue
+function StaticMarker({ position, icon }: { position: [number, number]; icon: L.Icon }) {
+  const map = useMap();
+  const markerRef = useRef<L.Marker | null>(null);
+  
+  useEffect(() => {
+    if (!markerRef.current) {
+      // Créer le marqueur sans l'ajouter automatiquement au groupe de marqueurs
+      markerRef.current = L.marker(position, { icon });
+      markerRef.current.addTo(map);
+    } else {
+      // Mettre à jour la position sans déclencher de recentrage
+      markerRef.current.setLatLng(position);
+    }
+    
+    return () => {
+      if (markerRef.current) {
+        map.removeLayer(markerRef.current);
+        markerRef.current = null;
+      }
+    };
+  }, [map, position, icon]);
   
   return null;
 }
@@ -80,18 +123,17 @@ function MapUpdater({ center, zoom }: { center: [number, number]; zoom: number }
 export function LocationMapPicker({ latitude, longitude, onLocationChange }: LocationMapPickerProps) {
   const [isMounted, setIsMounted] = useState(false);
   
-  // Centre de la carte (France par défaut, ou coordonnées existantes)
-  const center = useMemo<[number, number]>(() => {
+  // Capturer les valeurs initiales au montage pour l'initialisation de la carte
+  const [initialCenter] = useState<[number, number]>(() => {
     if (latitude !== null && longitude !== null) {
       return [latitude, longitude];
     }
     return [46.603354, 1.888334]; // Centre de la France
-  }, [latitude, longitude]);
-
-  // Zoom initial selon si on a déjà des coordonnées
-  const zoom = useMemo(() => {
+  });
+  
+  const [initialZoom] = useState(() => {
     return latitude !== null && longitude !== null ? 13 : 6;
-  }, [latitude, longitude]);
+  });
 
   // S'assurer que le composant est monté côté client (pour éviter les erreurs SSR)
   useEffect(() => {
@@ -125,8 +167,8 @@ export function LocationMapPicker({ latitude, longitude, onLocationChange }: Loc
 
       <div className="rounded-xl overflow-hidden border-2 border-gray-200 dark:border-gray-700 shadow-lg h-[400px] sm:h-[500px] bg-white map-light-theme">
         <MapContainer
-          center={center}
-          zoom={zoom}
+          center={initialCenter}
+          zoom={initialZoom}
           scrollWheelZoom={true}
           className="h-full w-full z-0"
           style={{ zIndex: 0 }}
@@ -137,16 +179,15 @@ export function LocationMapPicker({ latitude, longitude, onLocationChange }: Loc
             url="https://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png"
           />
           
-          {/* Mettre à jour la position de la carte quand les coordonnées changent */}
-          <MapUpdater center={center} zoom={zoom} />
+          {/* Initialiser la carte uniquement au montage */}
+          <MapInitializer center={initialCenter} initialZoom={initialZoom} />
           
           {/* Écouter les clics sur la carte */}
           <MapClickHandler onLocationChange={handleLocationChange} />
           
-          {/* Marqueur si des coordonnées existent */}
+          {/* Marqueur si des coordonnées existent - Utilise un composant personnalisé pour éviter le recentrage */}
           {latitude !== null && longitude !== null && (
-            <Marker
-              key={`${latitude}-${longitude}`}
+            <StaticMarker
               position={[latitude, longitude]}
               icon={selectionIcon}
             />

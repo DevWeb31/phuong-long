@@ -20,7 +20,7 @@ export async function GET() {
     const { data: coaches, error } = await supabase
       .from('coaches')
       .select('*')
-      .order('display_order');
+      .order('name');
     
     if (error) {
       console.error('Error fetching coaches:', error);
@@ -40,10 +40,13 @@ export async function POST(request: Request) {
     const supabase = await createServerClient();
     const body = await request.json();
     
-    console.log('Création coach:', body);
+    // Exclure display_order, id, created_at, updated_at
+    const { display_order, id, created_at, updated_at, ...coachData } = body;
+    
+    console.log('Création coach:', coachData);
     
     // @ts-ignore - Supabase insert type incompatibility
-    const { data: coach, error } = await supabase.from('coaches').insert([body]).select().single();
+    const { data: coach, error } = await supabase.from('coaches').insert([coachData]).select().single();
     
     if (error) {
       console.error('Error creating coach:', error);

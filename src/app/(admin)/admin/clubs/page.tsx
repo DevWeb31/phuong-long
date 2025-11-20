@@ -12,7 +12,6 @@
 import { useState, useEffect } from 'react';
 import { DataTable, DataTableColumn, ConfirmModal } from '@/components/admin';
 import { ClubFormModal } from '@/components/admin/ClubFormModal';
-import { Button } from '@/components/common';
 import { Shield } from 'lucide-react';
 
 interface Club {
@@ -69,11 +68,15 @@ export default function AdminClubsPage() {
               alt={row.name}
               className="w-full h-full object-cover"
               onError={(e) => {
-                (e.target as HTMLImageElement).style.display = 'none';
-                const shieldDiv = document.createElement('div');
-                shieldDiv.className = 'w-6 h-6 text-gray-400';
-                (e.target as HTMLImageElement).parentElement!.innerHTML = '';
-                (e.target as HTMLImageElement).parentElement!.appendChild(shieldDiv);
+                const target = e.target as HTMLImageElement;
+                target.style.display = 'none';
+                const parent = target.parentElement;
+                if (parent) {
+                  parent.innerHTML = '';
+                  const shieldDiv = document.createElement('div');
+                  shieldDiv.className = 'w-6 h-6 text-gray-400';
+                  parent.appendChild(shieldDiv);
+                }
               }}
             />
           ) : (
@@ -183,36 +186,20 @@ export default function AdminClubsPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold dark:text-gray-100 mb-2">Gestion des Clubs</h1>
-          <p className="text-gray-600 dark:text-gray-500">
-            Gérez les clubs, leurs informations et leurs membres
-          </p>
-        </div>
-        <Button variant="primary" onClick={handleCreateNew}>
-          ➕ Nouveau Club
-        </Button>
-      </div>
-
-      {/* DataTable */}
-      {isLoading ? (
-        <div className="text-center py-12">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 dark:border-gray-800"></div>
-          <p className="mt-4 text-gray-600 dark:text-gray-500">Chargement...</p>
-        </div>
-      ) : (
-        <DataTable
-          data={clubs}
-          columns={columns}
-          onEdit={handleEdit}
-          onDelete={handleDelete}
-          onView={handleView}
-          searchPlaceholder="Rechercher un club..."
-          emptyMessage="Aucun club trouvé"
-        />
-      )}
+      <DataTable
+        data={clubs}
+        columns={columns}
+        isLoading={isLoading}
+        onEdit={handleEdit}
+        onDelete={handleDelete}
+        onView={handleView}
+        searchPlaceholder="Rechercher un club..."
+        emptyMessage="Aucun club trouvé"
+        defaultSortColumn="name"
+        defaultSortDirection="asc"
+        newItemLabel="Nouveau Club"
+        onNewItemClick={handleCreateNew}
+      />
 
       {/* Modals */}
       <ClubFormModal

@@ -21,16 +21,22 @@ interface ImageCropperProps {
   circular?: boolean;
   minZoom?: number;
   maxZoom?: number;
+  bucket?: 'coaches' | 'clubs'; // Bucket Supabase à utiliser
+  imageType?: 'avatar' | 'cover'; // Type d'image pour optimisation
 }
 
 export function ImageCropper({
   value,
   onChange,
-  aspectRatio: _aspectRatio = 1,
+  aspectRatio: _aspectRatio,
   circular = true,
   minZoom = 0.5,
   maxZoom = 3,
+  bucket = 'coaches',
+  imageType = 'avatar',
 }: ImageCropperProps) {
+  // Calculer le ratio d'aspect selon le type d'image
+  const aspectRatio = _aspectRatio ?? (imageType === 'cover' ? 16 / 9 : 1);
   const [imageSrc, setImageSrc] = useState<string | null>(value || null);
   const [imageUrl, setImageUrl] = useState<string>('');
   const [isLoadingUrl, setIsLoadingUrl] = useState(false);
@@ -46,10 +52,10 @@ export function ImageCropper({
   const imageRef = useRef<HTMLImageElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Vérifier si une URL vient du bucket coaches de Supabase
-  const isCoachesBucketUrl = useCallback((url: string | null | undefined): boolean => {
+  // Vérifier si une URL vient d'un bucket Supabase autorisé
+  const isBucketUrl = useCallback((url: string | null | undefined): boolean => {
     if (!url) return false;
-    return /\/storage\/v1\/object\/public\/coaches\//.test(url);
+    return /\/storage\/v1\/object\/public\/(coaches|clubs)\//.test(url);
   }, []);
 
   // Charger l'image depuis la valeur initiale (URL existante)
@@ -60,11 +66,11 @@ export function ImageCropper({
       setImageSrc(value);
       setImageUrl(value);
       // Mémoriser l'URL existante pour pouvoir la supprimer plus tard
-      if (isCoachesBucketUrl(value)) {
+      if (isBucketUrl(value)) {
         setUploadedImageUrl(value);
       }
     }
-  }, [value, imageSrc, isCoachesBucketUrl]);
+  }, [value, imageSrc, isBucketUrl]);
 
   // Initialiser la position quand une image est chargée
   useEffect(() => {
@@ -130,8 +136,8 @@ export function ImageCropper({
             setImageSrc(dataUrl);
             setZoom(1);
             setPosition({ x: 0, y: 0 });
-            // Si c'est une URL du bucket coaches, la mémoriser, sinon réinitialiser
-            if (isCoachesBucketUrl(imageUrl)) {
+            // Si c'est une URL d'un bucket autorisé, la mémoriser, sinon réinitialiser
+            if (isBucketUrl(imageUrl)) {
               setUploadedImageUrl(imageUrl);
             } else {
               setUploadedImageUrl(null);
@@ -143,8 +149,8 @@ export function ImageCropper({
             setImageSrc(imageUrl);
             setZoom(1);
             setPosition({ x: 0, y: 0 });
-            // Si c'est une URL du bucket coaches, la mémoriser, sinon réinitialiser
-            if (isCoachesBucketUrl(imageUrl)) {
+            // Si c'est une URL d'un bucket autorisé, la mémoriser, sinon réinitialiser
+            if (isBucketUrl(imageUrl)) {
               setUploadedImageUrl(imageUrl);
             } else {
               setUploadedImageUrl(null);
@@ -166,7 +172,7 @@ export function ImageCropper({
     } finally {
       setIsLoadingUrl(false);
     }
-  }, [imageUrl, isCoachesBucketUrl]);
+  }, [imageUrl, isBucketUrl]);
 
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
@@ -229,9 +235,20 @@ export function ImageCropper({
 
         const containerRect = containerRef.current!.getBoundingClientRect();
         
-        const containerSize = Math.min(containerRect.width, containerRect.height);
-        const cropSize = containerSize; // 100% du conteneur pour un recadrage carré complet
-
+        // Calculer la taille du crop selon le ratio d'aspect
+        let cropWidth: number;
+        let cropHeight: number;
+        
+        if (aspectRatio >= 1) {
+          // Ratio largeur >= hauteur (ex: 16:9)
+          cropWidth = Math.min(containerRect.width, containerRect.height * aspectRatio);
+          cropHeight = cropWidth / aspectRatio;
+        } else {
+          // Ratio hauteur > largeur
+          cropHeight = Math.min(containerRect.height, containerRect.width / aspectRatio);
+          cropWidth = cropHeight * aspectRatio;
+        }
+        
         // Calculer les dimensions réelles de l'image affichée (object-contain, sans zoom ni translate)
         const containerAspect = containerRect.width / containerRect.height;
         const imageAspect = img.width / img.height;
@@ -257,11 +274,11 @@ export function ImageCropper({
         const scaleX = img.width / displayedWidth;
         const scaleY = img.height / displayedHeight;
 
-        // Position du crop dans le conteneur (centré, carré)
-        const cropX = (containerRect.width - cropSize) / 2;
-        const cropY = (containerRect.height - cropSize) / 2;
-        const cropCenterX = cropX + cropSize / 2;
-        const cropCenterY = cropY + cropSize / 2;
+        // Position du crop dans le conteneur (centré selon le ratio d'aspect)
+        const cropX = (containerRect.width - cropWidth) / 2;
+        const cropY = (containerRect.height - cropHeight) / 2;
+        const cropCenterX = cropX + cropWidth / 2;
+        const cropCenterY = cropY + cropHeight / 2;
 
         // Coordonnées du centre du crop par rapport au conteneur
         // Convertir en coordonnées relatives à l'image affichée (sans transformations)
@@ -304,16 +321,18 @@ export function ImageCropper({
         const cropYNormal = cropYAfterScale - (position.y / zoom);
 
         // Taille du crop dans l'espace de l'image affichée normale
-        const cropSizeNormal = cropSize / zoom;
+        const cropWidthNormal = cropWidth / zoom;
+        const cropHeightNormal = cropHeight / zoom;
 
         // Position du coin supérieur gauche du crop dans l'espace de l'image affichée normale
-        const cropXNormalTopLeft = cropXNormal - cropSizeNormal / 2;
-        const cropYNormalTopLeft = cropYNormal - cropSizeNormal / 2;
+        const cropXNormalTopLeft = cropXNormal - cropWidthNormal / 2;
+        const cropYNormalTopLeft = cropYNormal - cropHeightNormal / 2;
 
         // Convertir en coordonnées de l'image source
         const sourceX = cropXNormalTopLeft * scaleX;
         const sourceY = cropYNormalTopLeft * scaleY;
-        const sourceSize = cropSizeNormal * scaleX; // Utiliser scaleX pour un carré
+        const sourceWidth = cropWidthNormal * scaleX;
+        const sourceHeight = cropHeightNormal * scaleY;
 
         // Logs de débogage (uniquement en développement)
         if (process.env.NODE_ENV === 'development') {
@@ -328,36 +347,69 @@ export function ImageCropper({
             cropCenterRelative: `X:${cropCenterXRelative.toFixed(2)}, Y:${cropCenterYRelative.toFixed(2)}`,
             cropAfterScale: `X:${cropXAfterScale.toFixed(2)}, Y:${cropYAfterScale.toFixed(2)}`,
             cropNormal: `X:${cropXNormal.toFixed(2)}, Y:${cropYNormal.toFixed(2)}`,
-            cropSizeNormal: cropSizeNormal.toFixed(2),
-            source: `X:${sourceX.toFixed(2)}, Y:${sourceY.toFixed(2)}, Size:${sourceSize.toFixed(2)}`,
+            cropSizeNormal: `${cropWidthNormal.toFixed(2)}x${cropHeightNormal.toFixed(2)}`,
+            source: `X:${sourceX.toFixed(2)}, Y:${sourceY.toFixed(2)}, W:${sourceWidth.toFixed(2)}, H:${sourceHeight.toFixed(2)}`,
           });
         }
 
         // S'assurer que les coordonnées sont valides
-        const clampedSourceX = Math.max(0, Math.min(sourceX, img.width - sourceSize));
-        const clampedSourceY = Math.max(0, Math.min(sourceY, img.height - sourceSize));
-        const clampedSourceSize = Math.min(
-          sourceSize, 
-          img.width - clampedSourceX, 
+        const clampedSourceX = Math.max(0, Math.min(sourceX, img.width - sourceWidth));
+        const clampedSourceY = Math.max(0, Math.min(sourceY, img.height - sourceHeight));
+        const clampedSourceWidth = Math.min(
+          sourceWidth, 
+          img.width - clampedSourceX
+        );
+        const clampedSourceHeight = Math.min(
+          sourceHeight,
           img.height - clampedSourceY
         );
 
         // Créer le canvas de sortie
-        canvas.width = clampedSourceSize;
-        canvas.height = clampedSourceSize;
+        if (circular) {
+          const size = Math.min(clampedSourceWidth, clampedSourceHeight);
+          canvas.width = size;
+          canvas.height = size;
+        } else {
+          canvas.width = clampedSourceWidth;
+          canvas.height = clampedSourceHeight;
+        }
 
-        // Dessiner l'image recadrée
-        ctx.drawImage(
-          img,
-          clampedSourceX,
-          clampedSourceY,
-          clampedSourceSize,
-          clampedSourceSize,
-          0,
-          0,
-          clampedSourceSize,
-          clampedSourceSize
-        );
+        // Dessiner l'image recadrée sur le canvas
+        if (circular) {
+          // Pour un crop circulaire, dessiner dans un cercle
+          const size = Math.min(clampedSourceWidth, clampedSourceHeight);
+          const centerX = canvas.width / 2;
+          const centerY = canvas.height / 2;
+          const radius = size / 2;
+          
+          ctx.beginPath();
+          ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+          ctx.clip();
+          
+          ctx.drawImage(
+            img,
+            clampedSourceX + (clampedSourceWidth - size) / 2,
+            clampedSourceY + (clampedSourceHeight - size) / 2,
+            size,
+            size,
+            0,
+            0,
+            canvas.width,
+            canvas.height
+          );
+        } else {
+          ctx.drawImage(
+            img,
+            clampedSourceX,
+            clampedSourceY,
+            clampedSourceWidth,
+            clampedSourceHeight,
+            0,
+            0,
+            canvas.width,
+            canvas.height
+          );
+        }
 
         // Convertir en base64 (JPEG pour compatibilité maximale)
         try {
@@ -382,9 +434,9 @@ export function ImageCropper({
     try {
       console.log('Début du recadrage et conversion en WebP...');
       
-      // Supprimer l'ancienne image si elle existe et vient du bucket coaches
+      // Supprimer l'ancienne image si elle existe et vient d'un bucket autorisé
       const imageToDelete = uploadedImageUrl || value;
-      if (isCoachesBucketUrl(imageToDelete)) {
+      if (isBucketUrl(imageToDelete)) {
         console.log('🗑️ Suppression de l\'ancienne image:', imageToDelete);
         try {
           const deleteResponse = await fetch('/api/admin/delete-image', {
@@ -411,7 +463,7 @@ export function ImageCropper({
 
       const croppedDataUrl = await getCroppedImage();
       if (croppedDataUrl) {
-        console.log('Image recadrée obtenue, upload vers Supabase Storage (bucket: coaches)...');
+        console.log(`Image recadrée obtenue, upload vers Supabase Storage (bucket: ${bucket})...`);
         // Upload vers Supabase Storage (optimisé en WebP automatiquement)
         const response = await fetch('/api/admin/upload-image', {
           method: 'POST',
@@ -420,16 +472,17 @@ export function ImageCropper({
           },
           body: JSON.stringify({
             image: croppedDataUrl,
-            folder: 'coaches', // Le bucket sera automatiquement "coaches"
-            type: 'avatar', // Pour optimisation avatar 400x400px en WebP
+            folder: bucket, // Utiliser le bucket spécifié (coaches ou clubs)
+            type: imageType, // Utiliser le type spécifié (avatar ou cover)
           }),
         });
 
         if (response.ok) {
           const data = await response.json();
+          const sizeInfo = imageType === 'cover' ? '1200x675px' : '400x400px';
           console.log('✅ Image convertie en WebP et uploadée avec succès:', data.url);
-          console.log('📦 Bucket Supabase: coaches');
-          console.log('📏 Taille optimisée: 400x400px');
+          console.log(`📦 Bucket Supabase: ${bucket}`);
+          console.log(`📏 Taille optimisée: ${sizeInfo}`);
           setUploadedImageUrl(data.url); // Mémoriser l'URL uploadée
           onChange(data.url);
           setIsCropping(false);
@@ -448,12 +501,12 @@ export function ImageCropper({
       alert(`Erreur lors du recadrage de l'image: ${error instanceof Error ? error.message : 'Erreur inconnue'}`);
       setIsCropping(false);
     }
-  }, [getCroppedImage, onChange, uploadedImageUrl, value, isCoachesBucketUrl]);
+  }, [getCroppedImage, onChange, uploadedImageUrl, value, isBucketUrl, bucket, imageType]);
 
   const handleRemove = useCallback(async () => {
     // Supprimer l'image du storage si elle existe
     const imageToDelete = uploadedImageUrl || value;
-    if (isCoachesBucketUrl(imageToDelete)) {
+    if (isBucketUrl(imageToDelete)) {
       try {
         console.log('🗑️ Suppression de l\'image lors de la suppression:', imageToDelete);
         await fetch('/api/admin/delete-image', {
@@ -477,7 +530,7 @@ export function ImageCropper({
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
-  }, [onChange, uploadedImageUrl, value, isCoachesBucketUrl]);
+  }, [onChange, uploadedImageUrl, value, isBucketUrl]);
 
   if (!imageSrc) {
     return (
@@ -572,9 +625,11 @@ export function ImageCropper({
           className={cn(
             'relative overflow-hidden bg-slate-100 dark:bg-slate-800',
             circular ? 'rounded-full' : 'rounded-xl',
-            'w-full aspect-square max-w-md mx-auto',
+            'w-full max-w-md mx-auto',
+            circular ? 'aspect-square' : '',
             'cursor-move'
           )}
+          style={circular ? undefined : { aspectRatio: aspectRatio.toString() }}
           onMouseDown={handleMouseDown}
           onMouseMove={handleMouseMove}
           onMouseUp={handleMouseUp}
@@ -665,7 +720,7 @@ export function ImageCropper({
           💡 Glissez l'image pour la positionner • Utilisez le zoom pour cadrer le visage
         </p>
         <p className="text-xs font-semibold text-primary dark:text-primary-light">
-          ⚠️ N'oubliez pas de cliquer sur "Valider le recadrage" pour convertir en WebP et enregistrer dans Supabase
+          ⚠️ N'oubliez pas de cliquer sur "Valider le recadrage"
         </p>
       </div>
 
@@ -679,6 +734,7 @@ export function ImageCropper({
             setImageUrl('');
             setUrlError(null);
           }}
+          className="text-gray-900 dark:text-gray-100"
         >
           <LinkIcon className="w-4 h-4 mr-2" />
           Changer l'URL
@@ -688,6 +744,7 @@ export function ImageCropper({
           type="button"
           variant="ghost"
           onClick={() => fileInputRef.current?.click()}
+          className="text-gray-900 dark:text-gray-100"
         >
           <Upload className="w-4 h-4 mr-2" />
           Upload fichier
@@ -712,6 +769,7 @@ export function ImageCropper({
           type="button"
           variant="ghost"
           onClick={handleRemove}
+          className="text-gray-900 dark:text-gray-100"
         >
           <X className="w-4 h-4 mr-2" />
           Supprimer
@@ -746,9 +804,6 @@ export function ImageCropper({
               }}
             />
           </div>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">
-            URL: {value.substring(0, 50)}...
-          </p>
         </div>
       )}
     </div>

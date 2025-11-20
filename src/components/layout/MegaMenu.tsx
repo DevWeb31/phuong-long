@@ -108,7 +108,10 @@ export function MegaMenu({ sections, isOpen, onClose }: MegaMenuProps) {
                     </div>
 
                     {/* Section Items */}
-                    <div className="space-y-1">
+                    <div className={cn(
+                      'space-y-1',
+                      section.title === 'Nos Clubs' && section.items.length > 5 && 'max-h-[320px] overflow-y-auto scrollbar-thin'
+                    )}>
                       {section.items.map((item) => {
                         const ItemIcon = item.icon;
                         

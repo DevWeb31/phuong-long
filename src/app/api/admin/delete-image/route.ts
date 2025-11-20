@@ -60,10 +60,10 @@ export async function DELETE(request: Request) {
 
     const [, bucketName, fileName] = urlMatch;
 
-    // Vérifier que c'est bien le bucket coaches
-    if (bucketName !== 'coaches') {
+    // Vérifier que c'est bien un bucket autorisé (coaches ou clubs)
+    if (bucketName !== 'coaches' && bucketName !== 'clubs') {
       return NextResponse.json(
-        { error: 'Seules les images du bucket coaches peuvent être supprimées' },
+        { error: 'Seules les images des buckets coaches ou clubs peuvent être supprimées' },
         { status: 403 }
       );
     }

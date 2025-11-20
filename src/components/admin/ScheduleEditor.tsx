@@ -166,6 +166,7 @@ export function ScheduleEditor({ value, onChange, clubId: _clubId }: ScheduleEdi
                 size="sm"
                 variant="ghost"
                 onClick={() => addSession(day.key)}
+                className="text-gray-900 dark:text-gray-100"
               >
                 <Plus className="w-4 h-4 mr-1" />
                 Ajouter un cours
@@ -204,13 +205,103 @@ export function ScheduleEditor({ value, onChange, clubId: _clubId }: ScheduleEdi
                         <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
                           Horaire <span className="text-red-500">*</span>
                         </label>
-                        <input
-                          type="text"
-                          value={session.time}
-                          onChange={(e) => updateSession(day.key, index, 'time', e.target.value)}
-                          placeholder="18:00-19:00"
-                          className="w-full px-3 py-2 text-sm border dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500"
-                        />
+                        <div className="space-y-3">
+                          {/* Parser l'horaire existant */}
+                          {(() => {
+                            const parseTime = (timeStr: string) => {
+                              const match = timeStr.match(/^(\d{1,2}):(\d{2})-(\d{1,2}):(\d{2})$/);
+                              if (match) {
+                                return {
+                                  startHour: parseInt(match[1] || '0', 10),
+                                  startMinute: parseInt(match[2] || '0', 10),
+                                  endHour: parseInt(match[3] || '0', 10),
+                                  endMinute: parseInt(match[4] || '0', 10),
+                                };
+                              }
+                              return { startHour: 18, startMinute: 0, endHour: 19, endMinute: 0 };
+                            };
+
+                            const { startHour, startMinute, endHour, endMinute } = parseTime(session.time || '18:00-19:00');
+
+                            const updateTime = (field: 'startHour' | 'startMinute' | 'endHour' | 'endMinute', value: number) => {
+                              const current = parseTime(session.time || '18:00-19:00');
+                              const newTime = {
+                                ...current,
+                                [field]: value,
+                              };
+                              const timeStr = `${String(newTime.startHour).padStart(2, '0')}:${String(newTime.startMinute).padStart(2, '0')}-${String(newTime.endHour).padStart(2, '0')}:${String(newTime.endMinute).padStart(2, '0')}`;
+                              updateSession(day.key, index, 'time', timeStr);
+                            };
+
+                            return (
+                              <div className="grid grid-cols-2 gap-3">
+                                {/* Horaire de début */}
+                                <div className="space-y-1">
+                                  <label className="block text-xs text-slate-600 dark:text-slate-400">
+                                    Début
+                                  </label>
+                                  <div className="flex items-center gap-1">
+                                    <select
+                                      value={startHour}
+                                      onChange={(e) => updateTime('startHour', parseInt(e.target.value, 10))}
+                                      className="flex-1 px-2 py-1.5 text-sm border dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 [&>option]:bg-white [&>option]:dark:bg-gray-800 [&>option]:text-gray-900 [&>option]:dark:text-gray-100"
+                                    >
+                                      {Array.from({ length: 24 }, (_, i) => (
+                                        <option key={i} value={i}>
+                                          {String(i).padStart(2, '0')}
+                                        </option>
+                                      ))}
+                                    </select>
+                                    <span className="text-slate-500 dark:text-slate-400">:</span>
+                                    <select
+                                      value={startMinute}
+                                      onChange={(e) => updateTime('startMinute', parseInt(e.target.value, 10))}
+                                      className="flex-1 px-2 py-1.5 text-sm border dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 [&>option]:bg-white [&>option]:dark:bg-gray-800 [&>option]:text-gray-900 [&>option]:dark:text-gray-100"
+                                    >
+                                      {[0, 15, 30, 45].map((min) => (
+                                        <option key={min} value={min}>
+                                          {String(min).padStart(2, '0')}
+                                        </option>
+                                      ))}
+                                    </select>
+                                  </div>
+                                </div>
+
+                                {/* Horaire de fin */}
+                                <div className="space-y-1">
+                                  <label className="block text-xs text-slate-600 dark:text-slate-400">
+                                    Fin
+                                  </label>
+                                  <div className="flex items-center gap-1">
+                                    <select
+                                      value={endHour}
+                                      onChange={(e) => updateTime('endHour', parseInt(e.target.value, 10))}
+                                      className="flex-1 px-2 py-1.5 text-sm border dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 [&>option]:bg-white [&>option]:dark:bg-gray-800 [&>option]:text-gray-900 [&>option]:dark:text-gray-100"
+                                    >
+                                      {Array.from({ length: 24 }, (_, i) => (
+                                        <option key={i} value={i}>
+                                          {String(i).padStart(2, '0')}
+                                        </option>
+                                      ))}
+                                    </select>
+                                    <span className="text-slate-500 dark:text-slate-400">:</span>
+                                    <select
+                                      value={endMinute}
+                                      onChange={(e) => updateTime('endMinute', parseInt(e.target.value, 10))}
+                                      className="flex-1 px-2 py-1.5 text-sm border dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 [&>option]:bg-white [&>option]:dark:bg-gray-800 [&>option]:text-gray-900 [&>option]:dark:text-gray-100"
+                                    >
+                                      {[0, 15, 30, 45].map((min) => (
+                                        <option key={min} value={min}>
+                                          {String(min).padStart(2, '0')}
+                                        </option>
+                                      ))}
+                                    </select>
+                                  </div>
+                                </div>
+                              </div>
+                            );
+                          })()}
+                        </div>
                       </div>
 
                       {/* Type */}
@@ -221,10 +312,14 @@ export function ScheduleEditor({ value, onChange, clubId: _clubId }: ScheduleEdi
                         <input
                           type="text"
                           value={session.type || ''}
-                          onChange={(e) => updateSession(day.key, index, 'type', e.target.value)}
+                          onChange={(e) => updateSession(day.key, index, 'type', e.target.value.slice(0, 60))}
                           placeholder="Adultes, Enfants 8-12 ans..."
+                          maxLength={60}
                           className="w-full px-3 py-2 text-sm border dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500"
                         />
+                        <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                          {(session.type || '').length}/60 caractères
+                        </p>
                       </div>
 
                       {/* Niveau */}
@@ -252,53 +347,28 @@ export function ScheduleEditor({ value, onChange, clubId: _clubId }: ScheduleEdi
                         </label>
                         
                         {coaches.length > 0 ? (
-                          <>
-                            {/* Badges des instructeurs sélectionnés */}
-                            {(() => {
-                              // Gérer legacy format (string) et nouveau format (array)
+                          <div className="flex flex-wrap gap-2">
+                            {coaches.map((coach) => {
                               const selectedInstructors = session.instructors || (session.instructor ? [session.instructor] : []);
+                              const isSelected = selectedInstructors.includes(coach.name);
                               
-                              return selectedInstructors.length > 0 && (
-                                <div className="flex flex-wrap gap-2 mb-3 p-2 bg-slate-50 dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700">
-                                  {selectedInstructors.map((instructor) => (
-                                    <button
-                                      key={instructor}
-                                      type="button"
-                                      onClick={() => toggleInstructor(day.key, index, instructor)}
-                                      className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-primary text-white rounded-full text-xs font-semibold hover:bg-primary-dark transition-colors"
-                                    >
-                                      <span>{instructor}</span>
-                                      <span className="hover:scale-125 transition-transform">✕</span>
-                                    </button>
-                                  ))}
-                                </div>
+                              return (
+                                <button
+                                  key={coach.id}
+                                  type="button"
+                                  onClick={() => toggleInstructor(day.key, index, coach.name)}
+                                  className={`px-3 py-1.5 text-xs font-medium rounded-lg border-2 transition-all ${
+                                    isSelected
+                                      ? 'bg-primary/10 border-primary text-primary'
+                                      : 'bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:border-primary/50 hover:bg-slate-50 dark:hover:bg-slate-700'
+                                  }`}
+                                >
+                                  {isSelected && <Check className="w-3 h-3 mr-1 inline" />}
+                                  {coach.name}
+                                </button>
                               );
-                            })()}
-                            
-                            {/* Liste des instructeurs disponibles */}
-                            <div className="flex flex-wrap gap-2">
-                              {coaches.map((coach) => {
-                                const selectedInstructors = session.instructors || (session.instructor ? [session.instructor] : []);
-                                const isSelected = selectedInstructors.includes(coach.name);
-                                
-                                return (
-                                  <button
-                                    key={coach.id}
-                                    type="button"
-                                    onClick={() => toggleInstructor(day.key, index, coach.name)}
-                                    className={`px-3 py-1.5 text-xs font-medium rounded-lg border-2 transition-all ${
-                                      isSelected
-                                        ? 'bg-primary/10 border-primary text-primary'
-                                        : 'bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:border-primary/50 hover:bg-slate-50 dark:hover:bg-slate-700'
-                                    }`}
-                                  >
-                                    {isSelected && <Check className="w-3 h-3 mr-1" />}
-                                    {coach.name}
-                                  </button>
-                                );
-                              })}
-                            </div>
-                          </>
+                            })}
+                          </div>
                         ) : (
                           <p className="text-xs text-amber-600 dark:text-amber-400 p-3 bg-amber-50 dark:bg-amber-950/30 rounded-lg border border-amber-200 dark:border-amber-800 flex items-start gap-2">
                             <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" />

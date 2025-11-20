@@ -12,7 +12,7 @@
 import { useState, useEffect } from 'react';
 import { DataTable, DataTableColumn, ConfirmModal } from '@/components/admin';
 import { EventFormModal } from '@/components/admin/EventFormModal';
-import { Badge, Button } from '@/components/common';
+import { Badge } from '@/components/common';
 
 interface Event {
   id: string;
@@ -116,7 +116,21 @@ export default function AdminEventsPage() {
       key: 'title',
       label: 'Titre',
       sortable: true,
-      render: (value) => <span className="font-medium text-gray-900 dark:text-gray-100">{value}</span>,
+      render: (value) => {
+        const title = value as string;
+        const truncatedTitle = title.length > 20 ? `${title.slice(0, 20)}...` : title;
+        return (
+          <div className="relative group">
+            <span className="font-medium text-gray-900 dark:text-gray-100">{truncatedTitle}</span>
+            {title.length > 20 && (
+              <div className="absolute left-0 bottom-full mb-2 px-3 py-2 bg-gray-900 dark:bg-gray-800 text-white text-sm rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-10 max-w-xs whitespace-normal">
+                {title}
+                <div className="absolute left-4 top-full w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900 dark:border-t-gray-800"></div>
+              </div>
+            )}
+          </div>
+        );
+      },
       width: 'min-w-[200px]',
     },
     {
@@ -133,7 +147,7 @@ export default function AdminEventsPage() {
       key: 'club',
       label: 'Club',
       sortable: false,
-      render: (_, row) => row.club ? `${row.club.name} - ${row.club.city}` : '-',
+      render: (_, row) => row.club ? row.club.city : '-',
     },
     {
       key: 'start_date',
@@ -293,34 +307,18 @@ export default function AdminEventsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold dark:text-gray-100 mb-2">Gestion des Événements</h1>
-          <p className="text-gray-600 dark:text-gray-500">
-            Gérez les événements, stages, compétitions et inscriptions
-          </p>
-        </div>
-        <Button variant="primary" onClick={handleCreateNew}>
-          ➕ Nouvel Événement
-        </Button>
-      </div>
-
-      {isLoading ? (
-        <div className="text-center py-12">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 dark:border-gray-800"></div>
-          <p className="mt-4 text-gray-600 dark:text-gray-500">Chargement...</p>
-        </div>
-      ) : (
-        <DataTable
-          data={events}
-          columns={columns}
-          onEdit={handleEdit}
-          onDelete={handleDelete}
-          onView={handleView}
-          searchPlaceholder="Rechercher un événement..."
-          emptyMessage="Aucun événement trouvé"
-        />
-      )}
+      <DataTable
+        data={events}
+        columns={columns}
+        isLoading={isLoading}
+        onEdit={handleEdit}
+        onDelete={handleDelete}
+        onView={handleView}
+        searchPlaceholder="Rechercher un événement..."
+        emptyMessage="Aucun événement trouvé"
+        newItemLabel="Nouvel Événement"
+        onNewItemClick={handleCreateNew}
+      />
 
       <EventFormModal
         isOpen={isFormOpen}

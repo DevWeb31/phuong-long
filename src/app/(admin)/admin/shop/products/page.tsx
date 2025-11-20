@@ -12,7 +12,7 @@
 import { useState, useEffect } from 'react';
 import { DataTable, DataTableColumn, ConfirmModal } from '@/components/admin';
 import { ProductFormModal } from '@/components/admin/ProductFormModal';
-import { Badge, Button } from '@/components/common';
+import { Badge } from '@/components/common';
 
 interface Product {
   id: string;
@@ -190,18 +190,6 @@ export default function AdminShopProductsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold dark:text-gray-100 mb-2">Gestion des Produits</h1>
-          <p className="text-gray-600 dark:text-gray-500">
-            Gérez le catalogue, les stocks et les prix de la boutique
-          </p>
-        </div>
-        <Button variant="primary" onClick={handleCreateNew}>
-          ➕ Nouveau Produit
-        </Button>
-      </div>
-
       {isLoading ? (
         <div className="text-center py-12">
           <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 dark:border-gray-800"></div>
@@ -216,6 +204,8 @@ export default function AdminShopProductsPage() {
           onView={handleView}
           searchPlaceholder="Rechercher un produit..."
           emptyMessage="Aucun produit trouvé"
+          newItemLabel="Nouveau Produit"
+          onNewItemClick={handleCreateNew}
         />
       )}
 

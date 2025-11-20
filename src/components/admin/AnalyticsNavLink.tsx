@@ -26,53 +26,66 @@ export function AnalyticsNavLink() {
         const supabase = createClient();
         const { data: { user } } = await supabase.auth.getUser();
         
+        // Vérifier le paramètre analytics.hidden d'abord
+        const { data: settings, error: settingsError } = await supabase
+          .from('developer_settings')
+          .select('value')
+          .eq('key', 'analytics.hidden')
+          .maybeSingle();
+
+        if (settingsError) {
+          console.error('Error fetching analytics settings:', settingsError);
+        }
+
+        // Vérifier si value est true (booléen JSONB)
+        // La valeur est stockée comme JSONB, donc elle peut être directement un booléen
+        let isHidden = false;
+        if (settings) {
+          const value = (settings as { value: unknown }).value;
+          if (value !== null && value !== undefined) {
+            // Si c'est un booléen directement (JSONB peut retourner un booléen)
+            if (typeof value === 'boolean') {
+              isHidden = value;
+            }
+            // Si c'est une string JSON (peut arriver selon le client Supabase)
+            else if (typeof value === 'string') {
+              try {
+                const parsed = JSON.parse(value);
+                isHidden = parsed === true || parsed === 'true';
+              } catch {
+                isHidden = value === 'true' || value === '"true"';
+              }
+            }
+            // Si c'est un nombre (0 = false, 1 = true)
+            else if (typeof value === 'number') {
+              isHidden = value === 1;
+            }
+          }
+        }
+        
+        setIsAnalyticsHidden(isHidden);
+        
         if (user) {
           // Vérifier si l'utilisateur est développeur
-          const { data: userRoles } = await supabase
+          const { data: userRoles, error: rolesError } = await supabase
             .from('user_roles')
             .select('role_id, roles!inner(name)')
             .eq('user_id', user.id);
 
+          if (rolesError) {
+            console.error('Error fetching user roles:', rolesError);
+          }
+
           const roles = (userRoles as any[])?.map(ur => ur.roles?.name) || [];
           const isDev = roles.includes('developer');
           setIsDeveloper(isDev);
-
-          // Vérifier le paramètre analytics.hidden
-          const { data: settings } = await supabase
-            .from('developer_settings')
-            .select('value')
-            .eq('key', 'analytics.hidden')
-            .maybeSingle() as { data: { value: unknown } | null };
-
-          // Vérifier si value est true (booléen) ou "true" (string JSON)
-          const isHidden = (settings?.value === true || settings?.value === 'true' || settings?.value === '"true"') ?? false;
-          setIsAnalyticsHidden(isHidden);
-
-          // Si développeur, toujours afficher (même si masquée)
-          if (isDev) {
-            setLoading(false);
-            return;
-          }
-
-          // Si pas développeur et analytics masquée, ne rien afficher
-          if (isHidden && !isDev) {
-            setLoading(false);
-            return;
-          }
         } else {
-          // Pas d'utilisateur connecté, vérifier quand même le paramètre
-          const { data: settings } = await supabase
-            .from('developer_settings')
-            .select('value')
-            .eq('key', 'analytics.hidden')
-            .maybeSingle() as { data: { value: unknown } | null };
-
-          const isHidden = (settings?.value === true || settings?.value === 'true' || settings?.value === '"true"') ?? false;
-          setIsAnalyticsHidden(isHidden);
+          setIsDeveloper(false);
         }
       } catch (error) {
         console.error('Error checking analytics visibility:', error);
         setIsAnalyticsHidden(false);
+        setIsDeveloper(false);
       } finally {
         setLoading(false);
       }

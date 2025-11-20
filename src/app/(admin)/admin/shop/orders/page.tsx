@@ -209,13 +209,6 @@ export default function AdminShopOrdersPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold dark:text-gray-100 mb-2">Gestion des Commandes</h1>
-        <p className="text-gray-600 dark:text-gray-500">
-          Suivez et gérez toutes les commandes de la boutique
-        </p>
-      </div>
 
       {/* DataTable */}
       <DataTable

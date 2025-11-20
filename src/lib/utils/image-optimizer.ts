@@ -151,3 +151,46 @@ export async function optimizeThumbnail(
     .toBuffer();
 }
 
+/**
+ * Optimise une image pour les couvertures de clubs (format 16:9)
+ * 
+ * @param buffer Buffer de l'image source
+ * @param width Largeur (défaut: 1200px)
+ * @param height Hauteur (défaut: 675px)
+ * @param quality Qualité (défaut: 85)
+ * @returns Buffer optimisé en WebP
+ */
+export async function optimizeCover(
+  buffer: Buffer,
+  width: number = 1200,
+  height: number = 675,
+  quality: number = 85
+): Promise<Buffer> {
+  try {
+    // Vérifier que le buffer est valide
+    if (!buffer || buffer.length === 0) {
+      throw new Error('Buffer d\'image vide ou invalide');
+    }
+
+    // Vérifier que Sharp peut lire l'image
+    const metadata = await sharp(buffer).metadata();
+    if (!metadata.width || !metadata.height) {
+      throw new Error('Impossible de lire les métadonnées de l\'image');
+    }
+
+    return sharp(buffer)
+      .resize(width, height, {
+        fit: 'cover',
+        position: 'center',
+      })
+      .webp({
+        quality,
+        effort: 6,
+      })
+      .toBuffer();
+  } catch (error) {
+    console.error('Erreur dans optimizeCover:', error);
+    throw new Error(`Échec de l'optimisation cover: ${error instanceof Error ? error.message : 'Erreur inconnue'}`);
+  }
+}
+

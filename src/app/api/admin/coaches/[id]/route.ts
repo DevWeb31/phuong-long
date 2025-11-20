@@ -22,10 +22,13 @@ export async function PUT(
     const supabase = await createServerClient();
     const body = await request.json();
     
-    console.log('Mise à jour coach:', { id, body });
+    // Exclure display_order, id, created_at, updated_at
+    const { display_order, id: _id, created_at, updated_at, ...coachData } = body;
+    
+    console.log('Mise à jour coach:', { id, coachData });
     
     // @ts-ignore - Supabase update type incompatibility
-    const { data: coach, error } = await supabase.from('coaches').update(body).eq('id', id).select().single();
+    const { data: coach, error } = await supabase.from('coaches').update(coachData).eq('id', id).select().single();
     
     if (error) {
       console.error('Error updating coach:', error);

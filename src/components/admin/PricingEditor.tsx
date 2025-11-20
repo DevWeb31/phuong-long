@@ -73,10 +73,14 @@ export function PricingEditor({ value, onChange }: PricingEditorProps) {
               <input
                 type="text"
                 value={category}
-                onChange={(e) => updateCategory(category, e.target.value, price)}
+                onChange={(e) => updateCategory(category, e.target.value.slice(0, 60), price)}
                 placeholder="adultes, enfants, famille..."
-                className="w-full px-3 py-2 text-sm border dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                maxLength={60}
+                className="w-full px-3 py-2 text-sm border dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500"
               />
+              <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                {category.length}/60 caractères
+              </p>
             </div>
 
             {/* Prix */}
@@ -93,7 +97,7 @@ export function PricingEditor({ value, onChange }: PricingEditorProps) {
                     min="0"
                     step="10"
                     placeholder="250"
-                    className="w-full px-3 py-2 text-sm border dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                    className="w-full px-3 py-2 text-sm border dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500"
                   />
                   <Euro className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
                 </div>
@@ -118,7 +122,7 @@ export function PricingEditor({ value, onChange }: PricingEditorProps) {
         type="button"
         variant="ghost"
         onClick={addCategory}
-        className="w-full border-2 border-dashed border-slate-300 dark:border-slate-600 hover:border-primary"
+        className="w-full border-2 border-dashed border-slate-300 dark:border-slate-600 hover:border-primary text-gray-900 dark:text-gray-100"
       >
         <Plus className="w-4 h-4 mr-2" />
         Ajouter une catégorie de tarif

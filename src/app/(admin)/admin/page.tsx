@@ -26,14 +26,6 @@ import { ShoppingCart, FileText, Check, Calendar } from 'lucide-react';
 export default function AdminDashboardPage() {
   return (
     <div className="space-y-8">
-      {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold dark:text-gray-100 mb-2">Dashboard Admin</h1>
-        <p className="text-gray-600 dark:text-gray-500">
-          Vue d'ensemble de votre plateforme Phuong Long Vo Dao
-        </p>
-      </div>
-
       {/* Quick Stats */}
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
         <StatsCard

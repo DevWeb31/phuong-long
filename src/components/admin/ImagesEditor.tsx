@@ -146,7 +146,7 @@ export function ImagesEditor({ images, onChange, disabled = false }: ImagesEdito
                     onChange={(e) => updateImage(index, 'image_url', e.target.value)}
                     placeholder="URL de l'image"
                     disabled={disabled}
-                    className="w-full px-3 py-2 text-sm border dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                    className="w-full px-3 py-2 text-sm border dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
                   />
 
                   <div className="grid grid-cols-2 gap-2">
@@ -157,7 +157,7 @@ export function ImagesEditor({ images, onChange, disabled = false }: ImagesEdito
                       onChange={(e) => updateImage(index, 'caption', e.target.value)}
                       placeholder="Légende (optionnelle)"
                       disabled={disabled}
-                      className="px-3 py-1.5 text-xs border dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                      className="px-3 py-1.5 text-xs border dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
                     />
 
                     {/* Alt text */}
@@ -167,7 +167,7 @@ export function ImagesEditor({ images, onChange, disabled = false }: ImagesEdito
                       onChange={(e) => updateImage(index, 'alt_text', e.target.value)}
                       placeholder="Texte alternatif (SEO)"
                       disabled={disabled}
-                      className="px-3 py-1.5 text-xs border dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                      className="px-3 py-1.5 text-xs border dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
                     />
                   </div>
                 </div>
@@ -237,7 +237,7 @@ export function ImagesEditor({ images, onChange, disabled = false }: ImagesEdito
           onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addImage())}
           placeholder="URL de la nouvelle image..."
           disabled={disabled}
-          className="flex-1 px-4 py-2.5 border dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+          className="flex-1 px-4 py-2.5 border dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
         />
         <Button
           type="button"

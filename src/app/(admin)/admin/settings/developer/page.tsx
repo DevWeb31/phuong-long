@@ -13,7 +13,6 @@ import { useEffect, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
 import { 
-  CodeBracketIcon, 
   CheckCircleIcon,
   XCircleIcon,
   InformationCircleIcon,
@@ -148,18 +147,6 @@ export default function DeveloperSettingsPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div>
-        <div className="flex items-center gap-3 mb-2">
-          <CodeBracketIcon className="w-8 h-8 text-purple-600 dark:text-purple-400" />
-          <h1 className="text-3xl font-bold dark:text-gray-100">
-            Paramètres Développeur
-          </h1>
-        </div>
-        <p className="text-gray-600 dark:text-gray-500">
-          Gérer les paramètres techniques et de configuration avancés du site
-        </p>
-      </div>
 
       {/* Info Banner */}
       <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-4 flex items-start gap-3">

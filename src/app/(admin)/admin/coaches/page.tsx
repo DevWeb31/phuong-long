@@ -12,7 +12,7 @@
 import { useState, useEffect } from 'react';
 import { DataTable, DataTableColumn, ConfirmModal } from '@/components/admin';
 import { CoachFormModal } from '@/components/admin/CoachFormModal';
-import { Badge, Button } from '@/components/common';
+import { Badge } from '@/components/common';
 import { UserCircle } from 'lucide-react';
 
 interface Coach {
@@ -23,13 +23,19 @@ interface Coach {
   specialties?: string[] | null;
   years_experience: number;
   active: boolean;
-  display_order: number;
   club_id?: string | null;
   created_at: string;
 }
 
+interface Club {
+  id: string;
+  name: string;
+  city: string;
+}
+
 export default function AdminCoachesPage() {
   const [coaches, setCoaches] = useState<Coach[]>([]);
+  const [clubs, setClubs] = useState<Club[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
@@ -38,7 +44,20 @@ export default function AdminCoachesPage() {
 
   useEffect(() => {
     loadCoaches();
+    loadClubs();
   }, []);
+
+  const loadClubs = async () => {
+    try {
+      const response = await fetch('/api/clubs');
+      if (response.ok) {
+        const data = await response.json();
+        setClubs(data);
+      }
+    } catch (error) {
+      console.error('Error loading clubs:', error);
+    }
+  };
 
   const loadCoaches = async () => {
     try {
@@ -55,13 +74,19 @@ export default function AdminCoachesPage() {
     }
   };
 
+  const getClubName = (clubId: string | null | undefined): string => {
+    if (!clubId) return 'Tous les clubs';
+    const club = clubs.find(c => c.id === clubId);
+    return club ? club.name : 'Club inconnu';
+  };
+
   const columns: DataTableColumn<Coach>[] = [
     {
       key: 'photo_url',
       label: 'Photo',
       sortable: false,
       render: (value) => (
-        <div className="w-16 h-16 rounded-full overflow-hidden bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-800 flex items-center justify-center">
+        <div className="w-10 h-10 rounded-full overflow-hidden bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-800 flex items-center justify-center">
           {value ? (
             <img
               src={value as string}
@@ -69,7 +94,7 @@ export default function AdminCoachesPage() {
               className="w-full h-full object-cover"
             />
           ) : (
-            <UserCircle className="w-12 h-12 text-gray-400 dark:text-gray-600" />
+            <UserCircle className="w-6 h-6 text-gray-400 dark:text-gray-600" />
           )}
         </div>
       ),
@@ -78,47 +103,27 @@ export default function AdminCoachesPage() {
       key: 'name',
       label: 'Nom',
       sortable: true,
-      render: (value) => (
-        <span className="font-semibold text-slate-900 dark:text-slate-100">{value as string}</span>
-      ),
+      render: (value) => {
+        const fullName = value as string;
+        const truncatedName = fullName.length > 40 ? `${fullName.substring(0, 40)}...` : fullName;
+        return (
+          <span 
+            className="font-semibold text-slate-900 dark:text-slate-100"
+            title={fullName.length > 40 ? fullName : undefined}
+          >
+            {truncatedName}
+          </span>
+        );
+      },
     },
     {
-      key: 'years_experience',
-      label: 'Expérience',
+      key: 'club_id',
+      label: 'Club',
       sortable: true,
       render: (value) => (
         <span className="text-sm text-slate-600 dark:text-slate-400">
-          {value} ans
+          {getClubName(value as string | null)}
         </span>
-      ),
-    },
-    {
-      key: 'specialties',
-      label: 'Spécialités',
-      sortable: false,
-      render: (value) => (
-        <div className="flex flex-wrap gap-1">
-          {(value as string[] || []).slice(0, 3).map((spec, idx) => (
-            <Badge key={idx} size="sm" className="bg-secondary/20 text-secondary-dark border-secondary/30">
-              {spec}
-            </Badge>
-          ))}
-          {(value as string[] || []).length > 3 && (
-            <Badge size="sm" variant="default">
-              +{(value as string[]).length - 3}
-            </Badge>
-          )}
-        </div>
-      ),
-    },
-    {
-      key: 'display_order',
-      label: 'Ordre',
-      sortable: true,
-      render: (value) => (
-        <Badge size="sm" variant="default">
-          {value as number}
-        </Badge>
       ),
     },
     {
@@ -170,7 +175,6 @@ export default function AdminCoachesPage() {
         specialties: coachData.specialties || [],
         years_experience: coachData.years_experience || 0,
         active: coachData.active ?? true,
-        display_order: coachData.display_order || 0,
         club_id: coachData.club_id || null,
       };
       
@@ -225,20 +229,6 @@ export default function AdminCoachesPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100">
-            Professeurs / Coaches
-          </h1>
-          <p className="text-slate-600 dark:text-slate-400 mt-1">
-            Gérez les instructeurs et leur affichage sur le site
-          </p>
-        </div>
-        <Button onClick={handleCreate} variant="primary">
-          ➕ Nouveau Coach
-        </Button>
-      </div>
-
       <DataTable
         columns={columns}
         data={coaches}
@@ -246,6 +236,10 @@ export default function AdminCoachesPage() {
         onEdit={handleEdit}
         onDelete={handleDelete}
         emptyMessage="Aucun coach pour le moment"
+        defaultSortColumn="name"
+        defaultSortDirection="asc"
+        newItemLabel="Nouveau Coach"
+        onNewItemClick={handleCreate}
       />
 
       <CoachFormModal

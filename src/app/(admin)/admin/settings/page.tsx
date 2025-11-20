@@ -93,12 +93,6 @@ export default function AdminSettingsPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold dark:text-gray-100 mb-2">Paramètres du Site</h1>
-        <p className="text-gray-600 dark:text-gray-500">
-          Gérez les paramètres généraux du site
-        </p>
-      </div>
 
       {Object.entries(groupedSettings).map(([category, categorySettings]) => (
         <div key={category} className="bg-white dark:bg-gray-900 rounded-lg border dark:border-gray-800 p-6">

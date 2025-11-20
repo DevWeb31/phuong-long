@@ -58,7 +58,7 @@ export function Modal({ isOpen, onClose, title, children, size = 'md', footer }:
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto">
+    <div className="fixed inset-0 z-50 overflow-hidden">
       {/* Overlay */}
       <div
         className="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity"
@@ -66,9 +66,9 @@ export function Modal({ isOpen, onClose, title, children, size = 'md', footer }:
       />
 
       {/* Modal Container */}
-      <div className="flex min-h-full items-center justify-center p-2 sm:p-4">
+      <div className="flex min-h-screen items-start justify-center px-2 sm:px-4 py-4 sm:py-8">
         <div
-          className={`relative bg-white dark:bg-gray-900 rounded-xl sm:rounded-2xl shadow-2xl w-full ${sizeClasses[size]} transform transition-all animate-scale-in max-h-[calc(100vh-1rem)] sm:max-h-[calc(100vh-2rem)] flex flex-col`}
+          className={`relative bg-white dark:bg-gray-900 rounded-xl sm:rounded-2xl shadow-2xl w-full ${sizeClasses[size]} transform transition-all animate-scale-in max-h-[calc(100vh-2rem)] sm:max-h-[calc(100vh-4rem)] flex flex-col`}
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
@@ -83,8 +83,8 @@ export function Modal({ isOpen, onClose, title, children, size = 'md', footer }:
             </button>
           </div>
 
-          {/* Content */}
-          <div className="px-4 sm:px-6 py-4 sm:py-6 overflow-y-auto flex-1 min-h-0">
+          {/* Content - Seule cette zone est scrollable */}
+          <div className="px-4 sm:px-6 py-4 sm:py-6 overflow-y-auto flex-1 min-h-0 overscroll-contain scrollbar-thin">
             {children}
           </div>
 
@@ -105,7 +105,7 @@ interface ConfirmModalProps {
   onClose: () => void;
   onConfirm: () => void;
   title: string;
-  message: string;
+  message: string | React.ReactNode;
   confirmLabel?: string;
   cancelLabel?: string;
   variant?: 'primary' | 'secondary' | 'ghost' | 'danger';
@@ -148,7 +148,11 @@ export function ConfirmModal({
         </div>
       }
     >
-      <p className="text-gray-700 dark:text-gray-300 leading-relaxed">{message}</p>
+      {typeof message === 'string' ? (
+        <p className="text-gray-700 dark:text-gray-300 leading-relaxed">{message}</p>
+      ) : (
+        <div className="text-gray-700 dark:text-gray-300 leading-relaxed">{message}</div>
+      )}
     </Modal>
   );
 }
