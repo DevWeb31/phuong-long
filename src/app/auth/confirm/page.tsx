@@ -243,7 +243,7 @@ function ConfirmEmailContent() {
                 Renvoyer l'email de confirmation
               </Button>
               <Link href="/signup">
-                <Button variant="outline" size="lg" className="w-full">
+                <Button variant="ghost" size="lg" className="w-full">
                   Retour à l'inscription
                 </Button>
               </Link>
@@ -282,7 +282,7 @@ function ConfirmEmailContent() {
               Renvoyer l'email de confirmation
             </Button>
             <Link href="/signin">
-              <Button variant="outline" size="lg" className="w-full">
+              <Button variant="ghost" size="lg" className="w-full">
                 Aller à la connexion
               </Button>
             </Link>
