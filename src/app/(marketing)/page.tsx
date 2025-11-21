@@ -9,6 +9,7 @@
 
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { Suspense } from 'react';
 import { Container, Button, Card, CardHeader, CardTitle, CardDescription, CardContent, Badge, ScrollReveal } from '@/components/common';
 import { createServerClient } from '@/lib/supabase/server';
 import type { Club, Event } from '@/lib/types';
@@ -17,6 +18,7 @@ import { HeroCarousel, type HeroSlide } from '@/components/marketing/HeroCarouse
 import { AnimatedCounter } from '@/components/marketing/AnimatedCounter';
 import { Sparkles, Mail, Shield } from 'lucide-react';
 import { getFeatureIcon } from '@/lib/icons/feature-icons';
+import { EmailConfirmRedirect } from '@/components/auth/EmailConfirmRedirect';
 
 export const metadata: Metadata = {
   title: 'Accueil - Art Martial Vietnamien',
@@ -88,6 +90,11 @@ export default async function HomePage() {
 
   return (
     <>
+      {/* Intercepter les codes de confirmation d'email depuis la racine */}
+      <Suspense fallback={null}>
+        <EmailConfirmRedirect />
+      </Suspense>
+      
       {/* Hero Carousel avec vidéo YouTube */}
       {typedHeroSlides.length > 0 ? (
         <HeroCarousel slides={typedHeroSlides} autoPlayInterval={5000} />

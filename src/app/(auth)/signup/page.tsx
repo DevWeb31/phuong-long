@@ -97,14 +97,14 @@ export default function SignUpPage() {
           </CardHeader>
 
           <CardContent>
-            <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4 mb-6">
-              <p className="text-sm text-green-800 dark:text-green-200">
-                Un email de confirmation a été envoyé à <strong>{formData.email}</strong>. 
+            <div className="bg-green-50 dark:bg-green-950/40 border border-green-200 dark:border-green-800/50 rounded-lg p-4 mb-6">
+              <p className="text-sm text-green-800 dark:text-green-100">
+                Un email de confirmation a été envoyé à <strong className="font-semibold">{formData.email}</strong>. 
                 <br />
                 <br />
                 Cliquez sur le lien dans l'email pour activer votre compte. 
                 <br />
-                <span className="text-xs text-green-700 dark:text-green-300">
+                <span className="text-xs text-green-700 dark:text-green-300 mt-2 block">
                   Vérifiez aussi votre dossier spam si vous ne voyez pas l'email dans votre boîte de réception.
                 </span>
               </p>

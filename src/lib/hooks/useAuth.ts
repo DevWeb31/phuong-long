@@ -68,12 +68,17 @@ export function useAuth() {
   };
 
   const signUp = async (email: string, password: string, metadata?: Record<string, unknown>) => {
+    // Utiliser NEXT_PUBLIC_APP_URL si disponible (pour production), sinon window.location.origin
+    const baseUrl = typeof window !== 'undefined' 
+      ? (process.env.NEXT_PUBLIC_APP_URL || window.location.origin)
+      : process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+    
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
         data: metadata,
-        emailRedirectTo: `${window.location.origin}/auth/confirm?email=${encodeURIComponent(email)}`,
+        emailRedirectTo: `${baseUrl}/auth/confirm?email=${encodeURIComponent(email)}`,
       },
     });
     return { data, error };

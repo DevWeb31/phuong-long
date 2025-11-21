@@ -26,6 +26,7 @@ function ConfirmEmailContent() {
     const confirmEmail = async () => {
       const token_hash = searchParams.get('token_hash');
       const type = searchParams.get('type');
+      const code = searchParams.get('code');
 
       const supabase = createClient();
 
@@ -40,7 +41,49 @@ function ConfirmEmailContent() {
         return;
       }
 
-      // Vérifier que nous avons les paramètres nécessaires
+      // Gérer le format avec code (PKCE flow)
+      if (code) {
+        try {
+          // Échanger le code pour une session (géré automatiquement par Supabase via cookies)
+          // Le code est déjà échangé par Supabase quand on arrive sur cette page
+          // On vérifie juste que la session est active
+          const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+          
+          if (sessionError) {
+            setStatus('error');
+            setErrorMessage('Erreur lors de la confirmation : ' + sessionError.message);
+            return;
+          }
+
+          if (sessionData?.session?.user) {
+            setStatus('success');
+            setTimeout(() => {
+              router.push('/dashboard');
+            }, 3000);
+          } else {
+            // Attendre un peu pour que Supabase traite le code
+            setTimeout(async () => {
+              const { data: retrySession } = await supabase.auth.getSession();
+              if (retrySession?.session?.user) {
+                setStatus('success');
+                setTimeout(() => {
+                  router.push('/dashboard');
+                }, 3000);
+              } else {
+                setStatus('error');
+                setErrorMessage('Impossible de confirmer votre email. Le code est peut-être invalide ou expiré.');
+              }
+            }, 1000);
+          }
+          return;
+        } catch (err) {
+          setStatus('error');
+          setErrorMessage('Une erreur inattendue est survenue lors de la confirmation.');
+          return;
+        }
+      }
+
+      // Gérer le format avec token_hash (ancien format)
       if (!token_hash || type !== 'email') {
         setStatus('error');
         setErrorMessage('Lien de confirmation invalide. Paramètres manquants.');
