@@ -207,6 +207,18 @@ export default function AdminSettingsPage() {
 
   return (
     <div className="space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-4">
+        <div>
+          <h1 className="text-2xl font-bold bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">
+            Paramètres
+          </h1>
+          <p className="text-xs text-gray-600 dark:text-gray-400 mt-0.5">
+            Gérez les paramètres généraux de votre site
+          </p>
+        </div>
+      </div>
+
       {/* Tabs */}
       {categories.length > 0 && (
         <div className="flex flex-wrap gap-2 border-b dark:border-gray-800 pb-3">
@@ -366,7 +378,9 @@ export default function AdminSettingsPage() {
               return (
                 <div key={moduleId} className={cardClasses}>
                   <div className={headerClasses}>
-                    <h3 className="text-lg font-semibold dark:text-gray-100">{title}</h3>
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 bg-gradient-to-r from-gray-900 to-gray-700 dark:from-gray-100 dark:to-gray-300 bg-clip-text text-transparent">
+                      {title}
+                    </h3>
                     {description && (
                       <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
                         {description}

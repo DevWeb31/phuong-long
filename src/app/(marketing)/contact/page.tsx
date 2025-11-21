@@ -39,6 +39,18 @@ export default async function ContactPage() {
   const hours = pageContent['hours'] || '{}';
   const address = pageContent['address'] || '{}';
 
+  const { data: clubsData } = await supabase
+    .from('clubs')
+    .select('id, name, city')
+    .eq('active', true)
+    .order('city');
+
+  const clubs = (clubsData || []).map((club: { id: string; name: string; city: string }) => ({
+    id: club.id,
+    name: club.name,
+    city: club.city,
+  }));
+
   return (
     <>
       {/* Hero Section with Parallax */}
@@ -89,7 +101,7 @@ export default async function ContactPage() {
 
             {/* Contact Form */}
             <div className="lg:col-span-2">
-              <ContactForm />
+              <ContactForm clubs={clubs} />
             </div>
           </div>
         </Container>

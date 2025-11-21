@@ -20,12 +20,16 @@ interface CoverImageUploaderProps {
   value?: string;
   onChange: (url: string) => void;
   error?: string;
+  folder?: string;
+  type?: string;
 }
 
 export function CoverImageUploader({
   value,
   onChange,
   error,
+  folder = 'clubs',
+  type = 'cover',
 }: CoverImageUploaderProps) {
   const [imageUrl, setImageUrl] = useState('');
   const [isLoadingUrl, setIsLoadingUrl] = useState(false);
@@ -80,11 +84,11 @@ export function CoverImageUploader({
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({
-            image: base64Data,
-            folder: 'clubs',
-            type: 'cover',
-          }),
+        body: JSON.stringify({
+          image: base64Data,
+          folder,
+          type,
+        }),
         });
 
         if (response.ok) {
@@ -148,11 +152,11 @@ export function CoverImageUploader({
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({
-            imageUrl: imageUrl,
-            folder: 'clubs',
-            type: 'cover',
-          }),
+        body: JSON.stringify({
+          imageUrl: imageUrl,
+          folder,
+          type,
+        }),
         });
 
         if (response.ok) {

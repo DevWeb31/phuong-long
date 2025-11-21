@@ -49,6 +49,7 @@ interface DataTableProps<T> {
   searchable?: boolean;
   searchPlaceholder?: string;
   itemsPerPage?: number;
+  minItemsPerPage?: number;
   emptyMessage?: string;
   newItemLabel?: string;
   newItemHref?: string;
@@ -56,6 +57,8 @@ interface DataTableProps<T> {
   isLoading?: boolean;
   defaultSortColumn?: keyof T | string;
   defaultSortDirection?: 'asc' | 'desc';
+  selectable?: boolean;
+  onBulkDelete?: (ids: (string | number)[]) => void;
 }
 
 export function DataTable<T extends { id: string | number }>({
@@ -68,6 +71,7 @@ export function DataTable<T extends { id: string | number }>({
   searchable = true,
   searchPlaceholder = 'Rechercher...',
   itemsPerPage = 8,
+  minItemsPerPage,
   emptyMessage = 'Aucune donnée disponible',
   newItemLabel,
   newItemHref,
@@ -75,43 +79,30 @@ export function DataTable<T extends { id: string | number }>({
   isLoading = false,
   defaultSortColumn,
   defaultSortDirection = 'asc',
+  selectable = false,
+  onBulkDelete,
 }: DataTableProps<T>) {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortColumn, setSortColumn] = useState<keyof T | string | null>(defaultSortColumn || null);
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>(defaultSortDirection);
   const [currentPage, setCurrentPage] = useState(1);
   const [isCardMode, setIsCardMode] = useState(false);
-  const [tableHeight, setTableHeight] = useState<number | null>(null);
   const [calculatedItemsPerPage, setCalculatedItemsPerPage] = useState<number | null>(null);
+  const [selectedIds, setSelectedIds] = useState<Set<string | number>>(new Set());
+  const selectAllCheckboxRef = useRef<HTMLInputElement>(null);
 
-  // Détecter la largeur de la fenêtre et calculer la hauteur du tableau
+  // Détecter la largeur de la fenêtre et calculer le nombre d'items par page
   useEffect(() => {
     const handleResize = () => {
       setIsCardMode(window.innerWidth < 1050);
       
-      // Calculer la hauteur disponible pour le tableau
-      // Prendre en compte le header admin, le padding, la recherche, la pagination
-      if (window.innerWidth >= 1050) {
-        const headerHeight = 64; // Header admin
-        const searchHeight = 80; // Zone de recherche (avec marges)
-        const paginationHeight = 80; // Pagination (avec marges)
-        const padding = 48; // Padding général (py-6 = 24px top + 24px bottom)
-        const spaceY = 32; // Espace entre les éléments (space-y-4 = 16px * 2)
-        const availableHeight = window.innerHeight - headerHeight - searchHeight - paginationHeight - padding - spaceY;
-        const calculatedHeight = Math.max(400, availableHeight);
-        setTableHeight(calculatedHeight);
-        
-        // Calculer le nombre de lignes qui peuvent tenir dans cette hauteur
-        // Hauteur d'une ligne de tableau : ~56px (py-4 = 16px top + 16px bottom + contenu)
-        // Hauteur du header : ~48px (py-3)
-        const rowHeight = 56;
-        const headerHeight_table = 48;
-        const maxRows = Math.floor((calculatedHeight - headerHeight_table) / rowHeight);
-        // Toujours afficher au moins 5 lignes, maximum 8 lignes par page
-        const optimalRows = Math.max(5, Math.min(maxRows, 8));
-        setCalculatedItemsPerPage(optimalRows);
+      // Si minItemsPerPage est spécifié, utiliser cette valeur
+      if (minItemsPerPage) {
+        setCalculatedItemsPerPage(minItemsPerPage);
+      } else if (window.innerWidth >= 1050) {
+        // Calculer dynamiquement pour desktop
+        setCalculatedItemsPerPage(itemsPerPage);
       } else {
-        setTableHeight(null);
         setCalculatedItemsPerPage(null);
       }
     };
@@ -121,7 +112,7 @@ export function DataTable<T extends { id: string | number }>({
 
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
-  }, []);
+  }, [minItemsPerPage, itemsPerPage]);
 
   // Filtrer les données
   const filteredData = useMemo(() => {
@@ -232,8 +223,51 @@ export function DataTable<T extends { id: string | number }>({
 
   const allActions = [...defaultActions, ...(actions || [])];
 
+  // Gestion de la sélection
+  const toggleSelection = (id: string | number) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedIds.size === paginatedData.length) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(paginatedData.map((row) => row.id)));
+    }
+  };
+
+  const handleBulkDelete = () => {
+    if (onBulkDelete && selectedIds.size > 0) {
+      onBulkDelete(Array.from(selectedIds));
+      setSelectedIds(new Set());
+    }
+  };
+
+  // Réinitialiser la sélection quand on change de page ou filtre
+  useEffect(() => {
+    setSelectedIds(new Set());
+  }, [currentPage, searchTerm, sortColumn, sortDirection]);
+
+  const allSelected = paginatedData.length > 0 && selectedIds.size === paginatedData.length;
+  const someSelected = selectedIds.size > 0 && selectedIds.size < paginatedData.length;
+
+  // Mettre à jour l'état indeterminate de la checkbox
+  useEffect(() => {
+    if (selectAllCheckboxRef.current) {
+      selectAllCheckboxRef.current.indeterminate = someSelected;
+    }
+  }, [someSelected]);
+
   return (
-    <div className="space-y-4 h-full flex flex-col overflow-hidden">
+    <div className="h-full flex flex-col gap-4 overflow-hidden">
       {/* Header */}
       <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between flex-shrink-0">
         {/* Search */}
@@ -255,41 +289,66 @@ export function DataTable<T extends { id: string | number }>({
           </div>
         )}
 
-        {/* New Item Button */}
-        {newItemLabel && (newItemHref || onNewItemClick) && (
-          <>
-            {newItemHref ? (
-              <Link href={newItemHref}>
-                <Button variant="primary" size="sm">
+        <div className="flex items-center gap-2">
+          {/* Bulk Delete Button */}
+          {selectable && selectedIds.size > 0 && onBulkDelete && (
+            <Button
+              variant="danger"
+              size="sm"
+              onClick={handleBulkDelete}
+              className="flex items-center gap-2"
+            >
+              <TrashIcon className="w-4 h-4" />
+              Supprimer ({selectedIds.size})
+            </Button>
+          )}
+
+          {/* New Item Button */}
+          {newItemLabel && (newItemHref || onNewItemClick) && (
+            <>
+              {newItemHref ? (
+                <Link href={newItemHref}>
+                  <Button variant="primary" size="sm">
+                    <PlusIcon className="w-4 h-4 mr-2" />
+                    {newItemLabel}
+                  </Button>
+                </Link>
+              ) : (
+                <Button variant="primary" size="sm" onClick={onNewItemClick}>
                   <PlusIcon className="w-4 h-4 mr-2" />
                   {newItemLabel}
                 </Button>
-              </Link>
-            ) : (
-              <Button variant="primary" size="sm" onClick={onNewItemClick}>
-                <PlusIcon className="w-4 h-4 mr-2" />
-                {newItemLabel}
-              </Button>
-            )}
-          </>
-        )}
+              )}
+            </>
+          )}
+        </div>
       </div>
 
       {/* Table - Desktop */}
-      <div className={isCardMode ? 'hidden' : 'block border dark:border-gray-800 rounded-lg overflow-hidden flex-1 min-h-0 flex flex-col'}>
+      <div className={isCardMode ? 'hidden' : 'block border dark:border-gray-800 rounded-lg overflow-hidden'}>
         <div 
-          className="overflow-x-auto flex-1 min-h-0" 
-          style={tableHeight ? { height: `${tableHeight}px` } : undefined}
+          className="overflow-x-auto"
         >
           <table className="min-w-full divide-y dark:divide-gray-800">
-            <thead className="bg-gray-50 dark:bg-gray-900">
+            <thead className="bg-gray-50 dark:bg-gray-900 sticky top-0 z-10">
               <tr>
+                {selectable && (
+                  <th className="px-4 py-2 w-12">
+                    <input
+                      type="checkbox"
+                      ref={selectAllCheckboxRef}
+                      checked={allSelected}
+                      onChange={toggleSelectAll}
+                      className="w-4 h-4 text-primary bg-gray-100 border-gray-300 rounded focus:ring-primary dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                    />
+                  </th>
+                )}
                 {columns.map((column) => {
                   const alignClass = column.align === 'center' ? 'text-center' : column.align === 'right' ? 'text-right' : 'text-left';
                   return (
                     <th
                       key={String(column.key)}
-                      className={`px-6 py-3 ${alignClass} text-xs font-medium text-gray-500 dark:text-gray-500 uppercase tracking-wider ${
+                      className={`px-4 py-2 ${alignClass} text-xs font-medium text-gray-500 dark:text-gray-500 uppercase tracking-wider ${
                         column.sortable ? 'cursor-pointer select-none hover:bg-gray-100 dark:hover:bg-gray-800' : ''
                       } ${column.width || ''}`}
                       onClick={() => column.sortable && handleSort(column)}
@@ -319,7 +378,7 @@ export function DataTable<T extends { id: string | number }>({
                   );
                 })}
                 {allActions.length > 0 && (
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-500 uppercase tracking-wider w-24 min-w-[96px] max-w-[120px]">
+                  <th className="px-4 py-2 text-right text-xs font-medium text-gray-500 dark:text-gray-500 uppercase tracking-wider w-24 min-w-[96px] max-w-[120px]">
                     Actions
                   </th>
                 )}
@@ -329,8 +388,8 @@ export function DataTable<T extends { id: string | number }>({
             {isLoading ? (
               <tr>
                 <td
-                  colSpan={columns.length + (allActions.length > 0 ? 1 : 0)}
-                  className="px-6 py-12 text-center dark:text-gray-500"
+                  colSpan={columns.length + (allActions.length > 0 ? 1 : 0) + (selectable ? 1 : 0)}
+                  className="px-6 py-8 text-center dark:text-gray-500"
                 >
                   <div className="flex items-center justify-center gap-2">
                     <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
@@ -341,8 +400,8 @@ export function DataTable<T extends { id: string | number }>({
             ) : paginatedData.length === 0 ? (
               <tr>
                 <td
-                  colSpan={columns.length + (allActions.length > 0 ? 1 : 0)}
-                  className="px-6 py-12 text-center dark:text-gray-500"
+                  colSpan={columns.length + (allActions.length > 0 ? 1 : 0) + (selectable ? 1 : 0)}
+                  className="px-6 py-8 text-center dark:text-gray-500"
                 >
                   {emptyMessage}
                 </td>
@@ -350,17 +409,27 @@ export function DataTable<T extends { id: string | number }>({
             ) : (
               paginatedData.map((row) => (
                 <tr key={row.id} className="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                  {selectable && (
+                    <td className="px-4 py-2">
+                      <input
+                        type="checkbox"
+                        checked={selectedIds.has(row.id)}
+                        onChange={() => toggleSelection(row.id)}
+                        className="w-4 h-4 text-primary bg-gray-100 border-gray-300 rounded focus:ring-primary dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                      />
+                    </td>
+                  )}
                   {columns.map((column) => {
                     const value = row[column.key as keyof T];
                     const alignClass = column.align === 'center' ? 'text-center' : column.align === 'right' ? 'text-right' : 'text-left';
                     return (
-                      <td key={String(column.key)} className={`px-6 py-4 whitespace-nowrap ${alignClass}`}>
+                      <td key={String(column.key)} className={`px-4 py-2 whitespace-nowrap ${alignClass}`}>
                         {column.render ? column.render(value, row) : String(value)}
                       </td>
                     );
                   })}
                   {allActions.length > 0 && (
-                    <td className="px-6 py-4 whitespace-nowrap text-right font-medium w-24 min-w-[96px] max-w-[120px]">
+                    <td className="px-4 py-2 whitespace-nowrap text-right font-medium w-24 min-w-[96px] max-w-[120px]">
                       <div className="flex items-center justify-end gap-2">
                         {allActions.map((action, actionIndex) => {
                           if (action.show && !action.show(row)) return null;
@@ -526,7 +595,7 @@ export function DataTable<T extends { id: string | number }>({
 
       {/* Pagination */}
       {sortedData.length > 0 && (
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 flex-shrink-0 pt-4">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 flex-shrink-0">
           <div className="text-sm text-gray-700 dark:text-gray-300">
             Affichage de <span className="font-medium">{startIndex + 1}</span> à{' '}
             <span className="font-medium">{Math.min(endIndex, sortedData.length)}</span> sur{' '}
@@ -545,7 +614,7 @@ export function DataTable<T extends { id: string | number }>({
                 size="sm"
                 onClick={() => handlePageChange(safeCurrentPage - 1)}
                 disabled={safeCurrentPage === 1}
-                className="disabled:opacity-50 disabled:cursor-not-allowed"
+                className="disabled:opacity-50 disabled:cursor-not-allowed text-gray-900 dark:text-gray-300"
               >
                 Précédent
               </Button>
@@ -569,7 +638,7 @@ export function DataTable<T extends { id: string | number }>({
                       variant={safeCurrentPage === pageNumber ? 'primary' : 'ghost'}
                       size="sm"
                       onClick={() => handlePageChange(pageNumber)}
-                      className="min-w-[40px]"
+                      className={`min-w-[40px] ${safeCurrentPage !== pageNumber ? 'text-gray-900 dark:text-gray-300' : ''}`}
                     >
                       {pageNumber}
                     </Button>
@@ -582,7 +651,7 @@ export function DataTable<T extends { id: string | number }>({
                 size="sm"
                 onClick={() => handlePageChange(safeCurrentPage + 1)}
                 disabled={safeCurrentPage === totalPages}
-                className="disabled:opacity-50 disabled:cursor-not-allowed"
+                className="disabled:opacity-50 disabled:cursor-not-allowed text-gray-900 dark:text-gray-300"
               >
                 Suivant
               </Button>

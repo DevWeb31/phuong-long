@@ -19,7 +19,8 @@ export interface HeroSlide {
   title: string;
   subtitle?: string | null;
   description?: string | null;
-  youtube_video_id: string;
+  youtube_video_id?: string | null;
+  image_url?: string | null;
   cta_text?: string | null;
   cta_link?: string | null;
   overlay_opacity: number;
@@ -101,21 +102,44 @@ export function HeroCarousel({ slides, autoPlayInterval = 5000 }: HeroCarouselPr
 
   return (
     <section className="relative h-screen min-h-[600px] max-h-[900px] overflow-hidden">
-      {/* Vidéo YouTube en fond */}
+      {/* Vidéo YouTube ou image de fond */}
       <div className="absolute inset-0 w-full h-full overflow-hidden">
-        <iframe
-          src={getYouTubeEmbedUrl(currentSlide.youtube_video_id)}
-          className="absolute top-1/2 left-1/2 w-[177.78vh] h-[100vw] min-w-full min-h-full -translate-x-1/2 -translate-y-1/2 pointer-events-none"
-          style={{
-            width: '100vw',
-            height: '56.25vw',
-            minHeight: '100%',
-            minWidth: '177.78%',
-          }}
-          allow="autoplay; encrypted-media"
-          allowFullScreen
-          title={`Hero video ${currentIndex + 1}`}
-        />
+        {currentSlide.youtube_video_id ? (
+          <>
+            {currentSlide.image_url && (
+              <div className="absolute inset-0 w-full h-full md:hidden">
+                <img
+                  src={currentSlide.image_url}
+                  alt={currentSlide.title || 'Illustration du slide'}
+                  className="w-full h-full object-cover"
+                  loading="lazy"
+                />
+              </div>
+            )}
+            <div className={`absolute inset-0 w-full h-full overflow-hidden ${currentSlide.image_url ? 'hidden md:block' : ''}`}>
+              <iframe
+                src={getYouTubeEmbedUrl(currentSlide.youtube_video_id)}
+                className="absolute top-1/2 left-1/2 w-[177.78vh] h-[100vw] min-w-full min-h-full -translate-x-1/2 -translate-y-1/2 pointer-events-none"
+                style={{
+                  width: '100vw',
+                  height: '56.25vw',
+                  minHeight: '100%',
+                  minWidth: '177.78%',
+                }}
+                allow="autoplay; encrypted-media"
+                allowFullScreen
+                title={`Hero video ${currentIndex + 1}`}
+              />
+            </div>
+          </>
+        ) : currentSlide.image_url ? (
+          <img
+            src={currentSlide.image_url}
+            alt={currentSlide.title || 'Illustration du slide'}
+            className="w-full h-full object-cover"
+            loading="lazy"
+          />
+        ) : null}
       </div>
 
       {/* Overlay avec opacité configurable */}

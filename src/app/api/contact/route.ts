@@ -11,10 +11,17 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 
 // Schema de validation Zod
+const phoneRegex = /^0[1-9](?: [0-9]{2}){4}$/;
+
 const contactSchema = z.object({
   name: z.string().min(2, 'Le nom doit contenir au moins 2 caractères'),
   email: z.string().email('Email invalide'),
-  phone: z.string().optional(),
+  phone: z
+    .string()
+    .optional()
+    .refine((value) => !value || phoneRegex.test(value), {
+      message: 'Le téléphone doit être au format 01 02 03 04 05',
+    }),
   club: z.string().optional(),
   subject: z.string().min(3, 'Le sujet doit contenir au moins 3 caractères'),
   message: z.string().min(10, 'Le message doit contenir au moins 10 caractères'),

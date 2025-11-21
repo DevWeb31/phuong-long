@@ -16,6 +16,8 @@ import { Badge } from '@/components/common';
 import { Play } from 'lucide-react';
 import type { HeroSlide } from '@/components/marketing/HeroCarousel';
 
+const MAX_SLIDES = 4;
+
 export default function AdminHeroSlidesPage() {
   const [slides, setSlides] = useState<HeroSlide[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -46,25 +48,44 @@ export default function AdminHeroSlidesPage() {
   const columns: DataTableColumn<HeroSlide>[] = [
     {
       key: 'youtube_video_id',
-      label: 'Vidéo',
+      label: 'Média',
       sortable: false,
-      render: (value) => (
-        <div className="flex items-center gap-2">
-          <div className="w-12 h-8 rounded bg-slate-200 dark:bg-slate-700 flex items-center justify-center">
-            <Play className="w-4 h-4 text-slate-600 dark:text-slate-400" />
-          </div>
-          <span className="text-xs text-slate-600 dark:text-slate-400 font-mono">
-            {(value as string).substring(0, 11)}
-          </span>
-        </div>
-      ),
+      render: (_value, row) => {
+        if (row.youtube_video_id) {
+          return (
+            <div className="flex items-center gap-2">
+              <div className="w-12 h-8 rounded bg-gradient-to-br from-red-500/20 to-red-600/20 dark:from-red-500/30 dark:to-red-600/30 border-2 border-red-500/30 dark:border-red-500/20 flex items-center justify-center shadow-sm shadow-red-500/20">
+                <Play className="w-4 h-4 text-red-600 dark:text-red-400 fill-red-600 dark:fill-red-400" />
+              </div>
+              <span className="text-xs text-red-600 dark:text-red-400 font-mono font-semibold">
+                {row.youtube_video_id.substring(0, 11)}
+              </span>
+            </div>
+          );
+        }
+        if (row.image_url) {
+          return (
+            <div className="flex items-center gap-2">
+              <div className="w-12 h-8 rounded bg-gradient-to-br from-primary/20 via-secondary/20 to-accent/20 border-2 border-primary/30 dark:border-primary/20 flex items-center justify-center shadow-sm shadow-primary/10">
+                <span className="text-xs font-bold text-primary dark:text-primary-light">IMG</span>
+              </div>
+              <span className="text-xs text-gray-600 dark:text-gray-400 truncate max-w-[120px] font-medium">
+                Image statique
+              </span>
+            </div>
+          );
+        }
+        return <span className="text-xs text-gray-500 dark:text-gray-400">-</span>;
+      },
     },
     {
       key: 'title',
       label: 'Titre',
       sortable: true,
       render: (value) => (
-        <span className="font-semibold text-slate-900 dark:text-slate-100">{value as string}</span>
+        <span className="font-semibold bg-gradient-to-r from-gray-900 to-gray-700 dark:from-gray-100 dark:to-gray-300 bg-clip-text text-transparent">
+          {value as string}
+        </span>
       ),
     },
     {
@@ -82,7 +103,7 @@ export default function AdminHeroSlidesPage() {
       label: 'Ordre',
       sortable: true,
       render: (value) => (
-        <Badge size="sm" variant="default">
+        <Badge size="sm" variant="default" className="bg-accent/10 text-accent dark:bg-accent/20 dark:text-accent border-accent/30 dark:border-accent/20">
           {value as number}
         </Badge>
       ),
@@ -99,7 +120,12 @@ export default function AdminHeroSlidesPage() {
     },
   ];
 
+  const isMaxSlidesReached = slides.length >= MAX_SLIDES;
+
   const handleCreate = () => {
+    if (isMaxSlidesReached) {
+      return;
+    }
     setSelectedSlide(null);
     setIsFormOpen(true);
   };
@@ -116,6 +142,9 @@ export default function AdminHeroSlidesPage() {
 
   const handleSubmit = async (slideData: Partial<HeroSlide>) => {
     try {
+      if (!selectedSlide && slides.length >= MAX_SLIDES) {
+        return;
+      }
       setIsSubmitting(true);
       
       const url = selectedSlide
@@ -128,7 +157,8 @@ export default function AdminHeroSlidesPage() {
         title: slideData.title || '',
         subtitle: slideData.subtitle || null,
         description: slideData.description || null,
-        youtube_video_id: slideData.youtube_video_id || '',
+        youtube_video_id: slideData.youtube_video_id ?? null,
+        image_url: slideData.image_url ? slideData.image_url : null,
         cta_text: slideData.cta_text || null,
         cta_link: slideData.cta_link || null,
         overlay_opacity: slideData.overlay_opacity ?? 0.5,
@@ -182,7 +212,19 @@ export default function AdminHeroSlidesPage() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-4">
+        <div>
+          <h1 className="text-2xl font-bold bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">
+            Gestion du Carousel Hero
+          </h1>
+          <p className="text-xs text-gray-600 dark:text-gray-400 mt-0.5">
+            Gérez les slides de la page d'accueil
+          </p>
+        </div>
+      </div>
+
       <DataTable
         columns={columns}
         data={slides}
@@ -190,9 +232,15 @@ export default function AdminHeroSlidesPage() {
         onEdit={handleEdit}
         onDelete={handleDelete}
         emptyMessage="Aucun slide pour le moment"
-        newItemLabel="Nouveau Slide"
-        onNewItemClick={handleCreate}
+        newItemLabel={isMaxSlidesReached ? undefined : 'Nouveau Slide'}
+        onNewItemClick={!isMaxSlidesReached ? handleCreate : undefined}
       />
+
+      {isMaxSlidesReached && (
+        <p className="text-sm text-amber-600 dark:text-amber-400">
+          Limite atteinte : vous pouvez créer jusqu&apos;à {MAX_SLIDES} slides maximum. Supprimez un slide pour en ajouter un nouveau.
+        </p>
+      )}
 
       <HeroSlideFormModal
         isOpen={isFormOpen}

@@ -86,7 +86,7 @@ export default function AdminCoachesPage() {
       label: 'Photo',
       sortable: false,
       render: (value) => (
-        <div className="w-10 h-10 rounded-full overflow-hidden bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-800 flex items-center justify-center">
+        <div className="w-10 h-10 rounded-full overflow-hidden bg-gradient-to-br from-primary/20 via-secondary/20 to-accent/20 border-2 border-primary/30 dark:border-primary/20 flex items-center justify-center shadow-sm shadow-primary/10">
           {value ? (
             <img
               src={value as string}
@@ -94,7 +94,7 @@ export default function AdminCoachesPage() {
               className="w-full h-full object-cover"
             />
           ) : (
-            <UserCircle className="w-6 h-6 text-gray-400 dark:text-gray-600" />
+            <UserCircle className="w-6 h-6 text-primary dark:text-primary-light" />
           )}
         </div>
       ),
@@ -108,7 +108,7 @@ export default function AdminCoachesPage() {
         const truncatedName = fullName.length > 40 ? `${fullName.substring(0, 40)}...` : fullName;
         return (
           <span 
-            className="font-semibold text-slate-900 dark:text-slate-100"
+            className="font-semibold bg-gradient-to-r from-gray-900 to-gray-700 dark:from-gray-100 dark:to-gray-300 bg-clip-text text-transparent"
             title={fullName.length > 40 ? fullName : undefined}
           >
             {truncatedName}
@@ -121,7 +121,7 @@ export default function AdminCoachesPage() {
       label: 'Club',
       sortable: true,
       render: (value) => (
-        <span className="text-sm text-slate-600 dark:text-slate-400">
+        <span className="inline-flex items-center px-2.5 py-1 rounded-full text-sm font-medium bg-secondary/10 text-secondary dark:bg-secondary/20 dark:text-secondary-light border border-secondary/20 dark:border-secondary/30">
           {getClubName(value as string | null)}
         </span>
       ),
@@ -228,7 +228,19 @@ export default function AdminCoachesPage() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-4">
+        <div>
+          <h1 className="text-2xl font-bold bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">
+            Gestion des Professeurs
+          </h1>
+          <p className="text-xs text-gray-600 dark:text-gray-400 mt-0.5">
+            Gérez vos coaches et instructeurs
+          </p>
+        </div>
+      </div>
+
       <DataTable
         columns={columns}
         data={coaches}

@@ -69,7 +69,7 @@ export default function AdminBlogPage() {
       label: 'Image',
       sortable: false,
       render: (value, row) => (
-        <div className="w-10 h-10 rounded-lg overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900 flex items-center justify-center">
+        <div className="w-10 h-10 rounded-lg overflow-hidden bg-gradient-to-br from-primary/20 via-secondary/20 to-accent/20 border-2 border-primary/30 dark:border-primary/20 flex items-center justify-center shadow-sm shadow-primary/10">
           {value ? (
             <img
               src={value as string}
@@ -100,7 +100,9 @@ export default function AdminBlogPage() {
         const truncatedTitle = title.length > 30 ? `${title.slice(0, 30)}...` : title;
         return (
           <div className="relative group">
-            <span className="font-medium text-gray-900 dark:text-gray-100">{truncatedTitle}</span>
+            <span className="font-semibold bg-gradient-to-r from-gray-900 to-gray-700 dark:from-gray-100 dark:to-gray-300 bg-clip-text text-transparent">
+              {truncatedTitle}
+            </span>
             {title.length > 30 && (
               <div className="absolute left-0 bottom-full mb-2 px-3 py-2 bg-gray-900 dark:bg-gray-800 text-white text-sm rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-10 max-w-xs whitespace-normal">
                 {title}
@@ -128,12 +130,21 @@ export default function AdminBlogPage() {
       render: (value: string[]) => (
         <div className="flex flex-wrap gap-1">
           {value.slice(0, 2).map((tag, index) => (
-            <Badge key={index} variant="default" size="sm">
+            <Badge 
+              key={index} 
+              variant="default" 
+              size="sm"
+              className="bg-accent/10 text-accent dark:bg-accent/20 dark:text-accent border-accent/30 dark:border-accent/20"
+            >
               {tag}
             </Badge>
           ))}
           {value.length > 2 && (
-            <Badge variant="default" size="sm">
+            <Badge 
+              variant="default" 
+              size="sm"
+              className="bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-700"
+            >
               +{value.length - 2}
             </Badge>
           )}
@@ -144,11 +155,15 @@ export default function AdminBlogPage() {
       key: 'published_at',
       label: 'Publié le',
       sortable: true,
-      render: (value) => value ? new Date(value).toLocaleDateString('fr-FR', {
-        day: 'numeric',
-        month: 'short',
-        year: 'numeric',
-      }) : '-',
+      render: (value) => value ? (
+        <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+          {new Date(value).toLocaleDateString('fr-FR', {
+            day: 'numeric',
+            month: 'short',
+            year: 'numeric',
+          })}
+        </span>
+      ) : '-',
     },
   ];
 
@@ -221,9 +236,53 @@ export default function AdminBlogPage() {
     }
   };
 
+  const handleBulkDelete = async (ids: (string | number)[]) => {
+    if (!confirm(`Êtes-vous sûr de vouloir supprimer ${ids.length} article(s) ? Cette action est irréversible.`)) {
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+      const deletePromises = ids.map((id) =>
+        fetch(`/api/admin/blog/${id}`, {
+          method: 'DELETE',
+        })
+      );
+
+      const results = await Promise.allSettled(deletePromises);
+      const failed = results.filter((r) => r.status === 'rejected' || (r.status === 'fulfilled' && !r.value.ok));
+
+      if (failed.length > 0) {
+        alert(`${failed.length} article(s) n'ont pas pu être supprimé(s).`);
+      } else {
+        alert(`${ids.length} article(s) supprimé(s) avec succès.`);
+      }
+
+      await loadPosts();
+    } catch (error) {
+      console.error('Error bulk deleting posts:', error);
+      alert('Une erreur est survenue lors de la suppression');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
-    <div className="space-y-6">
-      <DataTable
+    <div className="h-full flex flex-col gap-4 overflow-hidden">
+      {/* Header */}
+      <div className="flex items-center justify-between flex-shrink-0">
+        <div>
+          <h1 className="text-2xl font-bold bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">
+            Gestion du Blog
+          </h1>
+          <p className="text-xs text-gray-600 dark:text-gray-400 mt-0.5">
+            Gérez vos articles et publications
+          </p>
+        </div>
+      </div>
+
+      <div className="flex-1 min-h-0 overflow-hidden">
+        <DataTable
         data={posts}
         columns={columns}
         isLoading={isLoading}
@@ -234,7 +293,12 @@ export default function AdminBlogPage() {
         emptyMessage="Aucun article trouvé"
         newItemLabel="Nouvel Article"
         onNewItemClick={handleCreateNew}
-      />
+        minItemsPerPage={8}
+        itemsPerPage={8}
+        selectable={true}
+        onBulkDelete={handleBulkDelete}
+        />
+      </div>
 
       <BlogFormModal
         isOpen={isFormOpen}

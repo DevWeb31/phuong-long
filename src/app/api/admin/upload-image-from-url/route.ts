@@ -102,7 +102,7 @@ export async function POST(request: Request) {
     let optimizedBuffer: Buffer;
 
     try {
-      if (type === 'cover' || folder === 'clubs') {
+      if (type === 'cover' || folder === 'clubs' || type === 'hero-slide' || folder === 'hero-slides') {
         // Pour les images de couverture de clubs : 16:9 (1200x675px)
         optimizedBuffer = await optimizeCover(originalBuffer, 1200, 675, 85);
       } else {
@@ -128,7 +128,14 @@ export async function POST(request: Request) {
     }
 
     // Déterminer le bucket selon le type/folder
-    const bucketName = folder === 'coaches' ? 'coaches' : folder === 'clubs' ? 'clubs' : 'coaches';
+    const bucketName =
+      folder === 'coaches'
+        ? 'coaches'
+        : folder === 'clubs'
+          ? 'clubs'
+          : folder === 'hero-slides'
+            ? 'hero-slides'
+            : folder || 'uploads';
     
     // Générer un nom de fichier unique en WebP
     const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.webp`;

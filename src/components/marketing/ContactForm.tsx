@@ -12,8 +12,13 @@
 import { useState } from 'react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, Button } from '@/components/common';
 import { CheckCircle2, XCircle, Loader2, Send } from 'lucide-react';
+import { PhoneInput } from '@/components/admin/PhoneInput';
 
-export function ContactForm() {
+interface ContactFormProps {
+  clubs: Array<{ id: string; name: string; city: string | null }>;
+}
+
+export function ContactForm({ clubs }: ContactFormProps) {
   const [formState, setFormState] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [formData, setFormData] = useState({
     name: '',
@@ -57,6 +62,13 @@ export function ContactForm() {
     setFormData(prev => ({
       ...prev,
       [e.target.name]: e.target.value,
+    }));
+  };
+
+  const handlePhoneChange = (formattedValue: string) => {
+    setFormData(prev => ({
+      ...prev,
+      phone: formattedValue,
     }));
   };
 
@@ -126,15 +138,15 @@ export function ContactForm() {
               <label htmlFor="phone" className="block text-sm font-medium dark:text-gray-300 mb-2">
                 Téléphone
               </label>
-              <input
-                type="tel"
-                id="phone"
-                name="phone"
+              <PhoneInput
                 value={formData.phone}
-                onChange={handleChange}
+                onChange={handlePhoneChange}
+                placeholder="01 23 45 67 89"
                 className="w-full px-4 py-2 border dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                placeholder="06 12 34 56 78"
               />
+              <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                Format requis : 01 02 03 04 05
+              </p>
             </div>
 
             {/* Club */}
@@ -150,11 +162,11 @@ export function ContactForm() {
                 className="w-full px-4 py-2 border dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
               >
                 <option value="">-- Sélectionnez un club --</option>
-                <option value="marseille">Marseille Centre</option>
-                <option value="paris">Paris Bastille</option>
-                <option value="nice">Nice Promenade</option>
-                <option value="creteil">Créteil Université</option>
-                <option value="strasbourg">Strasbourg Centre</option>
+                {clubs.map((club) => (
+                  <option key={club.id} value={club.id}>
+                    {club.name}{club.city ? ` (${club.city})` : ''}
+                  </option>
+                ))}
                 <option value="autre">Autre / Question générale</option>
               </select>
             </div>

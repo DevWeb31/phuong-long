@@ -290,7 +290,8 @@ export interface Database {
           title: string;
           subtitle: string | null;
           description: string | null;
-          youtube_video_id: string;
+          youtube_video_id: string | null;
+          image_url: string | null;
           cta_text: string | null;
           cta_link: string | null;
           overlay_opacity: number;
@@ -304,7 +305,8 @@ export interface Database {
           title: string;
           subtitle?: string | null;
           description?: string | null;
-          youtube_video_id: string;
+          youtube_video_id?: string | null;
+          image_url?: string | null;
           cta_text?: string | null;
           cta_link?: string | null;
           overlay_opacity?: number;
@@ -318,7 +320,8 @@ export interface Database {
           title?: string;
           subtitle?: string | null;
           description?: string | null;
-          youtube_video_id?: string;
+          youtube_video_id?: string | null;
+          image_url?: string | null;
           cta_text?: string | null;
           cta_link?: string | null;
           overlay_opacity?: number;

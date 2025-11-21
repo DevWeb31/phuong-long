@@ -148,9 +148,14 @@ export function TimelineEditor({ value, onChange, label }: TimelineEditorProps) 
                   <input
                     type="text"
                     value={step.year}
-                    onChange={(e) => handleStepChange(step.id, 'year', e.target.value)}
+                    onChange={(e) => {
+                      const sanitizedValue = e.target.value.replace(/[^0-9-]/g, '');
+                      handleStepChange(step.id, 'year', sanitizedValue);
+                    }}
                     placeholder="2020"
                     maxLength={10}
+                    inputMode="numeric"
+                    pattern="[0-9-]*"
                     className="w-full px-3 py-2 border dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
                   />
                 </div>

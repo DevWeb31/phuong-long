@@ -90,7 +90,7 @@ export default function AdminEventsPage() {
       label: 'Image',
       sortable: false,
       render: (value, row) => (
-        <div className="w-10 h-10 rounded-lg overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900 flex items-center justify-center">
+        <div className="w-10 h-10 rounded-lg overflow-hidden bg-gradient-to-br from-primary/20 via-secondary/20 to-accent/20 border-2 border-primary/30 dark:border-primary/20 flex items-center justify-center shadow-sm shadow-primary/10">
           {value ? (
             <img
               src={value as string}
@@ -121,7 +121,9 @@ export default function AdminEventsPage() {
         const truncatedTitle = title.length > 20 ? `${title.slice(0, 20)}...` : title;
         return (
           <div className="relative group">
-            <span className="font-medium text-gray-900 dark:text-gray-100">{truncatedTitle}</span>
+            <span className="font-semibold bg-gradient-to-r from-gray-900 to-gray-700 dark:from-gray-100 dark:to-gray-300 bg-clip-text text-transparent">
+              {truncatedTitle}
+            </span>
             {title.length > 20 && (
               <div className="absolute left-0 bottom-full mb-2 px-3 py-2 bg-gray-900 dark:bg-gray-800 text-white text-sm rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-10 max-w-xs whitespace-normal">
                 {title}
@@ -147,28 +149,38 @@ export default function AdminEventsPage() {
       key: 'club',
       label: 'Club',
       sortable: false,
-      render: (_, row) => row.club ? row.club.city : '-',
+      render: (_, row) => row.club ? (
+        <span className="inline-flex items-center px-2.5 py-1 rounded-full text-sm font-medium bg-secondary/10 text-secondary dark:bg-secondary/20 dark:text-secondary-light border border-secondary/20 dark:border-secondary/30">
+          {row.club.city}
+        </span>
+      ) : '-',
     },
     {
       key: 'start_date',
       label: 'Date',
       sortable: true,
-      render: (value) => new Date(value).toLocaleDateString('fr-FR', {
-        day: 'numeric',
-        month: 'short',
-        year: 'numeric',
-      }),
+      render: (value) => (
+        <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+          {new Date(value).toLocaleDateString('fr-FR', {
+            day: 'numeric',
+            month: 'short',
+            year: 'numeric',
+          })}
+        </span>
+      ),
     },
     {
       key: 'max_attendees',
       label: 'Places max',
       sortable: true,
       render: (value) => value ? (
-        <Badge variant="primary" size="sm">
+        <Badge variant="primary" size="sm" className="bg-primary/10 text-primary dark:bg-primary/20 dark:text-primary-light border-primary/30 dark:border-primary/20">
           {value} places
         </Badge>
       ) : (
-        <span className="text-gray-400 dark:text-gray-400">Illimité</span>
+        <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-gray-700">
+          Illimité
+        </span>
       ),
     },
   ];
@@ -305,9 +317,53 @@ export default function AdminEventsPage() {
     }
   };
 
+  const handleBulkDelete = async (ids: (string | number)[]) => {
+    if (!confirm(`Êtes-vous sûr de vouloir supprimer ${ids.length} événement(s) ? Cette action est irréversible.`)) {
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+      const deletePromises = ids.map((id) =>
+        fetch(`/api/admin/events/${id}`, {
+          method: 'DELETE',
+        })
+      );
+
+      const results = await Promise.allSettled(deletePromises);
+      const failed = results.filter((r) => r.status === 'rejected' || (r.status === 'fulfilled' && !r.value.ok));
+
+      if (failed.length > 0) {
+        alert(`${failed.length} événement(s) n'ont pas pu être supprimé(s).`);
+      } else {
+        alert(`${ids.length} événement(s) supprimé(s) avec succès.`);
+      }
+
+      await loadEvents();
+    } catch (error) {
+      console.error('Error bulk deleting events:', error);
+      alert('Une erreur est survenue lors de la suppression');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
-    <div className="space-y-6">
-      <DataTable
+    <div className="h-full flex flex-col gap-4 overflow-hidden">
+      {/* Header */}
+      <div className="flex items-center justify-between flex-shrink-0">
+        <div>
+          <h1 className="text-2xl font-bold bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">
+            Gestion des Événements
+          </h1>
+          <p className="text-xs text-gray-600 dark:text-gray-400 mt-0.5">
+            Gérez vos événements et compétitions
+          </p>
+        </div>
+      </div>
+
+      <div className="flex-1 min-h-0 overflow-hidden">
+        <DataTable
         data={events}
         columns={columns}
         isLoading={isLoading}
@@ -318,7 +374,12 @@ export default function AdminEventsPage() {
         emptyMessage="Aucun événement trouvé"
         newItemLabel="Nouvel Événement"
         onNewItemClick={handleCreateNew}
-      />
+        minItemsPerPage={8}
+        itemsPerPage={8}
+        selectable={true}
+        onBulkDelete={handleBulkDelete}
+        />
+      </div>
 
       <EventFormModal
         isOpen={isFormOpen}

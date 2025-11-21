@@ -211,21 +211,21 @@ export default function PageContentEditor() {
   return (
     <div className="space-y-6 pb-24">
       {/* Header */}
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-4 flex-shrink-0">
         <Button
           variant="ghost"
           size="sm"
           onClick={() => router.push('/admin/content')}
-          className="flex items-center gap-2"
+          className="flex items-center gap-2 text-gray-700 dark:text-gray-300 hover:text-primary dark:hover:text-primary-light"
         >
           <ArrowLeft className="w-4 h-4" />
           Retour
         </Button>
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+          <h1 className="text-2xl font-bold bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">
             {pageNames[pageSlug] || pageSlug}
           </h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-1">
+          <p className="text-xs text-gray-600 dark:text-gray-400 mt-0.5">
             Modifiez le contenu de cette page
           </p>
         </div>
@@ -249,10 +249,10 @@ export default function PageContentEditor() {
         {pageSlug === 'home' ? (
           <>
             {/* Section Valeurs - Titre et Sous-titre */}
-            <Card className="lg:col-span-2">
+            <Card className="lg:col-span-2 border dark:border-gray-800">
               <CardHeader>
-                <CardTitle className="text-lg">Section Valeurs</CardTitle>
-                <CardDescription>Configuration de la section principale des valeurs</CardDescription>
+                <CardTitle className="text-lg font-semibold text-gray-900 dark:text-gray-100 bg-gradient-to-r from-gray-900 to-gray-700 dark:from-gray-100 dark:to-gray-300 bg-clip-text text-transparent">Section Valeurs</CardTitle>
+                <CardDescription className="text-gray-600 dark:text-gray-400">Configuration de la section principale des valeurs</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
@@ -297,16 +297,20 @@ export default function PageContentEditor() {
             </Card>
 
             {/* Valeur 1 */}
-            <Card>
+            <Card className="border dark:border-gray-800">
               <CardHeader>
-                <CardTitle className="text-lg flex items-center gap-2">
+                <CardTitle className="text-lg font-semibold flex items-center gap-2 text-gray-900 dark:text-gray-100 bg-gradient-to-r from-gray-900 to-gray-700 dark:from-gray-100 dark:to-gray-300 bg-clip-text text-transparent">
                   {(() => {
                     const IconComponent = getFeatureIcon(editedContent['feature_1_icon'] || 'Bolt');
-                    return <IconComponent className="w-5 h-5 text-primary" />;
+                    return (
+                      <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary/20 via-secondary/20 to-accent/20 border-2 border-primary/30 dark:border-primary/20 flex items-center justify-center shadow-sm shadow-primary/10">
+                        <IconComponent className="w-4 h-4 text-primary dark:text-primary-light" />
+                      </div>
+                    );
                   })()}
                   Valeur 1
                 </CardTitle>
-                <CardDescription>Première carte de valeur affichée sur la page d'accueil</CardDescription>
+                <CardDescription className="text-gray-600 dark:text-gray-400">Première carte de valeur affichée sur la page d'accueil</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
@@ -354,16 +358,20 @@ export default function PageContentEditor() {
             </Card>
 
             {/* Valeur 2 */}
-            <Card>
+            <Card className="border dark:border-gray-800">
               <CardHeader>
-                <CardTitle className="text-lg flex items-center gap-2">
+                <CardTitle className="text-lg font-semibold flex items-center gap-2 text-gray-900 dark:text-gray-100 bg-gradient-to-r from-gray-900 to-gray-700 dark:from-gray-100 dark:to-gray-300 bg-clip-text text-transparent">
                   {(() => {
                     const IconComponent = getFeatureIcon(editedContent['feature_2_icon'] || 'Trophy');
-                    return <IconComponent className="w-5 h-5 text-secondary" />;
+                    return (
+                      <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary/20 via-secondary/20 to-accent/20 border-2 border-primary/30 dark:border-primary/20 flex items-center justify-center shadow-sm shadow-primary/10">
+                        <IconComponent className="w-4 h-4 text-primary dark:text-primary-light" />
+                      </div>
+                    );
                   })()}
                   Valeur 2
                 </CardTitle>
-                <CardDescription>Deuxième carte de valeur affichée sur la page d'accueil</CardDescription>
+                <CardDescription className="text-gray-600 dark:text-gray-400">Deuxième carte de valeur affichée sur la page d'accueil</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
@@ -411,16 +419,20 @@ export default function PageContentEditor() {
             </Card>
 
             {/* Valeur 3 */}
-            <Card>
+            <Card className="border dark:border-gray-800">
               <CardHeader>
-                <CardTitle className="text-lg flex items-center gap-2">
+                <CardTitle className="text-lg font-semibold flex items-center gap-2 text-gray-900 dark:text-gray-100 bg-gradient-to-r from-gray-900 to-gray-700 dark:from-gray-100 dark:to-gray-300 bg-clip-text text-transparent">
                   {(() => {
                     const IconComponent = getFeatureIcon(editedContent['feature_3_icon'] || 'Users');
-                    return <IconComponent className="w-5 h-5 text-accent" />;
+                    return (
+                      <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary/20 via-secondary/20 to-accent/20 border-2 border-primary/30 dark:border-primary/20 flex items-center justify-center shadow-sm shadow-primary/10">
+                        <IconComponent className="w-4 h-4 text-primary dark:text-primary-light" />
+                      </div>
+                    );
                   })()}
                   Valeur 3
                 </CardTitle>
-                <CardDescription>Troisième carte de valeur affichée sur la page d'accueil</CardDescription>
+                <CardDescription className="text-gray-600 dark:text-gray-400">Troisième carte de valeur affichée sur la page d'accueil</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
@@ -472,10 +484,10 @@ export default function PageContentEditor() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Titre Introduction */}
             {content.find(item => item.section_key === 'intro_title') && (
-              <Card>
+              <Card className="border dark:border-gray-800">
                 <CardHeader>
-                  <CardTitle className="text-lg">Titre introduction</CardTitle>
-                  <CardDescription>Titre de la section d'introduction</CardDescription>
+                  <CardTitle className="text-lg font-semibold text-gray-900 dark:text-gray-100 bg-gradient-to-r from-gray-900 to-gray-700 dark:from-gray-100 dark:to-gray-300 bg-clip-text text-transparent">Titre introduction</CardTitle>
+                  <CardDescription className="text-gray-600 dark:text-gray-400">Titre de la section d'introduction</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <input
@@ -491,10 +503,10 @@ export default function PageContentEditor() {
 
             {/* Texte Introduction */}
             {content.find(item => item.section_key === 'intro_text') && (
-              <Card>
+              <Card className="border dark:border-gray-800">
                 <CardHeader>
-                  <CardTitle className="text-lg">Texte introduction</CardTitle>
-                  <CardDescription>Contenu de la section d'introduction</CardDescription>
+                  <CardTitle className="text-lg font-semibold text-gray-900 dark:text-gray-100 bg-gradient-to-r from-gray-900 to-gray-700 dark:from-gray-100 dark:to-gray-300 bg-clip-text text-transparent">Texte introduction</CardTitle>
+                  <CardDescription className="text-gray-600 dark:text-gray-400">Contenu de la section d'introduction</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <RichTextEditor
@@ -508,10 +520,10 @@ export default function PageContentEditor() {
             )}
 
             {/* Section Timeline */}
-            <Card className="lg:col-span-2">
+            <Card className="lg:col-span-2 border dark:border-gray-800">
               <CardHeader>
-                <CardTitle className="text-lg">Timeline - Étapes de l'histoire</CardTitle>
-                <CardDescription>Gérez les étapes de la timeline (maximum 10 étapes)</CardDescription>
+                <CardTitle className="text-lg font-semibold text-gray-900 dark:text-gray-100 bg-gradient-to-r from-gray-900 to-gray-700 dark:from-gray-100 dark:to-gray-300 bg-clip-text text-transparent">Timeline - Étapes de l'histoire</CardTitle>
+                <CardDescription className="text-gray-600 dark:text-gray-400">Gérez les étapes de la timeline (maximum 10 étapes)</CardDescription>
               </CardHeader>
               <CardContent>
                 <TimelineEditor
@@ -529,10 +541,10 @@ export default function PageContentEditor() {
             </Card>
 
             {/* Section Valeurs Fondamentales */}
-            <Card className="lg:col-span-2">
+            <Card className="lg:col-span-2 border dark:border-gray-800">
               <CardHeader>
-                <CardTitle className="text-lg">Nos Valeurs Fondamentales</CardTitle>
-                <CardDescription>Gérez les 3 valeurs fondamentales de l'association</CardDescription>
+                <CardTitle className="text-lg font-semibold text-gray-900 dark:text-gray-100 bg-gradient-to-r from-gray-900 to-gray-700 dark:from-gray-100 dark:to-gray-300 bg-clip-text text-transparent">Nos Valeurs Fondamentales</CardTitle>
+                <CardDescription className="text-gray-600 dark:text-gray-400">Gérez les 3 valeurs fondamentales de l'association</CardDescription>
               </CardHeader>
               <CardContent>
                 <ValuesEditor
@@ -560,14 +572,15 @@ export default function PageContentEditor() {
               }
               return true;
             })
-            .map((item) => (
-            <Card key={item.id}>
-              <CardHeader>
-                <CardTitle className="text-lg">{item.label || item.section_key}</CardTitle>
-                {item.description && (
-                  <CardDescription>{item.description}</CardDescription>
-                )}
-              </CardHeader>
+            .map((item) => {
+              return (
+              <Card key={item.id} className="border dark:border-gray-800">
+                <CardHeader>
+                  <CardTitle className="text-lg font-semibold text-gray-900 dark:text-gray-100 bg-gradient-to-r from-gray-900 to-gray-700 dark:from-gray-100 dark:to-gray-300 bg-clip-text text-transparent">{item.label || item.section_key}</CardTitle>
+                  {item.description && (
+                    <CardDescription className="text-gray-600 dark:text-gray-400">{item.description}</CardDescription>
+                  )}
+                </CardHeader>
               <CardContent>
                 {item.section_key === 'hours' ? (
                   <HoursEditor
@@ -632,7 +645,8 @@ export default function PageContentEditor() {
                 )}
               </CardContent>
             </Card>
-          ))
+            );
+          })
         )}
       </div>
 

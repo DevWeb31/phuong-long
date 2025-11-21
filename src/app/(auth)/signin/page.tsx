@@ -97,9 +97,9 @@ export default function SignInPage() {
         }
       }
 
-      // Redirection vers dashboard avec refresh
+      // Redirection vers la page d'accueil
       router.refresh();
-      window.location.href = '/dashboard';
+      router.push('/');
     } catch (err) {
       setError('Une erreur est survenue');
       setLoading(false);

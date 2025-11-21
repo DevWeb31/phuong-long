@@ -12,6 +12,7 @@
 import { useState, useEffect, Fragment } from 'react';
 import { Modal } from './Modal';
 import { Button } from '@/components/common';
+import { CoverImageUploader } from '@/components/admin/CoverImageUploader';
 import { 
   FileText, 
   Video, 
@@ -19,7 +20,8 @@ import {
   Settings, 
   CheckCircle2, 
   AlertCircle, 
-  XCircle
+  XCircle,
+  Image as ImageIcon,
 } from 'lucide-react';
 import type { HeroSlide } from '@/components/marketing/HeroCarousel';
 
@@ -32,6 +34,7 @@ interface HeroSlideFormModalProps {
 }
 
 type Step = 'content' | 'video' | 'cta' | 'settings';
+type MediaType = 'video' | 'image';
 
 interface StepConfig {
   id: Step;
@@ -41,7 +44,7 @@ interface StepConfig {
 
 const STEPS: StepConfig[] = [
   { id: 'content', label: 'Contenu', icon: <FileText className="w-4 h-4" /> },
-  { id: 'video', label: 'Vidéo', icon: <Video className="w-4 h-4" /> },
+  { id: 'video', label: 'Vidéo & image', icon: <Video className="w-4 h-4" /> },
   { id: 'cta', label: 'Bouton CTA', icon: <MousePointerClick className="w-4 h-4" /> },
   { id: 'settings', label: 'Paramètres', icon: <Settings className="w-4 h-4" /> },
 ];
@@ -51,12 +54,14 @@ export function HeroSlideFormModal({ isOpen, onClose, onSubmit, slide, isLoading
   const [completedSteps, setCompletedSteps] = useState<Set<Step>>(new Set());
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
   const [showValidationErrors, setShowValidationErrors] = useState(false);
+  const [mediaType, setMediaType] = useState<MediaType>('video');
   
   const [formData, setFormData] = useState<Partial<HeroSlide>>({
     title: '',
     subtitle: '',
     description: '',
     youtube_video_id: '',
+    image_url: '',
     cta_text: '',
     cta_link: '',
     overlay_opacity: 0.5,
@@ -69,19 +74,30 @@ export function HeroSlideFormModal({ isOpen, onClose, onSubmit, slide, isLoading
       if (slide && slide.id) {
         setFormData({
           ...slide,
+          youtube_video_id: slide.youtube_video_id || '',
+          image_url: slide.image_url || '',
         });
+        if (slide.youtube_video_id) {
+          setMediaType('video');
+        } else if (slide.image_url) {
+          setMediaType('image');
+        } else {
+          setMediaType('video');
+        }
       } else {
         setFormData({
           title: '',
           subtitle: '',
           description: '',
           youtube_video_id: '',
+          image_url: '',
           cta_text: '',
           cta_link: '',
           overlay_opacity: 0.5,
           active: true,
           display_order: 0,
         });
+        setMediaType('video');
       }
     }
     // Réinitialiser à la première étape quand on ouvre la modale
@@ -102,10 +118,20 @@ export function HeroSlideFormModal({ isOpen, onClose, onSubmit, slide, isLoading
         }
         break;
       case 'video':
-        if (!formData.youtube_video_id?.trim()) {
-          errors.youtube_video_id = 'L\'ID de la vidéo YouTube est obligatoire';
-        } else if (formData.youtube_video_id.length !== 11 && !formData.youtube_video_id.includes('youtube.com') && !formData.youtube_video_id.includes('youtu.be')) {
-          errors.youtube_video_id = 'Format d\'ID YouTube invalide';
+        if (mediaType === 'video') {
+          if (!formData.youtube_video_id?.trim()) {
+            errors.youtube_video_id = 'L\'ID de la vidéo YouTube est obligatoire';
+          } else if (
+            formData.youtube_video_id.length !== 11 &&
+            !formData.youtube_video_id.includes('youtube.com') &&
+            !formData.youtube_video_id.includes('youtu.be')
+          ) {
+            errors.youtube_video_id = 'Format d\'ID YouTube invalide';
+          }
+        } else {
+          if (!formData.image_url?.trim()) {
+            errors.image_url = 'L\'image est obligatoire lorsque vous choisissez ce type de média';
+          }
         }
         break;
     }
@@ -247,7 +273,14 @@ export function HeroSlideFormModal({ isOpen, onClose, onSubmit, slide, isLoading
       return;
     }
 
-    await onSubmit(formData);
+    const youtubeId = formData.youtube_video_id?.trim() || '';
+    const payload: Partial<HeroSlide> = {
+      ...formData,
+      youtube_video_id: mediaType === 'video' ? (youtubeId || null) : null,
+      image_url: mediaType === 'image' ? (formData.image_url || null) : null,
+    };
+
+    await onSubmit(payload);
   };
 
   const handleSubmitAndClose = async () => {
@@ -317,6 +350,7 @@ export function HeroSlideFormModal({ isOpen, onClose, onSubmit, slide, isLoading
       ...prev,
       youtube_video_id: extractedId,
     }));
+    setMediaType('video');
     // Effacer l'erreur si elle existe
     if (validationErrors.youtube_video_id) {
       setValidationErrors(prev => {
@@ -324,6 +358,27 @@ export function HeroSlideFormModal({ isOpen, onClose, onSubmit, slide, isLoading
         delete newErrors.youtube_video_id;
         return newErrors;
       });
+    }
+  };
+
+  const handleMediaTypeChange = (type: MediaType) => {
+    setMediaType(type);
+    setValidationErrors(prev => {
+      const next = { ...prev };
+      delete next.youtube_video_id;
+      delete next.image_url;
+      return next;
+    });
+    if (type === 'video') {
+      setFormData(prev => ({
+        ...prev,
+        image_url: '',
+      }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        youtube_video_id: '',
+      }));
     }
   };
 
@@ -611,17 +666,50 @@ export function HeroSlideFormModal({ isOpen, onClose, onSubmit, slide, isLoading
                 placeholder="L'art martial vietnamien traditionnel"
               />
             </div>
+
           </div>
         )}
 
-        {/* Step 2: Vidéo */}
+        {/* Step 2: Vidéo & image */}
         {currentStep === 'video' && (
           <div className="space-y-4 sm:space-y-6 animate-fade-in">
             <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3 sm:p-4">
               <p className="text-xs sm:text-sm text-blue-800 dark:text-blue-200 flex items-start gap-2">
                 <Video className="w-4 h-4 flex-shrink-0 mt-0.5" />
-                <span>Ajoutez l'ID de la vidéo YouTube qui sera utilisée comme arrière-plan du slide. Vous pouvez coller l'URL complète ou juste l'ID.</span>
+                <span>Sélectionnez le type de média pour ce slide : soit une vidéo YouTube, soit une image statique optimisée. Un seul média peut être utilisé par slide.</span>
               </p>
+            </div>
+
+            <div>
+              <p className="text-xs font-semibold text-gray-600 dark:text-gray-300 mb-2">
+                Type de média
+              </p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <button
+                  type="button"
+                  onClick={() => handleMediaTypeChange('video')}
+                  className={`flex items-center gap-2 px-4 py-3 rounded-xl border transition ${
+                    mediaType === 'video'
+                      ? 'border-primary bg-primary/10 text-primary'
+                      : 'border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-300'
+                  }`}
+                >
+                  <Video className="w-4 h-4" />
+                  Vidéo YouTube
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleMediaTypeChange('image')}
+                  className={`flex items-center gap-2 px-4 py-3 rounded-xl border transition ${
+                    mediaType === 'image'
+                      ? 'border-primary bg-primary/10 text-primary'
+                      : 'border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-300'
+                  }`}
+                >
+                  <ImageIcon className="w-4 h-4" />
+                  Image statique
+                </button>
+              </div>
             </div>
             
             {/* Message d'erreur global */}
@@ -643,35 +731,61 @@ export function HeroSlideFormModal({ isOpen, onClose, onSubmit, slide, isLoading
               </div>
             )}
 
-            {/* YouTube Video ID */}
-            <div>
-              <label htmlFor="youtube_video_id" className="block text-sm font-semibold dark:text-gray-300 mb-2">
-                ID Vidéo YouTube <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                id="youtube_video_id"
-                name="youtube_video_id"
-                value={formData.youtube_video_id}
-                onChange={handleYouTubeIdChange}
-                required
-                className={`w-full px-4 py-2.5 border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 ${
-                  showValidationErrors && validationErrors.youtube_video_id
-                    ? 'border-red-500 dark:border-red-500 focus:ring-red-500'
-                    : 'dark:border-gray-700'
-                }`}
-                placeholder="dQw4w9WgXcQ ou https://www.youtube.com/watch?v=dQw4w9WgXcQ"
-              />
-              <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                Vous pouvez coller l'URL complète ou juste l'ID de la vidéo
-              </p>
-              {showValidationErrors && validationErrors.youtube_video_id && (
-                <p className="mt-1.5 text-xs text-red-600 dark:text-red-400 flex items-center gap-1">
-                  <XCircle className="w-3 h-3" />
-                  {validationErrors.youtube_video_id}
+            {mediaType === 'video' && (
+              <div>
+                <label htmlFor="youtube_video_id" className="block text-sm font-semibold dark:text-gray-300 mb-2">
+                  ID Vidéo YouTube <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  id="youtube_video_id"
+                  name="youtube_video_id"
+                  value={formData.youtube_video_id || ''}
+                  onChange={handleYouTubeIdChange}
+                  className={`w-full px-4 py-2.5 border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 ${
+                    showValidationErrors && validationErrors.youtube_video_id
+                      ? 'border-red-500 dark:border-red-500 focus:ring-red-500'
+                      : 'dark:border-gray-700'
+                  }`}
+                  placeholder="dQw4w9WgXcQ ou https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+                />
+                <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                  Vous pouvez coller l'URL complète ou juste l'ID de la vidéo
                 </p>
-              )}
-            </div>
+                {showValidationErrors && validationErrors.youtube_video_id && (
+                  <p className="mt-1.5 text-xs text-red-600 dark:text-red-400 flex items-center gap-1">
+                    <XCircle className="w-3 h-3" />
+                    {validationErrors.youtube_video_id}
+                  </p>
+                )}
+              </div>
+            )}
+
+            {mediaType === 'image' && (
+              <div className="pt-2 border-t dark:border-gray-800">
+                <label className="block text-sm font-semibold dark:text-gray-300 mb-3">
+                  Image du slide <span className="text-red-500">*</span>
+                </label>
+                <CoverImageUploader
+                  value={formData.image_url || ''}
+                  onChange={(url) => {
+                    setFormData((prev) => ({
+                      ...prev,
+                      image_url: url,
+                    }));
+                    if (url) {
+                      setMediaType('image');
+                    }
+                  }}
+                  folder="hero-slides"
+                  type="hero-slide"
+                  error={validationErrors.image_url}
+                />
+                <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                  L'image sera utilisée comme fond statique (formats conseillés : 16:9, minimum 1200x675px). Elle remplace la vidéo YouTube.
+                </p>
+              </div>
+            )}
           </div>
         )}
 
