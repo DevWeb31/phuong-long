@@ -434,7 +434,7 @@ export function BlogFormModal({ isOpen, onClose, onSubmit, post, isLoading = fal
     
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
-        e.preventDefault();
+    e.preventDefault();
         const currentStepIndex = STEPS.findIndex(s => s.id === currentStep);
         const isLast = currentStepIndex === STEPS.length - 1;
         if (isLast) {
@@ -475,7 +475,7 @@ export function BlogFormModal({ isOpen, onClose, onSubmit, post, isLoading = fal
       }
       return;
     }
-
+    
     // Convertir les tags
     const tags = tagsInput
       .split(',')
@@ -663,13 +663,13 @@ export function BlogFormModal({ isOpen, onClose, onSubmit, post, isLoading = fal
           </div>
           <div className="flex items-center gap-2 sm:gap-3 flex-1 sm:flex-initial justify-end">
             <div className="hidden sm:flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
-              {readingTime > 0 && (
-                <div className="flex items-center gap-1.5">
-                  <ClockIcon className="w-4 h-4" />
+            {readingTime > 0 && (
+              <div className="flex items-center gap-1.5">
+                <ClockIcon className="w-4 h-4" />
                   <span>{readingTime} min</span>
-                </div>
-              )}
-            </div>
+              </div>
+            )}
+              </div>
             <Button 
               variant="ghost" 
               onClick={onClose} 
@@ -698,8 +698,8 @@ export function BlogFormModal({ isOpen, onClose, onSubmit, post, isLoading = fal
                 disabled={!validateStep(currentStep).isValid}
                 className="flex-1 sm:flex-initial"
               >
-                {post ? 'Mettre à jour' : 'Créer'}
-              </Button>
+              {post ? 'Mettre à jour' : 'Créer'}
+            </Button>
             ) : (
               <Button 
                 variant="primary" 
@@ -725,9 +725,9 @@ export function BlogFormModal({ isOpen, onClose, onSubmit, post, isLoading = fal
               const canGo = canGoToStep(step.id);
               
               return (
-                <button
+          <button
                   key={step.id}
-                  type="button"
+            type="button"
                   onClick={() => canGo && handleStepChange(step.id)}
                   disabled={!canGo || isLoading}
                   className={`
@@ -750,7 +750,7 @@ export function BlogFormModal({ isOpen, onClose, onSubmit, post, isLoading = fal
                     {isCompleted ? '✓' : index + 1}
                   </div>
                   <span className="text-xs font-semibold whitespace-nowrap">{step.label}</span>
-                </button>
+          </button>
               );
             })}
           </div>
@@ -766,8 +766,8 @@ export function BlogFormModal({ isOpen, onClose, onSubmit, post, isLoading = fal
             
             return (
               <Fragment key={step.id}>
-                <button
-                  type="button"
+          <button
+            type="button"
                   onClick={() => canGo && handleStepChange(step.id)}
                   disabled={!canGo || isLoading}
                   className={`
@@ -821,7 +821,7 @@ export function BlogFormModal({ isOpen, onClose, onSubmit, post, isLoading = fal
                   `}>
                     {step.label}
                   </span>
-                </button>
+          </button>
                 
                 {/* Connector Line */}
                 {index < STEPS.length - 1 && (
@@ -839,7 +839,7 @@ export function BlogFormModal({ isOpen, onClose, onSubmit, post, isLoading = fal
             );
           })}
         </div>
-      </div>
+        </div>
 
       <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
         {/* Step 1: Informations de base */}
@@ -932,13 +932,13 @@ export function BlogFormModal({ isOpen, onClose, onSubmit, post, isLoading = fal
                     {validationErrors.slug}
                   </p>
                 )}
-              </div>
+            </div>
 
               {/* Extrait */}
               <div className="sm:col-span-2">
                 <label htmlFor="excerpt" className="block text-sm font-semibold dark:text-gray-300 mb-2">
                   Extrait (résumé)
-                </label>
+              </label>
                 <textarea
                   id="excerpt"
                   name="excerpt"
@@ -962,11 +962,11 @@ export function BlogFormModal({ isOpen, onClose, onSubmit, post, isLoading = fal
                     {validationErrors.excerpt}
                   </p>
                 )}
-              </div>
-            </div>
-          </div>
-        )}
-
+                    </div>
+                  </div>
+                </div>
+              )}
+              
         {/* Step 2: Image de couverture */}
         {currentStep === 'cover' && (
           <div className="space-y-4 sm:space-y-6 animate-fade-in">
@@ -978,13 +978,13 @@ export function BlogFormModal({ isOpen, onClose, onSubmit, post, isLoading = fal
             </div>
 
             {/* Image de couverture */}
-            <div>
+              <div>
               <label className="block text-sm font-semibold dark:text-gray-300 mb-2 flex items-center gap-2">
                 <ImageIcon className="w-4 h-4 text-primary" />
                 Image de couverture
-              </label>
+                </label>
               <CoverImageUploader
-                value={formData.cover_image_url || ''}
+                  value={formData.cover_image_url || ''}
                 onChange={(url) => {
                   setFormData(prev => ({
                     ...prev,
@@ -993,8 +993,8 @@ export function BlogFormModal({ isOpen, onClose, onSubmit, post, isLoading = fal
                 }}
                 error={showValidationErrors ? validationErrors.cover_image_url : undefined}
               />
+              </div>
             </div>
-          </div>
         )}
 
         {/* Step 3: Tags */}
@@ -1062,7 +1062,7 @@ export function BlogFormModal({ isOpen, onClose, onSubmit, post, isLoading = fal
                 </div>
               )}
             </div>
-          </div>
+              </div>
         )}
 
         {/* Step 4: Contenu */}
@@ -1072,9 +1072,9 @@ export function BlogFormModal({ isOpen, onClose, onSubmit, post, isLoading = fal
               <p className="text-xs sm:text-sm text-blue-800 dark:text-blue-200 flex items-start gap-2">
                 <FileText className="w-4 h-4 flex-shrink-0 mt-0.5" />
                 <span>Rédigez le contenu de votre article en Markdown. Utilisez la barre d'outils pour insérer du formatage.</span>
-              </p>
-            </div>
-            
+                  </p>
+                </div>
+
             {/* Message d'erreur global */}
             {showValidationErrors && Object.keys(validationErrors).length > 0 && (
               <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-3 sm:p-4">
@@ -1089,9 +1089,9 @@ export function BlogFormModal({ isOpen, onClose, onSubmit, post, isLoading = fal
                         <li key={field}>{message}</li>
                       ))}
                     </ul>
-                  </div>
                 </div>
               </div>
+            </div>
             )}
 
             {/* Tabs Edit/Preview */}
@@ -1123,138 +1123,138 @@ export function BlogFormModal({ isOpen, onClose, onSubmit, post, isLoading = fal
 
             {activeTab === 'edit' ? (
               <div className="space-y-4">
-                {/* Barre d'outils Markdown */}
-                <div className="border dark:border-gray-700 border-b-0 rounded-t-xl bg-gray-50 dark:bg-gray-800/50 p-2 flex flex-wrap items-center gap-1">
-                  {/* Formatage de texte */}
-                  <div className="flex items-center gap-1 border-r dark:border-gray-700 pr-2 mr-2">
-                    <button
-                      type="button"
-                      onClick={() => insertMarkdown('**', '**', 'texte en gras')}
+              {/* Barre d'outils Markdown */}
+              <div className="border dark:border-gray-700 border-b-0 rounded-t-xl bg-gray-50 dark:bg-gray-800/50 p-2 flex flex-wrap items-center gap-1">
+                {/* Formatage de texte */}
+                <div className="flex items-center gap-1 border-r dark:border-gray-700 pr-2 mr-2">
+                  <button
+                    type="button"
+                    onClick={() => insertMarkdown('**', '**', 'texte en gras')}
                       className="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors font-bold text-gray-900 dark:text-gray-100"
-                      title="Gras (Ctrl+B)"
-                    >
-                      <span className="text-sm">B</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => insertMarkdown('*', '*', 'texte en italique')}
+                    title="Gras (Ctrl+B)"
+                  >
+                    <span className="text-sm">B</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => insertMarkdown('*', '*', 'texte en italique')}
                       className="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors italic text-gray-900 dark:text-gray-100"
-                      title="Italique (Ctrl+I)"
-                    >
-                      <span className="text-sm">I</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => insertMarkdown('`', '`', 'code')}
+                    title="Italique (Ctrl+I)"
+                  >
+                    <span className="text-sm">I</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => insertMarkdown('`', '`', 'code')}
                       className="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors font-mono text-xs text-gray-900 dark:text-gray-100"
-                      title="Code inline"
-                    >
-                      &lt;/&gt;
-                    </button>
-                  </div>
+                    title="Code inline"
+                  >
+                    &lt;/&gt;
+                  </button>
+                </div>
 
-                  {/* Titres */}
-                  <div className="flex items-center gap-1 border-r dark:border-gray-700 pr-2 mr-2">
-                    <button
-                      type="button"
-                      onClick={() => insertMarkdownBlock('# ', false, true)}
+                {/* Titres */}
+                <div className="flex items-center gap-1 border-r dark:border-gray-700 pr-2 mr-2">
+                  <button
+                    type="button"
+                    onClick={() => insertMarkdownBlock('# ', false, true)}
                       className="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors text-xs font-bold text-gray-900 dark:text-gray-100"
-                      title="Titre 1"
-                    >
-                      H1
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => insertMarkdownBlock('## ', false, true)}
+                    title="Titre 1"
+                  >
+                    H1
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => insertMarkdownBlock('## ', false, true)}
                       className="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors text-xs font-semibold text-gray-900 dark:text-gray-100"
-                      title="Titre 2"
-                    >
-                      H2
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => insertMarkdownBlock('### ', false, true)}
+                    title="Titre 2"
+                  >
+                    H2
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => insertMarkdownBlock('### ', false, true)}
                       className="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors text-xs text-gray-900 dark:text-gray-100"
-                      title="Titre 3"
-                    >
-                      H3
-                    </button>
-                  </div>
+                    title="Titre 3"
+                  >
+                    H3
+                  </button>
+                </div>
 
-                  {/* Listes */}
-                  <div className="flex items-center gap-1 border-r dark:border-gray-700 pr-2 mr-2">
-                    <button
-                      type="button"
-                      onClick={() => insertMarkdownBlock('- ', false, true)}
+                {/* Listes */}
+                <div className="flex items-center gap-1 border-r dark:border-gray-700 pr-2 mr-2">
+                  <button
+                    type="button"
+                    onClick={() => insertMarkdownBlock('- ', false, true)}
                       className="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors text-gray-900 dark:text-gray-100"
-                      title="Liste à puces"
-                    >
-                      <ListBulletIcon className="w-4 h-4" />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => insertMarkdownBlock('1. ', false, true)}
+                    title="Liste à puces"
+                  >
+                    <ListBulletIcon className="w-4 h-4" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => insertMarkdownBlock('1. ', false, true)}
                       className="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors text-gray-900 dark:text-gray-100"
-                      title="Liste numérotée"
-                    >
-                      <span className="text-xs font-mono">1.</span>
-                    </button>
-                  </div>
+                    title="Liste numérotée"
+                  >
+                    <span className="text-xs font-mono">1.</span>
+                  </button>
+                </div>
 
-                  {/* Autres éléments */}
-                  <div className="flex items-center gap-1 border-r dark:border-gray-700 pr-2 mr-2">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        const url = prompt('URL du lien:', 'https://');
-                        const text = prompt('Texte du lien:', 'lien');
-                        if (url && text) {
-                          insertMarkdown(`[${text}](`, ')', url);
-                        }
-                      }}
+                {/* Autres éléments */}
+                <div className="flex items-center gap-1 border-r dark:border-gray-700 pr-2 mr-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const url = prompt('URL du lien:', 'https://');
+                      const text = prompt('Texte du lien:', 'lien');
+                      if (url && text) {
+                        insertMarkdown(`[${text}](`, ')', url);
+                      }
+                    }}
                       className="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors text-gray-900 dark:text-gray-100"
-                      title="Lien"
-                    >
-                      <LinkIcon className="w-4 h-4" />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        const url = prompt('URL de l\'image:', 'https://');
-                        const alt = prompt('Texte alternatif:', '');
-                        if (url) {
-                          insertMarkdownBlock(`![${alt || ''}](${url})`, true, true);
-                        }
-                      }}
+                    title="Lien"
+                  >
+                    <LinkIcon className="w-4 h-4" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const url = prompt('URL de l\'image:', 'https://');
+                      const alt = prompt('Texte alternatif:', '');
+                      if (url) {
+                        insertMarkdownBlock(`![${alt || ''}](${url})`, true, true);
+                      }
+                    }}
                       className="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors text-gray-900 dark:text-gray-100"
-                      title="Image"
-                    >
-                      <PhotoIcon className="w-4 h-4" />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => insertMarkdownBlock('> ', false, true)}
+                    title="Image"
+                  >
+                    <PhotoIcon className="w-4 h-4" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => insertMarkdownBlock('> ', false, true)}
                       className="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors text-gray-900 dark:text-gray-100"
-                      title="Citation"
-                    >
-                      <ChatBubbleLeftRightIcon className="w-4 h-4" />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => insertMarkdownBlock('---', true, true)}
+                    title="Citation"
+                  >
+                    <ChatBubbleLeftRightIcon className="w-4 h-4" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => insertMarkdownBlock('---', true, true)}
                       className="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors text-gray-900 dark:text-gray-100"
-                      title="Ligne horizontale"
-                    >
-                      <Bars3Icon className="w-4 h-4" />
-                    </button>
-                  </div>
+                    title="Ligne horizontale"
+                  >
+                    <Bars3Icon className="w-4 h-4" />
+                  </button>
+                </div>
 
-                  {/* Aide */}
-                  <div className="ml-auto">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        const help = `# Guide Markdown
+                {/* Aide */}
+                <div className="ml-auto">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const help = `# Guide Markdown
 
 ## Formatage
 - **Gras** : **texte**
@@ -1282,35 +1282,35 @@ export function BlogFormModal({ isOpen, onClose, onSubmit, post, isLoading = fal
 
 ## Ligne horizontale
 ---`;
-                        insertMarkdownBlock(help, true, true);
-                      }}
-                      className="px-3 py-1.5 text-xs rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
-                      title="Insérer un guide Markdown"
-                    >
-                      📖 Guide
-                    </button>
-                  </div>
+                      insertMarkdownBlock(help, true, true);
+                    }}
+                    className="px-3 py-1.5 text-xs rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
+                    title="Insérer un guide Markdown"
+                  >
+                    📖 Guide
+                  </button>
                 </div>
+              </div>
 
-                {/* Zone d'édition */}
-                <div className="border dark:border-gray-700 rounded-b-xl overflow-hidden bg-white dark:bg-gray-900">
-                  <textarea
-                    ref={textareaRef}
-                    id="content"
-                    name="content"
-                    value={formData.content || ''}
-                    onChange={handleChange}
-                    required
-                    rows={20}
+              {/* Zone d'édition */}
+              <div className="border dark:border-gray-700 rounded-b-xl overflow-hidden bg-white dark:bg-gray-900">
+                <textarea
+                  ref={textareaRef}
+                  id="content"
+                  name="content"
+                  value={formData.content || ''}
+                  onChange={handleChange}
+                  required
+                  rows={20}
                     className={`w-full px-4 py-3 border-0 focus:ring-2 focus:ring-primary focus:outline-none resize-none font-mono text-sm leading-relaxed bg-transparent text-gray-900 dark:text-gray-100 ${
                       showValidationErrors && validationErrors.content
                         ? 'focus:ring-red-500'
                         : ''
                     }`}
-                    placeholder="# Titre de l'article&#10;&#10;## Sous-titre&#10;&#10;Contenu en **markdown**..."
-                    style={{ minHeight: '400px' }}
-                  />
-                </div>
+                  placeholder="# Titre de l'article&#10;&#10;## Sous-titre&#10;&#10;Contenu en **markdown**..."
+                  style={{ minHeight: '400px' }}
+                />
+              </div>
                 {showValidationErrors && validationErrors.content && (
                   <p className="text-xs text-red-600 dark:text-red-400 flex items-center gap-1">
                     <XCircle className="w-3 h-3" />
@@ -1318,54 +1318,54 @@ export function BlogFormModal({ isOpen, onClose, onSubmit, post, isLoading = fal
                   </p>
                 )}
 
-                {/* Informations et actions */}
+              {/* Informations et actions */}
                 <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
-                  <div className="flex items-center gap-4">
-                    <span>💡 Astuce : Utilisez ## pour créer des sections (table des matières)</span>
-                    {formData.content && (
-                      <span className="text-gray-400 dark:text-gray-500">
-                        {formData.content.split('\n').length} lignes
-                      </span>
-                    )}
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => setShowPreviewModal(true)}
-                    className="flex items-center gap-1 text-primary hover:underline"
-                    disabled={!formData.content}
-                  >
-                    <EyeIcon className="w-4 h-4" />
-                    Afficher la prévisualisation
-                  </button>
+                <div className="flex items-center gap-4">
+                  <span>💡 Astuce : Utilisez ## pour créer des sections (table des matières)</span>
+                  {formData.content && (
+                    <span className="text-gray-400 dark:text-gray-500">
+                      {formData.content.split('\n').length} lignes
+                    </span>
+                  )}
                 </div>
+                <button
+                  type="button"
+                  onClick={() => setShowPreviewModal(true)}
+                  className="flex items-center gap-1 text-primary hover:underline"
+                  disabled={!formData.content}
+                >
+                  <EyeIcon className="w-4 h-4" />
+                  Afficher la prévisualisation
+                </button>
               </div>
-            ) : (
-              /* Mode Prévisualisation */
-              <div className="space-y-6">
-                {formData.content ? (
-                  <>
-                    {/* Prévisualisation de la table des matières */}
-                    <div className="border dark:border-gray-700 rounded-xl p-4 bg-gray-50 dark:bg-gray-800">
-                      <div className="flex items-center gap-2 mb-3">
-                        <ListBulletIcon className="w-5 h-5 text-primary" />
-                        <h3 className="font-semibold dark:text-gray-300">Table des matières</h3>
-                      </div>
-                      <BlogTableOfContents content={previewHtml} />
-                    </div>
-
-                    {/* Prévisualisation du contenu */}
-                    <div className="border dark:border-gray-700 rounded-xl p-6 bg-white dark:bg-gray-900">
-                      <div className="prose dark:prose-invert max-w-none">
-                        <BlogArticleContent content={previewHtml} />
-                      </div>
-                    </div>
-                  </>
-                ) : (
-                  <div className="text-center py-12 text-gray-500 dark:text-gray-400">
-                    <p>Aucun contenu à prévisualiser</p>
-                    <p className="text-sm mt-2">Rédigez votre article dans l'onglet "Éditer"</p>
+          </div>
+        ) : (
+          /* Mode Prévisualisation */
+          <div className="space-y-6">
+            {formData.content ? (
+              <>
+                {/* Prévisualisation de la table des matières */}
+                <div className="border dark:border-gray-700 rounded-xl p-4 bg-gray-50 dark:bg-gray-800">
+                  <div className="flex items-center gap-2 mb-3">
+                    <ListBulletIcon className="w-5 h-5 text-primary" />
+                    <h3 className="font-semibold dark:text-gray-300">Table des matières</h3>
                   </div>
-                )}
+                  <BlogTableOfContents content={previewHtml} />
+                </div>
+
+                {/* Prévisualisation du contenu */}
+                <div className="border dark:border-gray-700 rounded-xl p-6 bg-white dark:bg-gray-900">
+                  <div className="prose dark:prose-invert max-w-none">
+                    <BlogArticleContent content={previewHtml} />
+                  </div>
+                </div>
+              </>
+            ) : (
+              <div className="text-center py-12 text-gray-500 dark:text-gray-400">
+                <p>Aucun contenu à prévisualiser</p>
+                <p className="text-sm mt-2">Rédigez votre article dans l'onglet "Éditer"</p>
+              </div>
+            )}
               </div>
             )}
           </div>

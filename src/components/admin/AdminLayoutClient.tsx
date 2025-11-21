@@ -18,17 +18,18 @@ import { ThemeToggle } from '@/components/layout/ThemeToggle';
 import { DeveloperNavLink } from '@/components/admin/DeveloperNavLink';
 import { ShopNavLink } from '@/components/admin/ShopNavLink';
 import { AnalyticsNavLink } from '@/components/admin/AnalyticsNavLink';
+import { UsersNavLink } from '@/components/admin/UsersNavLink';
 import {
   HomeIcon,
   BuildingOfficeIcon,
   CalendarIcon,
   NewspaperIcon,
-  UsersIcon,
   Cog6ToothIcon,
   AcademicCapIcon,
   VideoCameraIcon,
   Bars3Icon,
   XMarkIcon,
+  DocumentTextIcon,
 } from '@heroicons/react/24/outline';
 import { cn } from '@/lib/utils/cn';
 import { createClient } from '@/lib/supabase/client';
@@ -40,7 +41,7 @@ const navigation = [
   { name: 'Carousel Hero', href: '/admin/hero-slides', icon: VideoCameraIcon },
   { name: 'Événements', href: '/admin/events', icon: CalendarIcon },
   { name: 'Blog', href: '/admin/blog', icon: NewspaperIcon },
-  { name: 'Utilisateurs', href: '/admin/users', icon: UsersIcon },
+  { name: 'Contenu', href: '/admin/content', icon: DocumentTextIcon },
   { name: 'Paramètres', href: '/admin/settings', icon: Cog6ToothIcon },
 ];
 
@@ -54,6 +55,10 @@ const getPageTitle = (pathname: string): string => {
     '/admin/events': 'Événements',
     '/admin/blog': 'Blog',
     '/admin/users': 'Utilisateurs',
+    '/admin/content': 'Contenu',
+    '/admin/content/home': 'Contenu - Accueil',
+    '/admin/content/contact': 'Contenu - Contact',
+    '/admin/content/notre-histoire': 'Contenu - Notre Histoire',
     '/admin/settings': 'Paramètres',
     '/admin/settings/developer': 'Paramètres Développeur',
     '/admin/shop/products': 'Produits',
@@ -268,6 +273,17 @@ export function AdminLayoutClient({
               );
             })}
 
+            {/* Utilisateurs - Visible uniquement pour admin et développeur */}
+            <div onClick={() => {
+              if (windowWidth < 1350) {
+                setSidebarOpen(false);
+              } else {
+                setMobileMenuOpen(false);
+              }
+            }}>
+              <UsersNavLink />
+            </div>
+
             {/* Boutique - Conditionnel selon paramètre développeur */}
             <div onClick={() => {
               if (windowWidth < 1300) {
@@ -336,10 +352,34 @@ export function AdminLayoutClient({
         </aside>
 
         {/* Main Content */}
-        <main className="flex-1 min-w-0 overflow-hidden py-6 lg:py-8 px-4 lg:px-6 flex flex-col">
-          <div className="w-full h-full flex flex-col overflow-hidden">
-            <Container size="full" padding={false} className="h-full flex flex-col overflow-hidden">
-              <div className="h-full flex flex-col overflow-hidden">
+        <main className={`flex-1 min-w-0 py-6 lg:py-8 px-4 lg:px-6 flex flex-col ${
+          pathname === '/admin' || 
+          pathname === '/admin/settings' || 
+          pathname.startsWith('/admin/content')
+            ? 'overflow-y-auto' 
+            : 'overflow-hidden'
+        }`}>
+          <div className={`w-full flex flex-col ${
+            pathname === '/admin' || 
+            pathname === '/admin/settings' || 
+            pathname.startsWith('/admin/content')
+              ? '' 
+              : 'h-full overflow-hidden'
+          }`}>
+            <Container size="full" padding={false} className={`flex flex-col ${
+              pathname === '/admin' || 
+              pathname === '/admin/settings' || 
+              pathname.startsWith('/admin/content')
+                ? '' 
+                : 'h-full overflow-hidden'
+            }`}>
+              <div className={`flex flex-col ${
+                pathname === '/admin' || 
+                pathname === '/admin/settings' || 
+                pathname.startsWith('/admin/content')
+                  ? '' 
+                  : 'h-full overflow-hidden'
+              }`}>
                 {children}
               </div>
             </Container>

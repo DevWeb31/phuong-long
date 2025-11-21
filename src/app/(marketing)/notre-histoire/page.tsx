@@ -10,7 +10,9 @@
 import type { Metadata } from 'next';
 import { Container, ScrollReveal, Card, CardContent } from '@/components/common';
 import { GradientButton } from '@/components/marketing/GradientButton';
-import { History, Users, Award, MapPin, Sparkles, Target, Shield } from 'lucide-react';
+import { History, Users, MapPin, Target, Shield } from 'lucide-react';
+import { createServerClient } from '@/lib/supabase/server';
+import { getFeatureIcon } from '@/lib/icons/feature-icons';
 
 export const metadata: Metadata = {
   title: 'Notre Histoire - Phuong Long Vo Dao',
@@ -25,80 +27,126 @@ interface TimelineItem {
   color: 'primary' | 'secondary' | 'accent';
 }
 
-const timeline: TimelineItem[] = [
-  {
-    year: '1916',
-    title: 'Naissance de Maître Nguyễn Dân Phú',
-    description: 'Nguyễn Dân Phú naît le 12 novembre 1916 dans le protectorat français du Tonkin. Il deviendra l\'un des maîtres les plus influents ayant permis l\'essor du Viet Vo Dao en France.',
-    icon: History,
-    color: 'primary',
-  },
-  {
-    year: '1973',
-    title: 'Cofondation de la Fédération Française',
-    description: 'Maître Nguyễn Dân Phú est l\'un des cofondateurs de la première fédération française de Viet Vo Dao. Cette étape marque la structuration officielle des arts martiaux vietnamiens en France.',
-    icon: Users,
-    color: 'secondary',
-  },
-  {
-    year: '1973-1991',
-    title: 'L\'École Thanh Long Vo Duong',
-    description: 'Maître Nguyễn Dân Phú crée et conduit l\'école Thanh Long Vo Duong à son apogée jusqu\'en 1991. Cette période voit l\'enseignement et la diffusion du Viet Vo Dao se développer considérablement en France.',
-    icon: Award,
-    color: 'accent',
-  },
-  {
-    year: '1991',
-    title: 'Patriarche du Viet Vo Dao',
-    description: 'Maître Nguyễn Dân Phú est nommé 10e dang, Patriarche du Viet Vo Dao en France et doyen du Viet Vo Dao pour l\'Europe. Il devient la référence incontestée des arts martiaux vietnamiens en Europe.',
-    icon: Award,
-    color: 'primary',
-  },
-  {
-    year: '1999',
-    title: 'Décès et Héritage',
-    description: 'Maître Nguyễn Dân Phú décède le 28 juin 1999 à Désertines. Son héritage perdure à travers ses élèves et l\'association Phuong Long Vo Dao qui continue de transmettre son enseignement.',
-    icon: History,
-    color: 'secondary',
-  },
-  {
-    year: '2015',
-    title: 'Reconnaissance Posthume',
-    description: 'Maître Nguyễn Dân Phú reçoit le grade officiel de 9e Dan à titre posthume, attribué par la FFKDA en mars 2015. Cette reconnaissance honore son immense contribution aux arts martiaux vietnamiens en France.',
-    icon: Sparkles,
-    color: 'accent',
-  },
-  {
-    year: '2025',
-    title: 'Aujourd\'hui',
-    description: 'Avec 5 clubs actifs, plus de 500 pratiquants et plusieurs décennies d\'expérience, l\'association Phuong Long Vo Dao perpétue l\'enseignement de Maître Nguyễn Dân Phú et continue de transmettre les valeurs et techniques du Viet Vo Dao aux nouvelles générations.',
-    icon: Sparkles,
-    color: 'primary',
-  },
-];
+interface TimelineStep {
+  id: string;
+  year: string;
+  title: string;
+  description: string;
+  icon?: string; // Nom de l'icône Lucide React
+}
 
-const values = [
-  {
-    icon: Target,
-    title: 'Excellence',
-    description: 'Nous visons l\'excellence dans la pratique et l\'enseignement des arts martiaux vietnamiens.',
-    color: 'primary',
-  },
-  {
-    icon: Shield,
-    title: 'Tradition',
-    description: 'Nous préservons et transmettons les techniques et valeurs traditionnelles du Vo Dao.',
-    color: 'secondary',
-  },
-  {
-    icon: Users,
-    title: 'Communauté',
-    description: 'Nous construisons une communauté soudée autour de valeurs communes et du partage.',
-    color: 'accent',
-  },
-];
+// Mapping des couleurs par index (pour alterner les couleurs)
+const colorMap: Array<'primary' | 'secondary' | 'accent'> = ['primary', 'secondary', 'accent', 'primary', 'secondary', 'accent', 'primary'];
 
-export default function NotreHistoirePage() {
+// Fonction pour convertir les étapes de la base en TimelineItem
+function convertTimelineSteps(steps: TimelineStep[]): TimelineItem[] {
+  return steps.map((step, index) => {
+    // Obtenir l'icône depuis le nom stocké, ou utiliser une icône par défaut
+    const IconName = step.icon || 'History';
+    const Icon = getFeatureIcon(IconName);
+    
+    // S'assurer que color a toujours une valeur valide
+    const colorIndex = index % colorMap.length;
+    const color: 'primary' | 'secondary' | 'accent' = colorMap[colorIndex] || 'primary';
+    
+    return {
+      year: step.year,
+      title: step.title,
+      description: step.description,
+      icon: Icon,
+      color,
+    };
+  });
+}
+
+export default async function NotreHistoirePage() {
+  const supabase = await createServerClient();
+  
+  // Récupérer le contenu de la page depuis la base de données
+  const { data: pageContentData } = await supabase
+    .from('page_content')
+    .select('section_key, content_type, content')
+    .eq('page_slug', 'notre-histoire')
+    .order('display_order', { ascending: true });
+
+  // Transformer en objet pour faciliter l'utilisation
+  const pageContent: Record<string, string> = {};
+  if (pageContentData) {
+    pageContentData.forEach((item: { section_key: string; content: string | null }) => {
+      pageContent[item.section_key] = item.content || '';
+    });
+  }
+
+  // Charger la timeline depuis la base de données
+  let timeline: TimelineItem[] = [];
+  try {
+    const timelineContent = pageContent['timeline'] || '[]';
+    const timelineSteps: TimelineStep[] = JSON.parse(timelineContent);
+    timeline = convertTimelineSteps(timelineSteps);
+  } catch {
+    // Fallback sur un tableau vide si erreur de parsing
+    timeline = [];
+  }
+
+  // Contenu de l'introduction
+  const introTitle = pageContent['intro_title'] || 'Une Tradition Millénaire';
+  const introText = pageContent['intro_text'] || '';
+
+  // Charger les valeurs depuis la base de données
+  interface Value {
+    id: string;
+    title: string;
+    description: string;
+    icon: string;
+  }
+
+  let values: Array<{
+    icon: React.ComponentType<{ className?: string }>;
+    title: string;
+    description: string;
+    color: 'primary' | 'secondary' | 'accent';
+  }> = [];
+  
+  try {
+    const valuesContent = pageContent['values'] || '[]';
+    const valuesData: Value[] = JSON.parse(valuesContent);
+    const colorMap: Array<'primary' | 'secondary' | 'accent'> = ['primary', 'secondary', 'accent'];
+    
+    values = valuesData.map((val, index) => {
+      const Icon = getFeatureIcon(val.icon);
+      const colorIndex = index % colorMap.length;
+      const color: 'primary' | 'secondary' | 'accent' = colorMap[colorIndex] || 'primary';
+      return {
+        icon: Icon,
+        title: val.title,
+        description: val.description,
+        color,
+      };
+    });
+  } catch {
+    // Fallback sur les valeurs par défaut si erreur de parsing
+    values = [
+      {
+        icon: Target,
+        title: 'Excellence',
+        description: 'Nous visons l\'excellence dans la pratique et l\'enseignement des arts martiaux vietnamiens.',
+        color: 'primary',
+      },
+      {
+        icon: Shield,
+        title: 'Tradition',
+        description: 'Nous préservons et transmettons les techniques et valeurs traditionnelles du Vo Dao.',
+        color: 'secondary',
+      },
+      {
+        icon: Users,
+        title: 'Communauté',
+        description: 'Nous construisons une communauté soudée autour de valeurs communes et du partage.',
+        color: 'accent',
+      },
+    ];
+  }
+
   return (
     <>
       {/* Hero Section */}
@@ -136,15 +184,14 @@ export default function NotreHistoirePage() {
           <ScrollReveal direction="up" delay={0}>
             <div className="max-w-4xl mx-auto text-center mb-16">
               <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-slate-900 dark:text-slate-100 mb-6">
-                Une Tradition Millénaire
+                {introTitle}
               </h2>
-              <p className="text-lg lg:text-xl text-slate-600 dark:text-slate-400 leading-relaxed">
-                Le Phuong Long Vo Dao est bien plus qu'un simple art martial. C'est un héritage culturel vietnamien 
-                qui allie techniques de combat ancestrales, philosophie orientale et valeurs humaines. 
-                Notre association perpétue l'enseignement de Maître Nguyễn Dân Phú, l'un des maîtres fondateurs 
-                du Viet Vo Dao en France, nommé 10e dang et Patriarche du Viet Vo Dao en France. 
-                Nous transmettons ce savoir précieux aux générations présentes et futures.
-              </p>
+              {introText && (
+                <div 
+                  className="text-lg lg:text-xl text-slate-600 dark:text-slate-400 leading-relaxed"
+                  dangerouslySetInnerHTML={{ __html: introText }}
+                />
+              )}
             </div>
           </ScrollReveal>
         </Container>
@@ -175,7 +222,7 @@ export default function NotreHistoirePage() {
             />
 
             <div className="space-y-16 lg:space-y-24">
-              {timeline.map((item, index) => {
+              {timeline.length > 0 ? timeline.map((item, index) => {
                 const Icon = item.icon;
                 const isEven = index % 2 === 0;
                 
@@ -230,7 +277,11 @@ export default function NotreHistoirePage() {
                     </div>
                   </ScrollReveal>
                 );
-              })}
+              }) : (
+                <div className="text-center py-12 text-slate-500 dark:text-slate-400">
+                  <p>Aucune étape dans la timeline pour le moment.</p>
+                </div>
+              )}
             </div>
           </div>
         </Container>
@@ -242,16 +293,16 @@ export default function NotreHistoirePage() {
           <ScrollReveal direction="down" delay={0}>
             <div className="text-center mb-16">
               <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-slate-900 dark:text-slate-100 mb-5">
-                Nos Valeurs Fondamentales
+                {pageContent['values_title'] || 'Nos Valeurs Fondamentales'}
               </h2>
               <p className="text-lg lg:text-xl text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
-                Les principes qui guident notre pratique et notre enseignement
+                {pageContent['values_subtitle'] || 'Les principes qui guident notre pratique et notre enseignement'}
               </p>
             </div>
           </ScrollReveal>
 
           <div className="grid md:grid-cols-3 gap-8">
-            {values.map((value, index) => {
+            {values.length > 0 ? values.map((value, index) => {
               const Icon = value.icon;
               return (
                 <ScrollReveal key={value.title} direction="up" delay={index * 100}>
@@ -274,14 +325,19 @@ export default function NotreHistoirePage() {
                       <h3 className="text-xl font-bold text-slate-900 dark:text-slate-100 mb-4">
                         {value.title}
                       </h3>
-                      <p className="text-base leading-relaxed text-slate-600 dark:text-slate-400 flex-1">
-                        {value.description}
-                      </p>
+                      <div 
+                        className="text-base leading-relaxed text-slate-600 dark:text-slate-400 flex-1"
+                        dangerouslySetInnerHTML={{ __html: value.description }}
+                      />
                     </CardContent>
                   </Card>
                 </ScrollReveal>
               );
-            })}
+            }) : (
+              <div className="col-span-3 text-center py-12 text-slate-500 dark:text-slate-400">
+                <p>Aucune valeur définie pour le moment.</p>
+              </div>
+            )}
           </div>
         </Container>
       </section>

@@ -36,6 +36,8 @@ const roleLabels: Record<string, string> = {
   coach: 'Coach',
   admin: 'Administrateur',
   moderator: 'Modérateur',
+  student: 'Élève',
+  developer: 'Développeur',
 };
 
 const roleColors: Record<string, 'default' | 'primary' | 'warning'> = {
@@ -43,6 +45,8 @@ const roleColors: Record<string, 'default' | 'primary' | 'warning'> = {
   coach: 'primary',
   admin: 'warning',
   moderator: 'primary',
+  student: 'default',
+  developer: 'warning',
 };
 
 const statusLabels: Record<string, string> = {
@@ -73,6 +77,10 @@ export default function AdminUsersPage() {
         const response = await fetch('/api/admin/users');
         
         if (!response.ok) {
+          if (response.status === 403) {
+            setError('Vous n\'avez pas les permissions nécessaires pour accéder à cette page.');
+            return;
+          }
           throw new Error('Erreur lors du chargement des utilisateurs');
         }
 

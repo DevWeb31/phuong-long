@@ -12,10 +12,11 @@ import Link from 'next/link';
 import { Container, Button, Card, CardHeader, CardTitle, CardDescription, CardContent, Badge, ScrollReveal } from '@/components/common';
 import { createServerClient } from '@/lib/supabase/server';
 import type { Club, Event } from '@/lib/types';
-import { BoltIcon, TrophyIcon, UserGroupIcon, ShieldCheckIcon, UsersIcon, MapPinIcon } from '@heroicons/react/24/outline';
+import { ShieldCheckIcon, UsersIcon, MapPinIcon } from '@heroicons/react/24/outline';
 import { HeroCarousel, type HeroSlide } from '@/components/marketing/HeroCarousel';
 import { AnimatedCounter } from '@/components/marketing/AnimatedCounter';
 import { Sparkles, Mail, Shield } from 'lucide-react';
+import { getFeatureIcon } from '@/lib/icons/feature-icons';
 
 export const metadata: Metadata = {
   title: 'Accueil - Art Martial Vietnamien',
@@ -24,6 +25,37 @@ export const metadata: Metadata = {
 
 export default async function HomePage() {
   const supabase = await createServerClient();
+  
+  // Récupérer le contenu éditable de la page d'accueil
+  const { data: pageContentData } = await supabase
+    .from('page_content')
+    .select('section_key, content_type, content')
+    .eq('page_slug', 'home')
+    .order('display_order', { ascending: true });
+
+  // Transformer en objet pour faciliter l'utilisation
+  const pageContent: Record<string, string> = {};
+  if (pageContentData) {
+    pageContentData.forEach((item: { section_key: string; content: string | null }) => {
+      pageContent[item.section_key] = item.content || '';
+    });
+  }
+
+  // Valeurs par défaut si le contenu n'existe pas en base
+  const featuresTitle = pageContent['features_title'] || 'Pourquoi choisir le Vo Dao ?';
+  const featuresSubtitle = pageContent['features_subtitle'] || 'Une discipline complète qui développe le corps et l\'esprit';
+  const feature1Title = pageContent['feature_1_title'] || 'Technique & Combat';
+  const feature1Description = pageContent['feature_1_description'] || 'Maîtrisez les <span class="text-primary dark:text-primary-light font-semibold">techniques de frappe</span>, blocage et combat. Développez réflexes, coordination et self-défense efficace.';
+  const feature1IconName = pageContent['feature_1_icon'] || 'Bolt';
+  const Feature1Icon = getFeatureIcon(feature1IconName);
+  const feature2Title = pageContent['feature_2_title'] || 'Excellence & Tradition';
+  const feature2Description = pageContent['feature_2_description'] || 'Apprenez un <span class="text-secondary dark:text-secondary-light font-semibold">art martial traditionnel</span> transmis de génération en génération. Respect des maîtres et de la philosophie orientale.';
+  const feature2IconName = pageContent['feature_2_icon'] || 'Trophy';
+  const Feature2Icon = getFeatureIcon(feature2IconName);
+  const feature3Title = pageContent['feature_3_title'] || 'Bien-être & Développement';
+  const feature3Description = pageContent['feature_3_description'] || 'Renforcez votre <span class="text-accent dark:text-accent-light font-semibold">santé physique</span> et mentale. Améliorez souplesse, endurance, concentration et confiance en soi.';
+  const feature3IconName = pageContent['feature_3_icon'] || 'Users';
+  const Feature3Icon = getFeatureIcon(feature3IconName);
   
   // Récupérer les slides du carousel hero
   const { data: heroSlides } = await supabase
@@ -91,11 +123,12 @@ export default async function HomePage() {
                 <Sparkles className="w-4 h-4 text-primary dark:text-primary-light" />
                 <span className="text-sm font-semibold text-primary dark:text-primary-light">Nos Valeurs</span>
               </div>
-              <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-slate-900 dark:text-slate-100 mb-5 tracking-tight">
-                Pourquoi choisir le <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-primary-dark to-secondary">Vo Dao</span> ?
-              </h2>
+              <h2 
+                className="text-3xl md:text-4xl lg:text-5xl font-bold text-slate-900 dark:text-slate-100 mb-5 tracking-tight"
+                dangerouslySetInnerHTML={{ __html: featuresTitle || 'Pourquoi choisir le Vo Dao ?' }}
+              />
               <p className="text-lg lg:text-xl text-slate-600 dark:text-slate-400 max-w-2xl mx-auto leading-relaxed">
-                Une discipline complète qui développe le corps et l'esprit
+                {featuresSubtitle}
               </p>
             </div>
           </ScrollReveal>
@@ -108,14 +141,14 @@ export default async function HomePage() {
                 <div className="relative w-20 h-20 mx-auto mb-8">
                   <div className="absolute inset-0 bg-gradient-to-br from-primary to-primary-dark rounded-2xl opacity-10 group-hover:opacity-20 transition-opacity" />
                   <div className="relative w-full h-full bg-gradient-to-br from-primary to-primary-dark rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-lg">
-                    <BoltIcon className="w-10 h-10 text-white" />
+                    <Feature1Icon className="w-10 h-10 text-white" />
                   </div>
                 </div>
-                <CardTitle className="mb-4 text-xl text-slate-900 dark:text-slate-100">Technique & Combat</CardTitle>
-                <CardDescription className="text-base leading-relaxed text-slate-600 dark:text-slate-400">
-                  Maîtrisez les <span className="text-primary dark:text-primary-light font-semibold">techniques de frappe</span>, blocage et combat. 
-                  Développez réflexes, coordination et self-défense efficace.
-                </CardDescription>
+                <CardTitle className="mb-4 text-xl text-slate-900 dark:text-slate-100">{feature1Title}</CardTitle>
+                <CardDescription 
+                  className="text-base leading-relaxed text-slate-600 dark:text-slate-400"
+                  dangerouslySetInnerHTML={{ __html: feature1Description }}
+                />
               </CardContent>
             </Card>
             </ScrollReveal>
@@ -127,14 +160,14 @@ export default async function HomePage() {
                 <div className="relative w-20 h-20 mx-auto mb-8">
                   <div className="absolute inset-0 bg-gradient-to-br from-secondary to-secondary-dark rounded-2xl opacity-10 group-hover:opacity-20 transition-opacity" />
                   <div className="relative w-full h-full bg-gradient-to-br from-secondary to-secondary-dark rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-lg">
-                    <TrophyIcon className="w-10 h-10 text-white" />
+                    <Feature2Icon className="w-10 h-10 text-white" />
                   </div>
                 </div>
-                <CardTitle className="mb-4 text-xl text-slate-900 dark:text-slate-100">Excellence & Tradition</CardTitle>
-                <CardDescription className="text-base leading-relaxed text-slate-600 dark:text-slate-400">
-                  Cultivez les valeurs martiales : <span className="text-secondary dark:text-secondary-light font-semibold">respect, humilité, persévérance</span>. 
-                  Un cadre structurant pour enfants et adultes.
-                </CardDescription>
+                <CardTitle className="mb-4 text-xl text-slate-900 dark:text-slate-100">{feature2Title}</CardTitle>
+                <CardDescription 
+                  className="text-base leading-relaxed text-slate-600 dark:text-slate-400"
+                  dangerouslySetInnerHTML={{ __html: feature2Description }}
+                />
               </CardContent>
             </Card>
             </ScrollReveal>
@@ -146,14 +179,14 @@ export default async function HomePage() {
                 <div className="relative w-20 h-20 mx-auto mb-8">
                   <div className="absolute inset-0 bg-gradient-to-br from-accent to-amber-600 rounded-2xl opacity-10 group-hover:opacity-20 transition-opacity" />
                   <div className="relative w-full h-full bg-gradient-to-br from-accent to-amber-600 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-lg">
-                    <UserGroupIcon className="w-10 h-10 text-white" />
+                    <Feature3Icon className="w-10 h-10 text-white" />
                   </div>
                 </div>
-                <CardTitle className="mb-4 text-xl text-slate-900 dark:text-slate-100">Communauté Passionnée</CardTitle>
-                <CardDescription className="text-base leading-relaxed text-slate-600 dark:text-slate-400">
-                  Rejoignez une <span className="text-accent dark:text-amber-400 font-semibold">famille soudée</span>. 
-                  Participez à des stages, compétitions et événements dans toute la France.
-                </CardDescription>
+                <CardTitle className="mb-4 text-xl text-slate-900 dark:text-slate-100">{feature3Title}</CardTitle>
+                <CardDescription 
+                  className="text-base leading-relaxed text-slate-600 dark:text-slate-400"
+                  dangerouslySetInnerHTML={{ __html: feature3Description }}
+                />
               </CardContent>
             </Card>
             </ScrollReveal>
@@ -171,7 +204,7 @@ export default async function HomePage() {
                 <span className="text-sm font-semibold text-secondary dark:text-secondary-light">Nos Emplacements</span>
               </div>
               <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-slate-900 dark:text-slate-100 mb-5 tracking-tight">
-                Nos 5 Clubs
+                Nos {typedClubs.length} {typedClubs.length > 1 ? 'Clubs' : 'Club'}
               </h2>
               <p className="text-lg lg:text-xl text-slate-600 dark:text-slate-400 max-w-2xl mx-auto leading-relaxed">
                 Trouvez le club le plus proche de chez vous

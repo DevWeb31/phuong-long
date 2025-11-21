@@ -66,9 +66,21 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'key et value sont requis' }, { status: 400 });
     }
 
+    // Convertir la valeur en JSONB selon le type
+    let jsonbValue: unknown;
+    if (type === 'boolean') {
+      jsonbValue = value === true || value === 'true';
+    } else if (type === 'number') {
+      jsonbValue = typeof value === 'number' ? value : Number(value);
+    } else if (type === 'string') {
+      jsonbValue = String(value);
+    } else {
+      jsonbValue = typeof value === 'object' ? value : JSON.parse(JSON.stringify(value));
+    }
+
     const updateData: Record<string, unknown> = {
       key,
-      value: typeof value === 'boolean' ? value : JSON.parse(JSON.stringify(value)),
+      value: jsonbValue,
       description: description || null,
       category: category || 'general',
     };

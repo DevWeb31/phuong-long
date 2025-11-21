@@ -11,6 +11,7 @@
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { MaintenanceBanner } from '@/components/layout/MaintenanceBanner';
+import { DevelopmentBanner } from '@/components/layout/DevelopmentBanner';
 
 export default async function MarketingLayout({
   children,
@@ -19,6 +20,7 @@ export default async function MarketingLayout({
 }) {
   return (
     <>
+      <DevelopmentBanner />
       <MaintenanceBanner />
       <Header />
       <main className="flex-1">{children}</main>

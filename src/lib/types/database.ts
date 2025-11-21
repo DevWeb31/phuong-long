@@ -208,7 +208,7 @@ export interface UserProfile {
 
 export interface Role {
   id: string;
-  name: 'admin' | 'moderator' | 'coach' | 'user' | 'student';
+  name: 'admin' | 'moderator' | 'coach' | 'user' | 'student' | 'developer';
   description: string | null;
   level: number;
   created_at: string;
