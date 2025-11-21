@@ -73,6 +73,7 @@ export function useAuth() {
       password,
       options: {
         data: metadata,
+        emailRedirectTo: `${window.location.origin}/auth/confirm?email=${encodeURIComponent(email)}`,
       },
     });
     return { data, error };

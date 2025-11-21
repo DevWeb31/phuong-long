@@ -223,8 +223,14 @@ export async function middleware(request: NextRequest) {
   }
 
   // Rediriger les utilisateurs connectés qui vont sur /signin ou /signup
+  // Mais permettre /auth/confirm même si connecté (pour renvoyer l'email)
   if (user && (request.nextUrl.pathname === '/signin' || request.nextUrl.pathname === '/signup')) {
     return NextResponse.redirect(new URL('/dashboard', request.url));
+  }
+
+  // Permettre /auth/confirm pour tous (nécessaire pour la confirmation d'email)
+  if (request.nextUrl.pathname === '/auth/confirm') {
+    return response;
   }
 
   return response;

@@ -17,7 +17,7 @@ export const runtime = 'nodejs';
 // PATCH - Update user (roles, club, status only)
 export async function PATCH(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = await createServerClient();
@@ -32,7 +32,7 @@ export async function PATCH(
       return NextResponse.json({ error: 'Non autorisé' }, { status: 403 });
     }
 
-    const userId = params.id;
+    const { id: userId } = await params;
     const body = await request.json();
 
     // Vérifier que l'utilisateur existe
@@ -142,6 +142,101 @@ export async function PATCH(
     });
   } catch (error) {
     console.error('Error updating user:', error);
+    return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 });
+  }
+}
+
+// DELETE - Supprimer un utilisateur (avec cascade)
+export async function DELETE(
+  _request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const supabase = await createServerClient();
+    
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      return NextResponse.json({ error: 'Non authentifié' }, { status: 401 });
+    }
+
+    const isAdmin = await checkAdminRole(user.id);
+    if (!isAdmin) {
+      return NextResponse.json({ error: 'Non autorisé' }, { status: 403 });
+    }
+
+    const { id: userId } = await params;
+
+    // Empêcher l'auto-suppression
+    if (userId === user.id) {
+      return NextResponse.json(
+        { error: 'Vous ne pouvez pas supprimer votre propre compte' },
+        { status: 400 }
+      );
+    }
+
+    const adminSupabase = createAdminClient();
+
+    // Vérifier que l'utilisateur existe
+    const { data: authUser, error: authError } = await adminSupabase.auth.admin.getUserById(userId);
+    
+    if (authError || !authUser.user) {
+      return NextResponse.json({ error: 'Utilisateur non trouvé' }, { status: 404 });
+    }
+
+    // Supprimer les blog posts de l'utilisateur (avant la suppression de l'utilisateur)
+    // Les commentaires seront supprimés automatiquement via CASCADE
+    const { error: deletePostsError } = await supabase
+      .from('blog_posts')
+      .delete()
+      .eq('author_id', userId);
+
+    if (deletePostsError) {
+      console.error('Error deleting user blog posts:', deletePostsError);
+      // On continue quand même la suppression de l'utilisateur
+    }
+
+    // Supprimer l'utilisateur dans auth.users
+    // Cela déclenchera automatiquement les CASCADE sur :
+    // - user_profiles
+    // - user_roles
+    // - blog_comments
+    // - event_registrations
+    // - user_bookmarks
+    // Les orders et audit_logs resteront (orders pour comptabilité, audit_logs pour traçabilité)
+    const { error: deleteError } = await adminSupabase.auth.admin.deleteUser(userId);
+
+    if (deleteError) {
+      console.error('Error deleting user:', deleteError);
+      return NextResponse.json(
+        { error: 'Erreur lors de la suppression de l\'utilisateur' },
+        { status: 500 }
+      );
+    }
+
+    // Créer un log d'audit pour la suppression
+    try {
+      await supabase.from('audit_logs').insert({
+        user_id: user.id,
+        action: 'delete',
+        table_name: 'auth.users',
+        record_id: userId,
+        old_data: {
+          email: authUser.user.email,
+          created_at: authUser.user.created_at,
+        },
+        new_data: null,
+      } as any);
+    } catch (auditError) {
+      // Log l'erreur mais ne bloque pas la suppression
+      console.error('Error creating audit log:', auditError);
+    }
+
+    return NextResponse.json({ 
+      success: true,
+      message: 'Utilisateur supprimé avec succès'
+    });
+  } catch (error) {
+    console.error('Error deleting user:', error);
     return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 });
   }
 }

@@ -133,7 +133,11 @@ export default function AdminUsersPage() {
       key: 'full_name',
       label: 'Nom',
       sortable: true,
-      render: (value) => <span className="font-medium text-gray-900 dark:text-gray-100">{value || 'N/A'}</span>,
+      render: (value) => (
+        <span className="font-semibold bg-gradient-to-r from-gray-900 to-gray-700 dark:from-gray-100 dark:to-gray-300 bg-clip-text text-transparent">
+          {value || 'N/A'}
+        </span>
+      ),
     },
     {
       key: 'role',
@@ -244,10 +248,55 @@ export default function AdminUsersPage() {
     }
   };
 
-  const handleDelete = (user: User) => {
-    if (confirm(`Êtes-vous sûr de vouloir supprimer l'utilisateur "${user.full_name}" ?`)) {
-      console.log('Delete user:', user);
-      // TODO: Implémenter la suppression
+  const handleDelete = async (user: User) => {
+    // Double confirmation pour une action critique
+    const confirmed = confirm(
+      `⚠️ ATTENTION : Cette action est irréversible !\n\n` +
+      `Êtes-vous sûr de vouloir supprimer définitivement l'utilisateur "${user.full_name || user.email}" ?\n\n` +
+      `Toutes les données associées seront supprimées (profil, rôles, commentaires, inscriptions aux événements, favoris).\n\n` +
+      `Les commandes seront conservées pour des raisons comptables.`
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+      const response = await fetch(`/api/admin/users/${user.id}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Erreur lors de la suppression');
+      }
+
+      // Recharger la liste des utilisateurs
+      const usersResponse = await fetch('/api/admin/users');
+      if (usersResponse.ok) {
+        const data = await usersResponse.json();
+        const transformedUsers: User[] = data.map((u: any) => {
+          return {
+            id: u.id,
+            full_name: u.full_name || u.email?.split('@')[0] || 'Utilisateur',
+            email: u.email || '',
+            role: u.primary_role || 'user',
+            club: u.club_city || u.club || null,
+            status: 'active' as const,
+            last_login: u.last_sign_in_at || null,
+            created_at: u.created_at,
+            user_roles: u.user_roles || [],
+            club_city: u.club_city || null,
+          } as User & { club_city?: string | null };
+        });
+        setUsers(transformedUsers);
+      }
+    } catch (error) {
+      console.error('Error deleting user:', error);
+      alert(error instanceof Error ? error.message : 'Une erreur est survenue lors de la suppression');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -257,7 +306,19 @@ export default function AdminUsersPage() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-4">
+        <div>
+          <h1 className="text-2xl font-bold bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">
+            Gestion des Utilisateurs
+          </h1>
+          <p className="text-xs text-gray-600 dark:text-gray-400 mt-0.5">
+            Gérez les utilisateurs de votre plateforme
+          </p>
+        </div>
+      </div>
+
       {error && (
         <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-6">
           <p className="text-red-800 dark:text-red-200 font-semibold">Erreur</p>
