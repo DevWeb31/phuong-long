@@ -28,6 +28,7 @@ function ConfirmEmailContent() {
       const token_hash = searchParams.get('token_hash');
       const type = searchParams.get('type');
       const code = searchParams.get('code');
+      const message = searchParams.get('message');
       
       const supabase = createClient();
       
@@ -44,7 +45,21 @@ function ConfirmEmailContent() {
       
       // Log pour débogage (à retirer en production)
       if (process.env.NODE_ENV === 'development') {
-        console.log('Email confirmation params:', { token_hash: !!token_hash, type, code: !!code, isUserLoggedIn, isEmailChange });
+        console.log('Email confirmation params:', { token_hash: !!token_hash, type, code: !!code, message, isUserLoggedIn, isEmailChange });
+      }
+      
+      // Gérer le cas spécial du changement d'email en deux étapes
+      // Si on a type=email_change mais pas de code/token_hash, c'est la première étape acceptée
+      if (type === 'email_change' && !code && !token_hash) {
+        // Décoder le message si nécessaire (il peut être URL-encodé)
+        const decodedMessage = message ? decodeURIComponent(message) : '';
+        if (decodedMessage && (decodedMessage.includes('other email') || decodedMessage.includes('other'))) {
+          // Première étape acceptée : afficher un message informatif
+          setStatus('success');
+          setErrorMessage(''); // Pas d'erreur, juste un message informatif
+          // Le message sera affiché dans l'UI de succès
+          return;
+        }
       }
       
       // Pour email_change, l'utilisateur DOIT être connecté
@@ -263,7 +278,10 @@ function ConfirmEmailContent() {
   // État de succès
   if (status === 'success') {
     const type = searchParams.get('type');
+    const message = searchParams.get('message');
+    const decodedMessage = message ? decodeURIComponent(message) : '';
     const isEmailChange = type === 'email_change';
+    const isFirstStepEmailChange = isEmailChange && decodedMessage && (decodedMessage.includes('other email') || decodedMessage.includes('other'));
     
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
@@ -273,19 +291,27 @@ function ConfirmEmailContent() {
               <CheckCircle2 className="w-20 h-20 text-green-600" />
             </div>
             <CardTitle className="text-3xl">
-              {isEmailChange ? 'Email changé avec succès !' : 'Email confirmé !'}
+              {isFirstStepEmailChange 
+                ? 'Première étape confirmée !' 
+                : isEmailChange 
+                  ? 'Email changé avec succès !' 
+                  : 'Email confirmé !'}
             </CardTitle>
             <CardDescription>
-              {isEmailChange 
-                ? 'Votre nouvelle adresse email a été confirmée et activée'
-                : 'Votre compte a été activé avec succès'}
+              {isFirstStepEmailChange
+                ? 'Votre demande de changement d\'email a été acceptée'
+                : isEmailChange 
+                  ? 'Votre nouvelle adresse email a été confirmée et activée'
+                  : 'Votre compte a été activé avec succès'}
             </CardDescription>
           </CardHeader>
           <CardContent>
             <p className="text-center text-gray-600 dark:text-gray-400 mb-6">
-              {isEmailChange
-                ? 'Votre adresse email a été mise à jour. Vous pouvez maintenant vous connecter avec votre nouvelle adresse.'
-                : 'Vous allez être redirigé vers votre tableau de bord dans quelques secondes...'}
+              {isFirstStepEmailChange
+                ? 'Un email de confirmation a été envoyé à votre nouvelle adresse email. Veuillez cliquer sur le lien dans cet email pour finaliser le changement d\'email.'
+                : isEmailChange
+                  ? 'Votre adresse email a été mise à jour. Vous pouvez maintenant vous connecter avec votre nouvelle adresse.'
+                  : 'Vous allez être redirigé vers votre tableau de bord dans quelques secondes...'}
             </p>
             <Link href={isEmailChange ? "/dashboard/account" : "/dashboard"}>
               <Button variant="primary" size="lg" className="w-full">
