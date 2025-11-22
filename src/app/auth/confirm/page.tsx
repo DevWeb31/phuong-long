@@ -28,23 +28,33 @@ function ConfirmEmailContent() {
       const token_hash = searchParams.get('token_hash');
       const type = searchParams.get('type');
       const code = searchParams.get('code');
-      const isEmailChange = type === 'email_change';
-
-      const supabase = createClient();
-
-      // Pour email_change, l'utilisateur DOIT être connecté
-      // Vérifier d'abord si l'utilisateur est connecté
-      const { data: existingSession } = await supabase.auth.getSession();
       
-      if (isEmailChange && !existingSession?.session?.user) {
-        // Pour le changement d'email, l'utilisateur doit être connecté
-        // Rediriger vers la page de connexion avec un message
-        setStatus('error');
-        setErrorMessage('Vous devez être connecté pour confirmer le changement d\'email. Veuillez vous connecter avec votre ancienne adresse email, puis cliquez à nouveau sur le lien de confirmation dans l\'email.');
-        // Ne pas return immédiatement, laisser l'utilisateur voir le message
+      const supabase = createClient();
+      
+      // Détecter le type de confirmation
+      // Si type est explicitement défini, l'utiliser
+      // Sinon, si l'utilisateur est connecté et qu'on a un code, c'est probablement un email_change
+      const { data: existingSession } = await supabase.auth.getSession();
+      const isUserLoggedIn = !!existingSession?.session?.user;
+      
+      // Déterminer si c'est un changement d'email
+      // 1. Si type est explicitement 'email_change'
+      // 2. Ou si l'utilisateur est connecté et qu'on a un code (changement d'email nécessite connexion)
+      const isEmailChange = type === 'email_change' || (isUserLoggedIn && !!code && !type);
+      
+      // Log pour débogage (à retirer en production)
+      if (process.env.NODE_ENV === 'development') {
+        console.log('Email confirmation params:', { token_hash: !!token_hash, type, code: !!code, isUserLoggedIn, isEmailChange });
       }
       
-      if (existingSession?.session?.user && !isEmailChange) {
+      // Pour email_change, l'utilisateur DOIT être connecté
+      if (isEmailChange && !isUserLoggedIn) {
+        setStatus('error');
+        setErrorMessage('Vous devez être connecté pour confirmer le changement d\'email. Veuillez vous connecter avec votre ancienne adresse email, puis cliquez à nouveau sur le lien de confirmation dans l\'email.');
+        return;
+      }
+      
+      if (isUserLoggedIn && !isEmailChange && !code && !token_hash) {
         // Pour les autres types, si déjà connecté, c'est bon
         setStatus('success');
         setTimeout(() => {
@@ -126,10 +136,20 @@ function ConfirmEmailContent() {
 
       // Gérer le format avec token_hash (ancien format)
       // Accepter les types 'email' (confirmation inscription) et 'email_change' (changement email)
-      if (!token_hash || (type !== 'email' && type !== 'email_change')) {
-        setStatus('error');
-        setErrorMessage('Lien de confirmation invalide. Paramètres manquants.');
-        return;
+      // Ne vérifier token_hash que si code n'existe pas (déjà traité ci-dessus)
+      if (!code) {
+        if (!token_hash) {
+          setStatus('error');
+          setErrorMessage('Lien de confirmation invalide. Paramètres manquants.');
+          return;
+        }
+        
+        // Vérifier que le type est valide pour token_hash
+        if (type && type !== 'email' && type !== 'email_change') {
+          setStatus('error');
+          setErrorMessage('Lien de confirmation invalide. Type de confirmation non reconnu.');
+          return;
+        }
       }
 
       try {
