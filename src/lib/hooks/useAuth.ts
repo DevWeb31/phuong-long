@@ -106,6 +106,20 @@ export function useAuth() {
     return { data, error };
   };
 
+  const updateEmail = async (newEmail: string) => {
+    const baseUrl = typeof window !== 'undefined' 
+      ? (process.env.NEXT_PUBLIC_APP_URL || window.location.origin)
+      : process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+    
+    const { data, error } = await supabase.auth.updateUser(
+      { email: newEmail },
+      {
+        emailRedirectTo: `${baseUrl}/auth/confirm?type=email_change`,
+      }
+    );
+    return { data, error };
+  };
+
   return {
     user: authState.user,
     session: authState.session,
@@ -115,6 +129,7 @@ export function useAuth() {
     signOut,
     resetPassword,
     updatePassword,
+    updateEmail,
     isAuthenticated: !!authState.user,
   };
 }

@@ -21,13 +21,52 @@ import {
 import { Loader2, CheckCircle2, AlertTriangle, XCircle, Lock, Trash2, Save } from 'lucide-react';
 
 export default function AccountPage() {
-  const { user, loading, updatePassword } = useAuth();
+  const { user, loading, updatePassword, updateEmail } = useAuth();
+  const [emailData, setEmailData] = useState({
+    newEmail: '',
+  });
+  const [emailLoading, setEmailLoading] = useState(false);
+  const [emailMessage, setEmailMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [passwordData, setPasswordData] = useState({
     newPassword: '',
     confirmPassword: '',
   });
   const [passwordLoading, setPasswordLoading] = useState(false);
   const [passwordMessage, setPasswordMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+
+  const handleEmailChange = async () => {
+    setEmailMessage(null);
+
+    if (!emailData.newEmail || !emailData.newEmail.includes('@')) {
+      setEmailMessage({ type: 'error', text: 'Veuillez entrer une adresse email valide' });
+      return;
+    }
+
+    if (emailData.newEmail === user?.email) {
+      setEmailMessage({ type: 'error', text: 'La nouvelle adresse email doit être différente de l\'actuelle' });
+      return;
+    }
+
+    setEmailLoading(true);
+
+    try {
+      const { error } = await updateEmail(emailData.newEmail);
+
+      if (error) {
+        setEmailMessage({ type: 'error', text: error.message || 'Une erreur est survenue lors du changement d\'email' });
+      } else {
+        setEmailMessage({ 
+          type: 'success', 
+          text: 'Un email de confirmation a été envoyé à votre nouvelle adresse. Veuillez cliquer sur le lien dans l\'email pour confirmer le changement.' 
+        });
+        setEmailData({ newEmail: '' });
+      }
+    } catch (err) {
+      setEmailMessage({ type: 'error', text: 'Une erreur est survenue' });
+    }
+
+    setEmailLoading(false);
+  };
 
   const handlePasswordChange = async () => {
     setPasswordMessage(null);
@@ -105,17 +144,57 @@ export default function AccountPage() {
           </div>
         </CardHeader>
         <CardContent>
-          <div className="flex items-center justify-between">
+          <div className="space-y-4">
             <div>
-              <p className="text-base font-medium dark:text-gray-100">{user.email}</p>
-              <p className="text-sm dark:text-gray-500 mt-1">
+              <p className="text-base font-medium dark:text-gray-100 mb-1">Email actuel</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">{user.email}</p>
+              <p className="text-sm dark:text-gray-500 mt-2">
                 {user.email_confirmed_at 
-                  ? <span className="flex items-center gap-1"><CheckCircle2 className="w-3.5 h-3.5" /> Email vérifié</span>
-                  : <span className="flex items-center gap-1"><AlertTriangle className="w-3.5 h-3.5" /> Email non vérifié - Consultez vos emails</span>}
+                  ? <span className="flex items-center gap-1 text-green-600 dark:text-green-400"><CheckCircle2 className="w-3.5 h-3.5" /> Email vérifié</span>
+                  : <span className="flex items-center gap-1 text-amber-600 dark:text-amber-400"><AlertTriangle className="w-3.5 h-3.5" /> Email non vérifié - Consultez vos emails</span>}
               </p>
             </div>
-            <Button variant="ghost" size="sm" disabled>
-              Modifier l'email (bientôt)
+
+            {emailMessage && (
+              <div className={`p-4 rounded-lg flex items-center gap-2 ${
+                emailMessage.type === 'success' 
+                  ? 'bg-green-50 border border-green-200 text-green-700 dark:bg-green-900/20 dark:border-green-800 dark:text-green-300' 
+                  : 'bg-red-50 border border-red-200 text-red-700 dark:bg-red-900/20 dark:border-red-800 dark:text-red-300'
+              }`}>
+                {emailMessage.type === 'success' ? (
+                  <><CheckCircle2 className="w-4 h-4" /> {emailMessage.text}</>
+                ) : (
+                  <><XCircle className="w-4 h-4" /> {emailMessage.text}</>
+                )}
+              </div>
+            )}
+
+            <div>
+              <label htmlFor="newEmail" className="block text-sm font-medium dark:text-gray-300 mb-2">
+                Nouvelle adresse email
+              </label>
+              <input
+                type="email"
+                id="newEmail"
+                value={emailData.newEmail}
+                onChange={(e) => setEmailData({ newEmail: e.target.value })}
+                className="w-full px-4 py-2 border dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent dark:bg-gray-800 dark:text-gray-100"
+                placeholder="nouvelle@email.com"
+              />
+              <p className="mt-1 text-xs dark:text-gray-500">Un email de confirmation sera envoyé à la nouvelle adresse</p>
+            </div>
+
+            <Button
+              variant="primary"
+              onClick={handleEmailChange}
+              disabled={emailLoading || !emailData.newEmail || emailData.newEmail === user.email}
+              className="flex items-center justify-center gap-2"
+            >
+              {emailLoading ? (
+                <><Loader2 className="w-4 h-4 animate-spin" /> Envoi en cours...</>
+              ) : (
+                <><EnvelopeIcon className="w-4 h-4" /> Changer l'email</>
+              )}
             </Button>
           </div>
         </CardContent>

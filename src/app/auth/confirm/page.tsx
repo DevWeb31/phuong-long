@@ -28,6 +28,7 @@ function ConfirmEmailContent() {
       const token_hash = searchParams.get('token_hash');
       const type = searchParams.get('type');
       const code = searchParams.get('code');
+      const isEmailChange = type === 'email_change';
 
       const supabase = createClient();
 
@@ -37,7 +38,7 @@ function ConfirmEmailContent() {
         // L'utilisateur est déjà confirmé et connecté
         setStatus('success');
         setTimeout(() => {
-          router.push('/dashboard');
+          router.push(isEmailChange ? '/dashboard/account' : '/dashboard');
         }, 3000);
         return;
       }
@@ -62,7 +63,7 @@ function ConfirmEmailContent() {
           if (sessionData?.session?.user) {
             setStatus('success');
             setTimeout(() => {
-              router.push('/dashboard');
+              router.push(isEmailChange ? '/dashboard/account' : '/dashboard');
             }, 3000);
           } else {
             // Si pas de session après 1 seconde, réessayer après un autre délai
@@ -72,7 +73,7 @@ function ConfirmEmailContent() {
             if (retrySession?.session?.user) {
               setStatus('success');
               setTimeout(() => {
-                router.push('/dashboard');
+                router.push(isEmailChange ? '/dashboard/account' : '/dashboard');
               }, 3000);
             } else {
               setStatus('error');
@@ -89,7 +90,8 @@ function ConfirmEmailContent() {
       }
 
       // Gérer le format avec token_hash (ancien format)
-      if (!token_hash || type !== 'email') {
+      // Accepter les types 'email' (confirmation inscription) et 'email_change' (changement email)
+      if (!token_hash || (type !== 'email' && type !== 'email_change')) {
         setStatus('error');
         setErrorMessage('Lien de confirmation invalide. Paramètres manquants.');
         return;
@@ -97,9 +99,10 @@ function ConfirmEmailContent() {
 
       try {
         // Confirmer l'email avec le token_hash
+        // Utiliser le type depuis l'URL (email ou email_change)
         const { data, error } = await supabase.auth.verifyOtp({
           token_hash,
-          type: 'email',
+          type: type as 'email' | 'email_change',
         });
 
         if (error) {
@@ -122,9 +125,9 @@ function ConfirmEmailContent() {
         if (data?.user) {
           setStatus('success');
           
-          // Rediriger vers le dashboard après 3 secondes
+          // Rediriger vers le dashboard ou la page account selon le type
           setTimeout(() => {
-            router.push('/dashboard');
+            router.push(isEmailChange ? '/dashboard/account' : '/dashboard');
           }, 3000);
         } else {
           setStatus('error');
@@ -187,6 +190,9 @@ function ConfirmEmailContent() {
 
   // État de succès
   if (status === 'success') {
+    const type = searchParams.get('type');
+    const isEmailChange = type === 'email_change';
+    
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
         <Card variant="bordered" className="w-full max-w-md">
@@ -194,18 +200,24 @@ function ConfirmEmailContent() {
             <div className="mb-4 flex justify-center">
               <CheckCircle2 className="w-20 h-20 text-green-600" />
             </div>
-            <CardTitle className="text-3xl">Email confirmé !</CardTitle>
+            <CardTitle className="text-3xl">
+              {isEmailChange ? 'Email changé avec succès !' : 'Email confirmé !'}
+            </CardTitle>
             <CardDescription>
-              Votre compte a été activé avec succès
+              {isEmailChange 
+                ? 'Votre nouvelle adresse email a été confirmée et activée'
+                : 'Votre compte a été activé avec succès'}
             </CardDescription>
           </CardHeader>
           <CardContent>
             <p className="text-center text-gray-600 dark:text-gray-400 mb-6">
-              Vous allez être redirigé vers votre tableau de bord dans quelques secondes...
+              {isEmailChange
+                ? 'Votre adresse email a été mise à jour. Vous pouvez maintenant vous connecter avec votre nouvelle adresse.'
+                : 'Vous allez être redirigé vers votre tableau de bord dans quelques secondes...'}
             </p>
-            <Link href="/dashboard">
+            <Link href={isEmailChange ? "/dashboard/account" : "/dashboard"}>
               <Button variant="primary" size="lg" className="w-full">
-                Aller au tableau de bord
+                {isEmailChange ? 'Retour aux paramètres' : 'Aller au tableau de bord'}
               </Button>
             </Link>
           </CardContent>
