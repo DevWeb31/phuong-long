@@ -32,23 +32,58 @@ function ConfirmEmailContent() {
 
       const supabase = createClient();
 
-      // Vérifier d'abord si l'utilisateur est déjà connecté (lien peut avoir été déjà cliqué)
+      // Pour email_change, l'utilisateur DOIT être connecté
+      // Vérifier d'abord si l'utilisateur est connecté
       const { data: existingSession } = await supabase.auth.getSession();
-      if (existingSession?.session?.user) {
-        // L'utilisateur est déjà confirmé et connecté
+      
+      if (isEmailChange && !existingSession?.session?.user) {
+        // Pour le changement d'email, l'utilisateur doit être connecté
+        // Rediriger vers la page de connexion avec un message
+        setStatus('error');
+        setErrorMessage('Vous devez être connecté pour confirmer le changement d\'email. Veuillez vous connecter avec votre ancienne adresse email, puis cliquez à nouveau sur le lien de confirmation dans l\'email.');
+        // Ne pas return immédiatement, laisser l'utilisateur voir le message
+      }
+      
+      if (existingSession?.session?.user && !isEmailChange) {
+        // Pour les autres types, si déjà connecté, c'est bon
         setStatus('success');
         setTimeout(() => {
-          router.push(isEmailChange ? '/dashboard/account' : '/dashboard');
+          router.push('/dashboard');
         }, 3000);
         return;
       }
 
       // Gérer le format avec code (PKCE flow)
-      // Supabase SSR gère automatiquement l'échange du code via les cookies
-      // On doit juste attendre que le code soit traité et vérifier la session
+      // Pour email_change, Supabase gère automatiquement la mise à jour via les cookies SSR
       if (code) {
         try {
-          // Attendre un peu pour que Supabase traite le code via les cookies SSR
+          // Pour email_change, utiliser exchangeCodeForSession pour confirmer le changement
+          if (isEmailChange) {
+            const { data: exchangeData, error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
+            
+            if (exchangeError) {
+              setStatus('error');
+              setErrorMessage('Erreur lors de la confirmation : ' + exchangeError.message);
+              return;
+            }
+
+            if (exchangeData?.user) {
+              // Vérifier que l'email a bien été mis à jour
+              const newEmail = exchangeData.user.email;
+              console.log('Email après confirmation:', newEmail);
+              
+              // Rafraîchir la session pour s'assurer que les données sont à jour
+              await supabase.auth.refreshSession();
+              
+              setStatus('success');
+              setTimeout(() => {
+                router.push('/dashboard/account');
+              }, 3000);
+              return;
+            }
+          }
+          
+          // Pour les autres types (signup), attendre que Supabase traite le code via les cookies SSR
           await new Promise(resolve => setTimeout(resolve, 1000));
           
           // Vérifier la session après le traitement du code
@@ -123,6 +158,15 @@ function ConfirmEmailContent() {
 
         // Succès
         if (data?.user) {
+          // Pour email_change, vérifier que l'email a bien été mis à jour
+          if (isEmailChange) {
+            const updatedEmail = data.user.email;
+            console.log('Email après confirmation (token_hash):', updatedEmail);
+            
+            // Rafraîchir la session pour s'assurer que les données sont à jour
+            await supabase.auth.refreshSession();
+          }
+          
           setStatus('success');
           
           // Rediriger vers le dashboard ou la page account selon le type
@@ -267,6 +311,9 @@ function ConfirmEmailContent() {
   }
 
   // État d'erreur générale
+  const type = searchParams.get('type');
+  const isEmailChangeError = type === 'email_change';
+  
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
       <Card variant="bordered" className="w-full max-w-md">
@@ -284,20 +331,30 @@ function ConfirmEmailContent() {
             <p className="text-center text-gray-600 dark:text-gray-400">
               {errorMessage || 'Une erreur est survenue lors de la confirmation.'}
             </p>
-            <Button 
-              variant="primary" 
-              size="lg" 
-              className="w-full"
-              onClick={handleResendEmail}
-            >
-              <Mail className="w-4 h-4 mr-2" />
-              Renvoyer l'email de confirmation
-            </Button>
-            <Link href="/signin">
-              <Button variant="ghost" size="lg" className="w-full">
-                Aller à la connexion
+            {!isEmailChangeError && (
+              <Button 
+                variant="primary" 
+                size="lg" 
+                className="w-full"
+                onClick={handleResendEmail}
+              >
+                <Mail className="w-4 h-4 mr-2" />
+                Renvoyer l'email de confirmation
               </Button>
-            </Link>
+            )}
+            {isEmailChangeError ? (
+              <Link href="/signin">
+                <Button variant="primary" size="lg" className="w-full">
+                  Se connecter pour confirmer
+                </Button>
+              </Link>
+            ) : (
+              <Link href="/signin">
+                <Button variant="ghost" size="lg" className="w-full">
+                  Aller à la connexion
+                </Button>
+              </Link>
+            )}
             <div className="text-center">
               <Link
                 href="/"
