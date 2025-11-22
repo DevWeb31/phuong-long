@@ -152,12 +152,20 @@ function ConfirmEmailContent() {
         }
       }
 
+      // À ce point, si on n'a pas de code, on doit avoir un token_hash (vérifié ci-dessus)
+      // TypeScript ne le comprend pas, donc on vérifie explicitement
+      if (!token_hash) {
+        setStatus('error');
+        setErrorMessage('Lien de confirmation invalide. Paramètres manquants.');
+        return;
+      }
+
       try {
         // Confirmer l'email avec le token_hash
         // Utiliser le type depuis l'URL (email ou email_change)
         const { data, error } = await supabase.auth.verifyOtp({
           token_hash,
-          type: type as 'email' | 'email_change',
+          type: (type || 'email') as 'email' | 'email_change',
         });
 
         if (error) {
