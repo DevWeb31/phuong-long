@@ -66,9 +66,17 @@ function ConfirmEmailChangeContent() {
 
     // Si on a un token, rediriger vers l'API pour le traiter
     if (token) {
-      const baseUrl = typeof window !== 'undefined' 
-        ? (process.env.NEXT_PUBLIC_APP_URL || window.location.origin)
-        : process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+      // Utiliser le domaine de production si on est en production
+      let baseUrl = typeof window !== 'undefined' 
+        ? window.location.origin
+        : 'http://localhost:3000';
+      
+      // En production, forcer l'utilisation du domaine personnalisé
+      if (typeof window !== 'undefined' && window.location.hostname.includes('vercel.app')) {
+        baseUrl = 'https://phuong-long-vo-dao.com';
+      } else if (typeof window !== 'undefined' && !window.location.hostname.includes('phuong-long-vo-dao.com') && !window.location.hostname.includes('localhost')) {
+        baseUrl = 'https://phuong-long-vo-dao.com';
+      }
       
       // Rediriger vers l'API qui gère la confirmation
       window.location.href = `${baseUrl}/api/auth/confirm-email-change?token=${token}`;
