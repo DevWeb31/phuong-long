@@ -48,10 +48,10 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // IMPORTANT: Déconnecter l'utilisateur s'il est connecté pour forcer la reconnexion avec l'ancien email
+    // Vérifier si l'utilisateur est connecté
     const supabase = await createAPIClient();
     const { data: { session } } = await supabase.auth.getSession();
-    
+
     // Si l'utilisateur n'est pas connecté, rediriger vers la page de connexion
     if (!session?.user) {
       let baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
@@ -63,12 +63,10 @@ export async function GET(request: NextRequest) {
     }
 
     // Si l'utilisateur est connecté, vérifier qu'il s'est connecté avec l'ancienne adresse email
-    // Si ce n'est pas le cas, le déconnecter et rediriger vers la page de connexion
     if (session.user.email?.toLowerCase() !== tokenData.old_email.toLowerCase()) {
-      // Déconnecter l'utilisateur
+      // Déconnecter l'utilisateur et rediriger vers la page de connexion
       await supabase.auth.signOut();
       
-      // Rediriger vers la page de connexion avec un message explicite
       let baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
       if (process.env.NODE_ENV === 'production' && !baseUrl.includes('phuong-long-vo-dao.com')) {
         baseUrl = 'https://phuong-long-vo-dao.com';
@@ -110,12 +108,7 @@ export async function GET(request: NextRequest) {
       .update({ used_at: new Date().toISOString() })
       .eq('token', token);
 
-    // IMPORTANT: Après la mise à jour de l'email, on doit forcer un refresh de la session
-    // Le JWT dans la session contient toujours l'ancien email
-    // On va forcer le client à rafraîchir en invalidant la session actuelle
-    // et en forçant un nouveau getSession() qui récupérera les infos à jour
-    
-    // Rediriger vers la page de succès avec un paramètre pour forcer le refresh
+    // Rediriger vers la page de succès
     let baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
     if (process.env.NODE_ENV === 'production' && !baseUrl.includes('phuong-long-vo-dao.com')) {
       baseUrl = 'https://phuong-long-vo-dao.com';
@@ -130,5 +123,3 @@ export async function GET(request: NextRequest) {
     );
   }
 }
-
-
