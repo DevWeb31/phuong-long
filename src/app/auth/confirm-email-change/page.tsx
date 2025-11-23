@@ -10,13 +10,16 @@
 'use client';
 
 import { useEffect, useState, Suspense } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Button, Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/common';
 import { CheckCircle2, XCircle, Loader2 } from 'lucide-react';
+import { createClient } from '@/lib/supabase/client';
 
 function ConfirmEmailChangeContent() {
   const searchParams = useSearchParams();
+  const router = useRouter();
+  const supabase = createClient();
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
   const [errorMessage, setErrorMessage] = useState<string>('');
 
@@ -26,7 +29,38 @@ function ConfirmEmailChangeContent() {
 
     // Si on vient de la redirection après succès
     if (success === 'true') {
-      setStatus('success');
+      // Forcer un refresh de la session pour récupérer le nouvel email
+      const refreshSession = async () => {
+        try {
+          // Appeler getUser() qui fait un appel API pour récupérer les infos à jour depuis le serveur
+          // Cela va mettre à jour le user dans le hook useAuth
+          const { data: { user }, error: userError } = await supabase.auth.getUser();
+          
+          if (userError) {
+            console.error('Erreur lors de la récupération de l\'utilisateur:', userError);
+          } else if (user) {
+            console.log('Email mis à jour dans la session:', user.email);
+          }
+          
+          // Forcer un refresh complet de la page pour mettre à jour l'UI
+          // Cela va déclencher un nouveau getSession() qui récupérera les infos à jour
+          router.refresh();
+          
+          // Attendre un peu pour que le refresh soit pris en compte
+          setTimeout(() => {
+            setStatus('success');
+            // Forcer un rechargement complet de la page après 1 seconde pour s'assurer que tout est à jour
+            setTimeout(() => {
+              window.location.href = '/dashboard/account';
+            }, 1000);
+          }, 500);
+        } catch (error) {
+          console.error('Erreur lors du refresh:', error);
+          setStatus('success');
+        }
+      };
+      
+      refreshSession();
       return;
     }
 

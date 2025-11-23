@@ -100,9 +100,14 @@ export async function GET(request: NextRequest) {
       .update({ used_at: new Date().toISOString() })
       .eq('token', token);
 
-    // Rediriger vers la page de succès
+    // IMPORTANT: Après la mise à jour de l'email, on doit forcer un refresh de la session
+    // Le JWT dans la session contient toujours l'ancien email
+    // On va forcer le client à rafraîchir en invalidant la session actuelle
+    // et en forçant un nouveau getSession() qui récupérera les infos à jour
+    
+    // Rediriger vers la page de succès avec un paramètre pour forcer le refresh
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
-    return NextResponse.redirect(`${baseUrl}/auth/confirm-email-change?success=true`);
+    return NextResponse.redirect(`${baseUrl}/auth/confirm-email-change?success=true&refresh=true`);
 
   } catch (error) {
     console.error('[EMAIL CHANGE] Erreur confirmation:', error);
