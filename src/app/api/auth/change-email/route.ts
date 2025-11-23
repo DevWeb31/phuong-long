@@ -89,12 +89,12 @@ export async function POST(request: NextRequest) {
     }
 
     // Construire l'URL de confirmation
-    // Utiliser le domaine de production si disponible, sinon NEXT_PUBLIC_APP_URL
-    let baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+    // TOUJOURS utiliser le domaine personnalisé en production
+    let baseUrl = 'https://phuong-long-vo-dao.com';
     
-    // En production, forcer l'utilisation du domaine personnalisé
-    if (process.env.NODE_ENV === 'production' && !baseUrl.includes('phuong-long-vo-dao.com')) {
-      baseUrl = 'https://phuong-long-vo-dao.com';
+    // En développement local, utiliser localhost
+    if (process.env.NODE_ENV !== 'production' || process.env.VERCEL_ENV === 'development') {
+      baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
     }
     
     const confirmationUrl = `${baseUrl}/auth/confirm-email-change?token=${token}`;
