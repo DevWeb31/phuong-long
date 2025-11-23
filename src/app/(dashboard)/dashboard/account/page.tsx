@@ -53,7 +53,17 @@ export default function AccountPage() {
       const { error } = await updateEmail(emailData.newEmail);
 
       if (error) {
-        setEmailMessage({ type: 'error', text: error.message || 'Une erreur est survenue lors du changement d\'email' });
+        // Gérer spécifiquement les erreurs de rate limit
+        if (error.message?.toLowerCase().includes('rate limit') || 
+            error.message?.toLowerCase().includes('too many requests') ||
+            error.status === 429) {
+          setEmailMessage({ 
+            type: 'error', 
+            text: 'Trop de tentatives. Veuillez attendre 60 secondes avant de réessayer. Si le problème persiste, vérifiez vos emails de confirmation précédents.' 
+          });
+        } else {
+          setEmailMessage({ type: 'error', text: error.message || 'Une erreur est survenue lors du changement d\'email' });
+        }
       } else {
         setEmailMessage({ 
           type: 'success', 
