@@ -80,12 +80,22 @@ export default function AccountPage() {
                            (error as { status?: number }).status === 429 ||
                            (error as { code?: string }).code === '429';
 
+        // Gérer les erreurs serveur (500)
+        const isServerError = (error as { status?: number }).status === 500 ||
+                             error.message?.toLowerCase().includes('internal server error') ||
+                             error.message?.toLowerCase().includes('error sending email');
+
         if (isRateLimit) {
           // Définir un cooldown de 60 secondes
           setCooldownSeconds(60);
           setEmailMessage({ 
             type: 'error', 
             text: 'Trop de tentatives. Le bouton sera réactivé dans 60 secondes. Si le problème persiste, vérifiez vos emails de confirmation précédents ou contactez le support.' 
+          });
+        } else if (isServerError) {
+          setEmailMessage({ 
+            type: 'error', 
+            text: 'Erreur serveur lors de l\'envoi de l\'email. Cela peut être dû à un problème de configuration SMTP. Vérifiez la configuration Resend dans Supabase Dashboard (Settings → Auth → SMTP Settings) et assurez-vous que l\'API Key est correcte.' 
           });
         } else {
           setEmailMessage({ type: 'error', text: error.message || 'Une erreur est survenue lors du changement d\'email' });

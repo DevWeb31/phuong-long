@@ -21,6 +21,7 @@ import { XCircle, Loader2, Lock, Sparkles } from 'lucide-react';
 export default function SignInPage() {
   const searchParams = useSearchParams();
   const fromMaintenance = searchParams.get('from') === 'maintenance';
+  const redirectTo = searchParams.get('redirectTo');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -97,9 +98,13 @@ export default function SignInPage() {
         }
       }
 
-      // Redirection vers la page d'accueil
+      // Redirection vers la page demandée ou la page d'accueil
       router.refresh();
-      router.push('/');
+      if (redirectTo) {
+        router.push(redirectTo);
+      } else {
+        router.push('/');
+      }
     } catch (err) {
       setError('Une erreur est survenue');
       setLoading(false);
@@ -112,8 +117,17 @@ export default function SignInPage() {
         <CardHeader className="text-center">
           <CardTitle className="text-3xl">Connexion</CardTitle>
           <CardDescription>
-            Connectez-vous à votre compte Phuong Long Vo Dao
+            {redirectTo && redirectTo.includes('email_change') 
+              ? 'Connectez-vous avec votre ancienne adresse email pour confirmer le changement'
+              : 'Connectez-vous à votre compte Phuong Long Vo Dao'}
           </CardDescription>
+          {redirectTo && redirectTo.includes('email_change') && (
+            <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+              <p className="text-sm text-blue-700 dark:text-blue-300">
+                ⚠️ Vous devez vous connecter avec votre <strong>ancienne adresse email</strong> pour confirmer le changement d'email. Après connexion, vous serez automatiquement redirigé vers la confirmation.
+              </p>
+            </div>
+          )}
         </CardHeader>
 
         <CardContent>

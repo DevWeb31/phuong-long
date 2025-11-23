@@ -64,8 +64,10 @@ function ConfirmEmailContent() {
       
       // Pour email_change, l'utilisateur DOIT être connecté
       if (isEmailChange && !isUserLoggedIn) {
-        setStatus('error');
-        setErrorMessage('Vous devez être connecté pour confirmer le changement d\'email. Veuillez vous connecter avec votre ancienne adresse email, puis cliquez à nouveau sur le lien de confirmation dans l\'email.');
+        // Rediriger automatiquement vers la page de connexion avec le lien de confirmation préservé
+        const currentUrl = window.location.href;
+        const signinUrl = `/signin?redirectTo=${encodeURIComponent(currentUrl)}`;
+        router.push(signinUrl);
         return;
       }
       
