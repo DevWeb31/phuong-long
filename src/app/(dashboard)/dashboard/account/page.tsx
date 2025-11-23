@@ -9,7 +9,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/lib/hooks/useAuth';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, Button } from '@/components/common';
 import { 
@@ -27,12 +27,24 @@ export default function AccountPage() {
   });
   const [emailLoading, setEmailLoading] = useState(false);
   const [emailMessage, setEmailMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [cooldownSeconds, setCooldownSeconds] = useState(0);
   const [passwordData, setPasswordData] = useState({
     newPassword: '',
     confirmPassword: '',
   });
   const [passwordLoading, setPasswordLoading] = useState(false);
   const [passwordMessage, setPasswordMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+
+  // Gérer le cooldown avec un timer
+  useEffect(() => {
+    if (cooldownSeconds > 0) {
+      const timer = setTimeout(() => {
+        setCooldownSeconds(cooldownSeconds - 1);
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+    return undefined;
+  }, [cooldownSeconds]);
 
   const handleEmailChange = async () => {
     setEmailMessage(null);
@@ -47,6 +59,14 @@ export default function AccountPage() {
       return;
     }
 
+    if (cooldownSeconds > 0) {
+      setEmailMessage({ 
+        type: 'error', 
+        text: `Veuillez attendre ${cooldownSeconds} seconde${cooldownSeconds > 1 ? 's' : ''} avant de réessayer.` 
+      });
+      return;
+    }
+
     setEmailLoading(true);
 
     try {
@@ -54,12 +74,18 @@ export default function AccountPage() {
 
       if (error) {
         // Gérer spécifiquement les erreurs de rate limit
-        if (error.message?.toLowerCase().includes('rate limit') || 
-            error.message?.toLowerCase().includes('too many requests') ||
-            error.status === 429) {
+        const isRateLimit = error.message?.toLowerCase().includes('rate limit') || 
+                           error.message?.toLowerCase().includes('too many requests') ||
+                           error.message?.toLowerCase().includes('email rate limit') ||
+                           (error as { status?: number }).status === 429 ||
+                           (error as { code?: string }).code === '429';
+
+        if (isRateLimit) {
+          // Définir un cooldown de 60 secondes
+          setCooldownSeconds(60);
           setEmailMessage({ 
             type: 'error', 
-            text: 'Trop de tentatives. Veuillez attendre 60 secondes avant de réessayer. Si le problème persiste, vérifiez vos emails de confirmation précédents.' 
+            text: 'Trop de tentatives. Le bouton sera réactivé dans 60 secondes. Si le problème persiste, vérifiez vos emails de confirmation précédents ou contactez le support.' 
           });
         } else {
           setEmailMessage({ type: 'error', text: error.message || 'Une erreur est survenue lors du changement d\'email' });
@@ -70,6 +96,8 @@ export default function AccountPage() {
           text: 'Un email de confirmation a été envoyé à votre nouvelle adresse. Veuillez cliquer sur le lien dans l\'email pour confirmer le changement.' 
         });
         setEmailData({ newEmail: '' });
+        // Réinitialiser le cooldown en cas de succès
+        setCooldownSeconds(0);
       }
     } catch (err) {
       setEmailMessage({ type: 'error', text: 'Une erreur est survenue' });
@@ -197,11 +225,13 @@ export default function AccountPage() {
             <Button
               variant="primary"
               onClick={handleEmailChange}
-              disabled={emailLoading || !emailData.newEmail || emailData.newEmail === user.email}
+              disabled={emailLoading || !emailData.newEmail || emailData.newEmail === user.email || cooldownSeconds > 0}
               className="flex items-center justify-center gap-2"
             >
               {emailLoading ? (
                 <><Loader2 className="w-4 h-4 animate-spin" /> Envoi en cours...</>
+              ) : cooldownSeconds > 0 ? (
+                <><Loader2 className="w-4 h-4 animate-spin" /> Attente... ({cooldownSeconds}s)</>
               ) : (
                 <><EnvelopeIcon className="w-4 h-4" /> Changer l'email</>
               )}
