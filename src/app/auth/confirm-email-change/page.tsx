@@ -65,6 +65,7 @@ function ConfirmEmailChangeContent() {
     }
 
     // Si on a un token, rediriger vers l'API pour le traiter
+    // IMPORTANT: Ne rediriger qu'une seule fois pour éviter les boucles
     if (token) {
       // Utiliser le domaine de production si on est en production
       let baseUrl = typeof window !== 'undefined' 
@@ -79,6 +80,7 @@ function ConfirmEmailChangeContent() {
       }
       
       // Rediriger vers l'API qui gère la confirmation
+      // L'API vérifiera si l'utilisateur est connecté et redirigera vers /signin si nécessaire
       window.location.href = `${baseUrl}/api/auth/confirm-email-change?token=${token}`;
       return;
     }
@@ -86,7 +88,7 @@ function ConfirmEmailChangeContent() {
     // Pas de token ni de succès = erreur
     setStatus('error');
     setErrorMessage('Lien de confirmation invalide. Token manquant.');
-  }, [searchParams]);
+  }, [searchParams, router, supabase]);
 
   if (status === 'loading') {
     return (
