@@ -80,10 +80,15 @@ export default function AccountPage() {
                            (error as { status?: number }).status === 429 ||
                            (error as { code?: string }).code === '429';
 
-        // Gérer les erreurs serveur (500)
+        // Gérer les erreurs serveur (500) et les erreurs Resend (403)
         const isServerError = (error as { status?: number }).status === 500 ||
                              error.message?.toLowerCase().includes('internal server error') ||
                              error.message?.toLowerCase().includes('error sending email');
+
+        // Détecter spécifiquement l'erreur Resend "testing emails only"
+        const isResendTestModeError = error.message?.toLowerCase().includes('only send testing emails') ||
+                                     error.message?.toLowerCase().includes('verify a domain') ||
+                                     (error as { status?: number }).status === 403;
 
         if (isRateLimit) {
           // Définir un cooldown de 60 secondes
@@ -91,6 +96,11 @@ export default function AccountPage() {
           setEmailMessage({ 
             type: 'error', 
             text: 'Trop de tentatives. Le bouton sera réactivé dans 60 secondes. Si le problème persiste, vérifiez vos emails de confirmation précédents ou contactez le support.' 
+          });
+        } else if (isResendTestModeError) {
+          setEmailMessage({ 
+            type: 'error', 
+            text: '⚠️ Resend est en mode test : vous ne pouvez envoyer qu\'à votre adresse vérifiée. Pour envoyer à d\'autres adresses, vous devez vérifier un domaine dans Resend Dashboard (resend.com/domains), puis changer le sender email dans Supabase SMTP Settings pour utiliser votre domaine vérifié (ex: noreply@votre-domaine.fr).' 
           });
         } else if (isServerError) {
           setEmailMessage({ 
@@ -103,7 +113,7 @@ export default function AccountPage() {
       } else {
         setEmailMessage({ 
           type: 'success', 
-          text: 'Un email de confirmation a été envoyé à votre nouvelle adresse. Veuillez cliquer sur le lien dans l\'email pour confirmer le changement.' 
+          text: 'Un email de confirmation a été envoyé à votre nouvelle adresse email. Veuillez cliquer sur le lien dans cet email. Vous devrez ensuite vous connecter avec votre ancienne adresse email et votre mot de passe pour finaliser le changement.' 
         });
         setEmailData({ newEmail: '' });
         // Réinitialiser le cooldown en cas de succès
@@ -229,7 +239,9 @@ export default function AccountPage() {
                 className="w-full px-4 py-2 border dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent dark:bg-gray-800 dark:text-gray-100"
                 placeholder="nouvelle@email.com"
               />
-              <p className="mt-1 text-xs dark:text-gray-500">Un email de confirmation sera envoyé à la nouvelle adresse</p>
+              <p className="mt-1 text-xs dark:text-gray-500">
+                Un email de confirmation sera envoyé à la nouvelle adresse. Après avoir cliqué sur le lien, vous devrez vous connecter avec votre ancienne adresse email pour finaliser le changement.
+              </p>
             </div>
 
             <Button

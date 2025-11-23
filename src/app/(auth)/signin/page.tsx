@@ -22,6 +22,7 @@ export default function SignInPage() {
   const searchParams = useSearchParams();
   const fromMaintenance = searchParams.get('from') === 'maintenance';
   const redirectTo = searchParams.get('redirectTo');
+  const confirmationMessage = searchParams.get('message');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -48,6 +49,9 @@ export default function SignInPage() {
 
     checkMaintenance();
   }, []);
+
+  // Note: Le message de confirmation est affiché dans le CardDescription
+  // si redirectTo contient 'email_change', pas besoin de le mettre dans error
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -124,7 +128,9 @@ export default function SignInPage() {
           {redirectTo && redirectTo.includes('email_change') && (
             <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
               <p className="text-sm text-blue-700 dark:text-blue-300">
-                ⚠️ Vous devez vous connecter avec votre <strong>ancienne adresse email</strong> pour confirmer le changement d'email. Après connexion, vous serez automatiquement redirigé vers la confirmation.
+                {confirmationMessage 
+                  ? decodeURIComponent(confirmationMessage)
+                  : '⚠️ Vous devez vous connecter avec votre ancienne adresse email pour confirmer le changement d\'email. Après connexion, vous serez automatiquement redirigé vers la confirmation.'}
               </p>
             </div>
           )}

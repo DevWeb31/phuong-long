@@ -63,10 +63,12 @@ function ConfirmEmailContent() {
       }
       
       // Pour email_change, l'utilisateur DOIT être connecté
+      // Si l'utilisateur n'est pas connecté, rediriger vers la page de connexion
+      // avec un message explicatif et le lien de confirmation préservé
       if (isEmailChange && !isUserLoggedIn) {
         // Rediriger automatiquement vers la page de connexion avec le lien de confirmation préservé
         const currentUrl = window.location.href;
-        const signinUrl = `/signin?redirectTo=${encodeURIComponent(currentUrl)}`;
+        const signinUrl = `/signin?redirectTo=${encodeURIComponent(currentUrl)}&message=${encodeURIComponent('Pour finaliser le changement d\'email, veuillez vous connecter avec votre ancienne adresse email et votre mot de passe.')}`;
         router.push(signinUrl);
         return;
       }
@@ -312,7 +314,7 @@ function ConfirmEmailContent() {
               {isFirstStepEmailChange
                 ? 'Un email de confirmation a été envoyé à votre nouvelle adresse email. Veuillez cliquer sur le lien dans cet email pour finaliser le changement d\'email.'
                 : isEmailChange
-                  ? 'Votre adresse email a été mise à jour. Vous pouvez maintenant vous connecter avec votre nouvelle adresse.'
+                  ? 'Votre adresse email a été mise à jour avec succès ! Vous pouvez maintenant vous connecter avec votre nouvelle adresse email.'
                   : 'Vous allez être redirigé vers votre tableau de bord dans quelques secondes...'}
             </p>
             <Link href={isEmailChange ? "/dashboard/account" : "/dashboard"}>
