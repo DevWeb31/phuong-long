@@ -100,12 +100,12 @@ export default function AccountPage() {
         } else if (isResendTestModeError) {
           setEmailMessage({ 
             type: 'error', 
-            text: '⚠️ Resend est en mode test : vous ne pouvez envoyer qu\'à votre adresse vérifiée. Pour envoyer à d\'autres adresses, vous devez vérifier un domaine dans Resend Dashboard (resend.com/domains), puis changer le sender email dans Supabase SMTP Settings pour utiliser votre domaine vérifié (ex: noreply@votre-domaine.fr).' 
+            text: '⚠️ Resend est en mode test : vous ne pouvez envoyer qu\'à votre adresse vérifiée. Pour envoyer à d\'autres adresses, vous devez vérifier un domaine dans Resend Dashboard (resend.com/domains), puis configurer RESEND_FROM_EMAIL dans les variables d\'environnement (ex: noreply@phuong-long-vo-dao.com).' 
           });
         } else if (isServerError) {
           setEmailMessage({ 
             type: 'error', 
-            text: 'Erreur serveur lors de l\'envoi de l\'email. Cela peut être dû à un problème de configuration SMTP. Vérifiez la configuration Resend dans Supabase Dashboard (Settings → Auth → SMTP Settings) et assurez-vous que l\'API Key est correcte.' 
+            text: 'Erreur serveur lors de l\'envoi de l\'email. Vérifiez que RESEND_API_KEY est correctement configurée dans les variables d\'environnement (Vercel ou .env.local).' 
           });
         } else {
           setEmailMessage({ type: 'error', text: error.message || 'Une erreur est survenue lors du changement d\'email' });

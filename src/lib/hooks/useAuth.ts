@@ -107,17 +107,40 @@ export function useAuth() {
   };
 
   const updateEmail = async (newEmail: string) => {
-    const baseUrl = typeof window !== 'undefined' 
-      ? (process.env.NEXT_PUBLIC_APP_URL || window.location.origin)
-      : process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
-    
-    const { data, error } = await supabase.auth.updateUser(
-      { email: newEmail },
-      {
-        emailRedirectTo: `${baseUrl}/auth/confirm?type=email_change`,
+    try {
+      // Utiliser la nouvelle API personnalisée pour le changement d'email
+      const response = await fetch('/api/auth/change-email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ newEmail }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        return {
+          data: null,
+          error: {
+            message: result.error || 'Erreur lors du changement d\'email',
+            status: response.status,
+          },
+        };
       }
-    );
-    return { data, error };
+
+      return {
+        data: result,
+        error: null,
+      };
+    } catch (error) {
+      return {
+        data: null,
+        error: {
+          message: error instanceof Error ? error.message : 'Erreur lors du changement d\'email',
+        },
+      };
+    }
   };
 
   return {
