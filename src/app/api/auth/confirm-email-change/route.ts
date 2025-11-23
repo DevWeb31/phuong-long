@@ -48,18 +48,32 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Vérifier que l'utilisateur est connecté (via cookies)
+    // IMPORTANT: Déconnecter l'utilisateur s'il est connecté pour forcer la reconnexion avec l'ancien email
     const supabase = await createAPIClient();
-    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-
-    if (sessionError || !session?.user) {
-      // Rediriger vers la page de connexion avec le token préservé
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    // Si l'utilisateur n'est pas connecté, rediriger vers la page de connexion
+    if (!session?.user) {
       let baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
       if (process.env.NODE_ENV === 'production' && !baseUrl.includes('phuong-long-vo-dao.com')) {
         baseUrl = 'https://phuong-long-vo-dao.com';
       }
-      const signinUrl = `${baseUrl}/signin?redirectTo=${encodeURIComponent(`/auth/confirm-email-change?token=${token}`)}&message=${encodeURIComponent('Veuillez vous connecter avec votre ancienne adresse email pour confirmer le changement.')}`;
+      const signinUrl = `${baseUrl}/signin?redirectTo=${encodeURIComponent(`/auth/confirm-email-change?token=${token}`)}&message=${encodeURIComponent('Veuillez vous connecter avec votre ancienne adresse email (' + tokenData.old_email + ') pour confirmer le changement d\'email.')}`;
+      return NextResponse.redirect(signinUrl);
+    }
+
+    // Si l'utilisateur est connecté, vérifier qu'il s'est connecté avec l'ancienne adresse email
+    // Si ce n'est pas le cas, le déconnecter et rediriger vers la page de connexion
+    if (session.user.email?.toLowerCase() !== tokenData.old_email.toLowerCase()) {
+      // Déconnecter l'utilisateur
+      await supabase.auth.signOut();
       
+      // Rediriger vers la page de connexion avec un message explicite
+      let baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+      if (process.env.NODE_ENV === 'production' && !baseUrl.includes('phuong-long-vo-dao.com')) {
+        baseUrl = 'https://phuong-long-vo-dao.com';
+      }
+      const signinUrl = `${baseUrl}/signin?redirectTo=${encodeURIComponent(`/auth/confirm-email-change?token=${token}`)}&message=${encodeURIComponent('Vous devez vous connecter avec votre ancienne adresse email (' + tokenData.old_email + ') pour confirmer le changement.')}`;
       return NextResponse.redirect(signinUrl);
     }
 
@@ -71,18 +85,7 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Vérifier que l'utilisateur se connecte avec l'ancienne adresse email
-    if (session.user.email?.toLowerCase() !== tokenData.old_email.toLowerCase()) {
-      // Rediriger vers la page de connexion avec un message explicite
-      let baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
-      if (process.env.NODE_ENV === 'production' && !baseUrl.includes('phuong-long-vo-dao.com')) {
-        baseUrl = 'https://phuong-long-vo-dao.com';
-      }
-      const signinUrl = `${baseUrl}/signin?redirectTo=${encodeURIComponent(`/auth/confirm-email-change?token=${token}`)}&message=${encodeURIComponent('Vous devez vous connecter avec votre ancienne adresse email (' + tokenData.old_email + ') pour confirmer le changement.')}`;
-      
-      return NextResponse.redirect(signinUrl);
-    }
-
+    // L'utilisateur est connecté avec l'ancienne adresse email, procéder à la confirmation
     // Mettre à jour l'email dans Supabase Auth via Admin Client
     // IMPORTANT: Utiliser admin client pour éviter les emails automatiques de Supabase
     const { error: updateError } = await adminSupabase.auth.admin.updateUserById(
@@ -127,4 +130,5 @@ export async function GET(request: NextRequest) {
     );
   }
 }
+
 
