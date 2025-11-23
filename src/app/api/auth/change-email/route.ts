@@ -89,7 +89,14 @@ export async function POST(request: NextRequest) {
     }
 
     // Construire l'URL de confirmation
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+    // Utiliser le domaine de production si disponible, sinon NEXT_PUBLIC_APP_URL
+    let baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+    
+    // En production, forcer l'utilisation du domaine personnalisé
+    if (process.env.NODE_ENV === 'production' && !baseUrl.includes('phuong-long-vo-dao.com')) {
+      baseUrl = 'https://phuong-long-vo-dao.com';
+    }
+    
     const confirmationUrl = `${baseUrl}/auth/confirm-email-change?token=${token}`;
 
     // Envoyer l'email de confirmation à la nouvelle adresse

@@ -54,7 +54,10 @@ export async function GET(request: NextRequest) {
 
     if (sessionError || !session?.user) {
       // Rediriger vers la page de connexion avec le token préservé
-      const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+      let baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+      if (process.env.NODE_ENV === 'production' && !baseUrl.includes('phuong-long-vo-dao.com')) {
+        baseUrl = 'https://phuong-long-vo-dao.com';
+      }
       const signinUrl = `${baseUrl}/signin?redirectTo=${encodeURIComponent(`/auth/confirm-email-change?token=${token}`)}&message=${encodeURIComponent('Veuillez vous connecter avec votre ancienne adresse email pour confirmer le changement.')}`;
       
       return NextResponse.redirect(signinUrl);
@@ -71,7 +74,10 @@ export async function GET(request: NextRequest) {
     // Vérifier que l'utilisateur se connecte avec l'ancienne adresse email
     if (session.user.email?.toLowerCase() !== tokenData.old_email.toLowerCase()) {
       // Rediriger vers la page de connexion avec un message explicite
-      const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+      let baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+      if (process.env.NODE_ENV === 'production' && !baseUrl.includes('phuong-long-vo-dao.com')) {
+        baseUrl = 'https://phuong-long-vo-dao.com';
+      }
       const signinUrl = `${baseUrl}/signin?redirectTo=${encodeURIComponent(`/auth/confirm-email-change?token=${token}`)}&message=${encodeURIComponent('Vous devez vous connecter avec votre ancienne adresse email (' + tokenData.old_email + ') pour confirmer le changement.')}`;
       
       return NextResponse.redirect(signinUrl);
@@ -107,7 +113,10 @@ export async function GET(request: NextRequest) {
     // et en forçant un nouveau getSession() qui récupérera les infos à jour
     
     // Rediriger vers la page de succès avec un paramètre pour forcer le refresh
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+    let baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+    if (process.env.NODE_ENV === 'production' && !baseUrl.includes('phuong-long-vo-dao.com')) {
+      baseUrl = 'https://phuong-long-vo-dao.com';
+    }
     return NextResponse.redirect(`${baseUrl}/auth/confirm-email-change?success=true&refresh=true`);
 
   } catch (error) {
