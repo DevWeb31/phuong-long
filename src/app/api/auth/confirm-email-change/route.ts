@@ -70,10 +70,11 @@ export async function GET(request: NextRequest) {
 
     // Vérifier que l'utilisateur se connecte avec l'ancienne adresse email
     if (session.user.email?.toLowerCase() !== tokenData.old_email.toLowerCase()) {
-      return NextResponse.json(
-        { success: false, error: 'Vous devez vous connecter avec votre ancienne adresse email pour confirmer le changement' },
-        { status: 403 }
-      );
+      // Rediriger vers la page de connexion avec un message explicite
+      const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+      const signinUrl = `${baseUrl}/signin?redirectTo=${encodeURIComponent(`/auth/confirm-email-change?token=${token}`)}&message=${encodeURIComponent('Vous devez vous connecter avec votre ancienne adresse email (' + tokenData.old_email + ') pour confirmer le changement.')}`;
+      
+      return NextResponse.redirect(signinUrl);
     }
 
     // Mettre à jour l'email dans Supabase Auth via Admin Client
