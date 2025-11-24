@@ -68,20 +68,48 @@ export function useAuth() {
   };
 
   const signUp = async (email: string, password: string, metadata?: Record<string, unknown>) => {
-    // Utiliser NEXT_PUBLIC_APP_URL si disponible (pour production), sinon window.location.origin
-    const baseUrl = typeof window !== 'undefined' 
-      ? (process.env.NEXT_PUBLIC_APP_URL || window.location.origin)
-      : process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
-    
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: metadata,
-        emailRedirectTo: `${baseUrl}/auth/confirm?email=${encodeURIComponent(email)}`,
-      },
-    });
-    return { data, error };
+    const fullName =
+      typeof metadata?.full_name === 'string' && metadata.full_name.trim().length > 0
+        ? metadata.full_name
+        : undefined;
+
+    try {
+      const response = await fetch('/api/auth/signup', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email,
+          password,
+          fullName,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        return {
+          data: null,
+          error: {
+            message: result.error || 'Impossible de créer le compte',
+            status: response.status,
+          },
+        };
+      }
+
+      return {
+        data: result,
+        error: null,
+      };
+    } catch (error) {
+      return {
+        data: null,
+        error: {
+          message: error instanceof Error ? error.message : 'Impossible de créer le compte',
+        },
+      };
+    }
   };
 
   const signOut = async () => {
@@ -93,10 +121,35 @@ export function useAuth() {
   };
 
   const resetPassword = async (email: string) => {
-    const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/auth/reset-password`,
-    });
-    return { data, error };
+    try {
+      const response = await fetch('/api/auth/reset-password', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email }),
+      });
+
+      if (!response.ok) {
+        const result = await response.json();
+        return {
+          data: null,
+          error: {
+            message: result.error || 'Impossible d\'envoyer l\'email de réinitialisation',
+            status: response.status,
+          },
+        };
+      }
+
+      return { data: { success: true }, error: null };
+    } catch (error) {
+      return {
+        data: null,
+        error: {
+          message: error instanceof Error ? error.message : 'Impossible d\'envoyer l\'email de réinitialisation',
+        },
+      };
+    }
   };
 
   const updatePassword = async (newPassword: string) => {

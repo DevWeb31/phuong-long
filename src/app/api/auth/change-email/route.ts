@@ -11,6 +11,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { createAPIClient, createAdminClient } from '@/lib/supabase/server';
+import { getAppBaseUrl } from '@/lib/utils/get-app-base-url';
 import { sendEmailChangeConfirmation } from '@/lib/services/email';
 import { randomBytes } from 'crypto';
 
@@ -88,15 +89,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Construire l'URL de confirmation
-    // TOUJOURS utiliser le domaine personnalisé en production
-    let baseUrl = 'https://phuong-long-vo-dao.com';
-    
-    // En développement local, utiliser localhost
-    if (process.env.NODE_ENV !== 'production' || process.env.VERCEL_ENV === 'development') {
-      baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
-    }
-    
+    const baseUrl = getAppBaseUrl();
     const confirmationUrl = `${baseUrl}/auth/confirm-email-change?token=${token}`;
 
     // Envoyer l'email de confirmation à la nouvelle adresse
