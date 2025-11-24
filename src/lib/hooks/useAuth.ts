@@ -196,6 +196,46 @@ export function useAuth() {
     }
   };
 
+  const deleteAccount = async (confirmEmail: string) => {
+    try {
+      const response = await fetch('/api/auth/delete-account', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ confirmEmail }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        return {
+          data: null,
+          error: {
+            message: result.error || 'Erreur lors de la suppression du compte',
+            status: response.status,
+          },
+        };
+      }
+
+      // Déconnecter l'utilisateur et rediriger vers la page d'accueil
+      await supabase.auth.signOut();
+      router.push('/');
+
+      return {
+        data: result,
+        error: null,
+      };
+    } catch (error) {
+      return {
+        data: null,
+        error: {
+          message: error instanceof Error ? error.message : 'Erreur lors de la suppression du compte',
+        },
+      };
+    }
+  };
+
   return {
     user: authState.user,
     session: authState.session,
@@ -206,6 +246,7 @@ export function useAuth() {
     resetPassword,
     updatePassword,
     updateEmail,
+    deleteAccount,
     isAuthenticated: !!authState.user,
   };
 }

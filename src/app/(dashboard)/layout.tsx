@@ -11,6 +11,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Container } from '@/components/common';
 import { LogoutButton } from '@/components/layout/LogoutButton';
+import { ThemeToggle } from '@/components/layout/ThemeToggle';
 import {
   HomeIcon,
   UserIcon,
@@ -56,6 +57,7 @@ export default function DashboardLayout({
               <Link href="/" className="text-sm dark:text-gray-500 hover:text-gray-900 transition-colors">
                 ← Retour au site
               </Link>
+              <ThemeToggle />
             </nav>
           </div>
         </Container>

@@ -21,7 +21,7 @@ import {
 import { Loader2, CheckCircle2, AlertTriangle, XCircle, Lock, Trash2, Save } from 'lucide-react';
 
 export default function AccountPage() {
-  const { user, loading, updatePassword, updateEmail } = useAuth();
+  const { user, loading, updatePassword, updateEmail, deleteAccount } = useAuth();
   const [emailData, setEmailData] = useState({
     newEmail: '',
   });
@@ -34,6 +34,10 @@ export default function AccountPage() {
   });
   const [passwordLoading, setPasswordLoading] = useState(false);
   const [passwordMessage, setPasswordMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleteConfirmEmail, setDeleteConfirmEmail] = useState('');
+  const [deleteLoading, setDeleteLoading] = useState(false);
+  const [deleteMessage, setDeleteMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   // Gérer le cooldown avec un timer
   useEffect(() => {
@@ -155,6 +159,37 @@ export default function AccountPage() {
     }
 
     setPasswordLoading(false);
+  };
+
+  const handleDeleteAccount = async () => {
+    setDeleteMessage(null);
+
+    if (!deleteConfirmEmail || !user?.email) {
+      setDeleteMessage({ type: 'error', text: 'Veuillez entrer votre adresse email' });
+      return;
+    }
+
+    if (deleteConfirmEmail.toLowerCase() !== user.email.toLowerCase()) {
+      setDeleteMessage({ type: 'error', text: 'L\'email ne correspond pas à votre adresse email' });
+      return;
+    }
+
+    setDeleteLoading(true);
+
+    try {
+      const { error } = await deleteAccount(deleteConfirmEmail);
+
+      if (error) {
+        setDeleteMessage({ type: 'error', text: error.message || 'Erreur lors de la suppression du compte' });
+      } else {
+        setDeleteMessage({ type: 'success', text: 'Votre compte a été supprimé avec succès. Vous allez être redirigé...' });
+        // La redirection est gérée dans deleteAccount
+      }
+    } catch (err) {
+      setDeleteMessage({ type: 'error', text: 'Une erreur est survenue' });
+    }
+
+    setDeleteLoading(false);
   };
 
   if (loading) {
@@ -300,7 +335,7 @@ export default function AccountPage() {
                 id="newPassword"
                 value={passwordData.newPassword}
                 onChange={(e) => setPasswordData(prev => ({ ...prev, newPassword: e.target.value }))}
-                className="w-full px-4 py-2 border dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                className="w-full px-4 py-2 border dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent dark:bg-gray-800 dark:text-gray-100"
                 placeholder="••••••••"
                 minLength={8}
               />
@@ -316,7 +351,7 @@ export default function AccountPage() {
                 id="confirmPassword"
                 value={passwordData.confirmPassword}
                 onChange={(e) => setPasswordData(prev => ({ ...prev, confirmPassword: e.target.value }))}
-                className="w-full px-4 py-2 border dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                className="w-full px-4 py-2 border dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent dark:bg-gray-800 dark:text-gray-100"
                 placeholder="••••••••"
               />
             </div>
@@ -396,29 +431,96 @@ export default function AccountPage() {
       </Card>
 
       {/* Danger Zone */}
-      <Card variant="bordered" className="border-red-200">
+      <Card variant="bordered" className="border-red-200 dark:border-red-800">
         <CardHeader>
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-red-50 rounded-lg flex items-center justify-center">
-              <TrashIcon className="w-6 h-6 text-red-600" />
+            <div className="w-12 h-12 bg-red-50 dark:bg-red-900/20 rounded-lg flex items-center justify-center">
+              <TrashIcon className="w-6 h-6 text-red-600 dark:text-red-400" />
             </div>
             <div>
-              <CardTitle className="text-red-600">Zone de danger</CardTitle>
+              <CardTitle className="text-red-600 dark:text-red-400">Zone de danger</CardTitle>
               <CardDescription>Actions irréversibles sur votre compte</CardDescription>
             </div>
           </div>
         </CardHeader>
         <CardContent>
-          <div className="bg-red-50 border rounded-lg p-4">
-            <p className="text-sm mb-4 flex items-start gap-2">
-              <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+          <div className="bg-red-50 dark:bg-red-900/20 border dark:border-red-800 rounded-lg p-4">
+            <p className="text-sm mb-4 flex items-start gap-2 dark:text-gray-200">
+              <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5 text-red-600 dark:text-red-400" />
               <span><strong>Attention :</strong> La suppression de votre compte est définitive et irréversible.</span> 
               Toutes vos données (profil, inscriptions, commandes) seront supprimées.
             </p>
-            <Button variant="danger" size="sm" disabled className="flex items-center gap-2">
-              <Trash2 className="w-4 h-4" />
-              Supprimer mon compte (bientôt)
-            </Button>
+
+            {!showDeleteConfirm ? (
+              <Button 
+                variant="danger" 
+                size="sm" 
+                onClick={() => setShowDeleteConfirm(true)}
+                className="flex items-center gap-2"
+              >
+                <Trash2 className="w-4 h-4" />
+                Supprimer mon compte
+              </Button>
+            ) : (
+              <div className="space-y-4">
+                {deleteMessage && (
+                  <div className={`p-3 rounded-lg flex items-center gap-2 text-sm ${
+                    deleteMessage.type === 'success' 
+                      ? 'bg-green-50 border border-green-200 text-green-700 dark:bg-green-900/20 dark:border-green-800 dark:text-green-300' 
+                      : 'bg-red-50 border border-red-200 text-red-700 dark:bg-red-900/20 dark:border-red-800 dark:text-red-300'
+                  }`}>
+                    {deleteMessage.type === 'success' ? (
+                      <><CheckCircle2 className="w-4 h-4" /> {deleteMessage.text}</>
+                    ) : (
+                      <><XCircle className="w-4 h-4" /> {deleteMessage.text}</>
+                    )}
+                  </div>
+                )}
+
+                <div>
+                  <label htmlFor="deleteConfirmEmail" className="block text-sm font-medium dark:text-gray-300 mb-2">
+                    Pour confirmer, entrez votre adresse email : <span className="font-mono text-xs">{user?.email}</span>
+                  </label>
+                  <input
+                    type="email"
+                    id="deleteConfirmEmail"
+                    value={deleteConfirmEmail}
+                    onChange={(e) => setDeleteConfirmEmail(e.target.value)}
+                    className="w-full px-4 py-2 border dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent dark:bg-gray-800 dark:text-gray-100"
+                    placeholder="votre@email.com"
+                    disabled={deleteLoading}
+                  />
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <Button 
+                    variant="danger" 
+                    size="sm" 
+                    onClick={handleDeleteAccount}
+                    disabled={deleteLoading || !deleteConfirmEmail || deleteConfirmEmail.toLowerCase() !== user?.email?.toLowerCase()}
+                    className="flex items-center gap-2"
+                  >
+                    {deleteLoading ? (
+                      <><Loader2 className="w-4 h-4 animate-spin" /> Suppression...</>
+                    ) : (
+                      <><Trash2 className="w-4 h-4" /> Confirmer la suppression</>
+                    )}
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={() => {
+                      setShowDeleteConfirm(false);
+                      setDeleteConfirmEmail('');
+                      setDeleteMessage(null);
+                    }}
+                    disabled={deleteLoading}
+                  >
+                    Annuler
+                  </Button>
+                </div>
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>
