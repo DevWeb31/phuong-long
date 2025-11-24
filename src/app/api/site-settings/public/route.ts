@@ -9,14 +9,14 @@
  */
 
 import { NextResponse } from 'next/server';
-import { createServerClient } from '@/lib/supabase/server';
+import { getPublicSupabaseClient } from '@/lib/supabase/server';
 
 export const runtime = 'nodejs';
 
 // GET - Fetch public site settings (maintenance.enabled, development.banner.*)
 export async function GET() {
   try {
-    const supabase = await createServerClient();
+    const supabase = getPublicSupabaseClient();
     
     const { data, error } = await supabase
       .from('site_settings')

@@ -12,6 +12,7 @@
  */
 
 import { createServerClient as createSupabaseServerClient } from '@supabase/ssr';
+import { createClient as createSupabaseBrowserClient, type SupabaseClient } from '@supabase/supabase-js';
 import { cookies } from 'next/headers';
 import type { Database } from './database.types';
 
@@ -114,6 +115,42 @@ export async function createAPIClient() {
       },
     }
   );
+}
+
+let publicSupabaseClient: SupabaseClient<Database> | null = null;
+
+/**
+ * Client public (lecture seule) sans cookies
+ * Idéal pour les endpoints 100 % publics afin d'éviter les erreurs dues à des sessions invalides.
+ */
+export function getPublicSupabaseClient() {
+  if (publicSupabaseClient) {
+    return publicSupabaseClient;
+  }
+
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+  if (!supabaseUrl || !supabaseAnonKey) {
+    throw new Error(
+      'Missing Supabase environment variables. ' +
+      'Please ensure NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY are set.'
+    );
+  }
+
+  publicSupabaseClient = createSupabaseBrowserClient<Database>(supabaseUrl, supabaseAnonKey, {
+    auth: {
+      persistSession: false,
+      autoRefreshToken: false,
+    },
+    global: {
+      headers: {
+        'X-Client-Info': 'public-server-client',
+      },
+    },
+  });
+
+  return publicSupabaseClient;
 }
 
 /**

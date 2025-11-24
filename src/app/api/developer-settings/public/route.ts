@@ -9,14 +9,14 @@
  */
 
 import { NextResponse } from 'next/server';
-import { createServerClient } from '@/lib/supabase/server';
+import { getPublicSupabaseClient } from '@/lib/supabase/server';
 
 export const runtime = 'nodejs';
 
 // GET - Get public developer settings (read-only)
 export async function GET() {
   try {
-    const supabase = await createServerClient();
+    const supabase = getPublicSupabaseClient();
     
     // Récupérer uniquement les paramètres nécessaires pour le public
     const { data, error } = await supabase

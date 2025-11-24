@@ -305,7 +305,11 @@ export default async function NotreHistoirePage() {
             {values.length > 0 ? values.map((value, index) => {
               const Icon = value.icon;
               return (
-                <ScrollReveal key={value.title} direction="up" delay={index * 100}>
+                <ScrollReveal
+                  key={`${value.title}-${value.id ?? index}`}
+                  direction="up"
+                  delay={index * 100}
+                >
                   <Card hoverable className="text-center bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 hover:border-primary/30 dark:hover:border-primary/30 hover:shadow-xl transition-all duration-300 h-full flex flex-col">
                     <CardContent className="pt-10 pb-10 px-8 flex-1 flex flex-col">
                       <div className="relative w-20 h-20 mx-auto mb-8">
