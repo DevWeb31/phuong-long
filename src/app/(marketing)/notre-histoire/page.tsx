@@ -306,7 +306,7 @@ export default async function NotreHistoirePage() {
               const Icon = value.icon;
               return (
                 <ScrollReveal
-                  key={`${value.title}-${value.id ?? index}`}
+                  key={`${value.title}-${index}`}
                   direction="up"
                   delay={index * 100}
                 >
