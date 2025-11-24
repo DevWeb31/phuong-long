@@ -21,6 +21,14 @@ function ConfirmEmailContent() {
   const router = useRouter();
   const [status, setStatus] = useState<'loading' | 'success' | 'error' | 'expired'>('loading');
   const [errorMessage, setErrorMessage] = useState<string>('');
+  const SUCCESS_REDIRECT_PATH = '/';
+  const SUCCESS_REDIRECT_DELAY = 5000;
+
+  const scheduleSuccessRedirect = () => {
+    setTimeout(() => {
+      router.push(SUCCESS_REDIRECT_PATH);
+    }, SUCCESS_REDIRECT_DELAY);
+  };
 
   useEffect(() => {
     const confirmEmail = async () => {
@@ -35,9 +43,7 @@ function ConfirmEmailContent() {
       if (existingSession?.session?.user) {
         // L'utilisateur est déjà confirmé et connecté
         setStatus('success');
-        setTimeout(() => {
-          router.push('/dashboard');
-        }, 3000);
+        scheduleSuccessRedirect();
         return;
       }
 
@@ -57,18 +63,14 @@ function ConfirmEmailContent() {
 
           if (sessionData?.session?.user) {
             setStatus('success');
-            setTimeout(() => {
-              router.push('/dashboard');
-            }, 3000);
+            scheduleSuccessRedirect();
           } else {
             // Attendre un peu pour que Supabase traite le code
             setTimeout(async () => {
               const { data: retrySession } = await supabase.auth.getSession();
               if (retrySession?.session?.user) {
                 setStatus('success');
-                setTimeout(() => {
-                  router.push('/dashboard');
-                }, 3000);
+                scheduleSuccessRedirect();
               } else {
                 setStatus('error');
                 setErrorMessage('Impossible de confirmer votre email. Le code est peut-être invalide ou expiré.');
@@ -116,11 +118,7 @@ function ConfirmEmailContent() {
         // Succès
         if (data?.user) {
           setStatus('success');
-          
-          // Rediriger vers le dashboard après 3 secondes
-          setTimeout(() => {
-            router.push('/dashboard');
-          }, 3000);
+          scheduleSuccessRedirect();
         } else {
           setStatus('error');
           setErrorMessage('Impossible de confirmer votre email. Veuillez réessayer.');
@@ -203,14 +201,14 @@ function ConfirmEmailContent() {
               </p>
             </div>
 
-            <Link href="/dashboard">
+            <Link href={SUCCESS_REDIRECT_PATH}>
               <Button variant="primary" size="lg" className="w-full">
-                Aller au tableau de bord
+                Aller à l'accueil
               </Button>
             </Link>
 
             <div className="mt-4 text-center text-sm dark:text-gray-500">
-              Redirection automatique dans 3 secondes...
+              Redirection automatique dans 5 secondes...
             </div>
           </CardContent>
         </Card>
