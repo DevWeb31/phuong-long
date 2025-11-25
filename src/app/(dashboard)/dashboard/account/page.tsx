@@ -51,6 +51,36 @@ export default function AccountPage() {
     return undefined;
   }, [cooldownSeconds]);
 
+  // Forcer un refresh de la session au chargement de la page pour s'assurer que l'email est à jour
+  useEffect(() => {
+    const refreshSessionIfNeeded = async () => {
+      if (!user) return;
+      
+      try {
+        // Vérifier si on vient d'une redirection après changement d'email
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('emailUpdated') === 'true') {
+          // Forcer un refresh de la session
+          const { createClient } = await import('@/lib/supabase/client');
+          const supabase = createClient();
+          const { data: { session } } = await supabase.auth.getSession();
+          
+          if (session?.refresh_token) {
+            await supabase.auth.refreshSession({
+              refresh_token: session.refresh_token,
+            });
+            // Nettoyer l'URL
+            window.history.replaceState({}, '', window.location.pathname);
+          }
+        }
+      } catch (error) {
+        console.error('Erreur lors du refresh de la session:', error);
+      }
+    };
+
+    refreshSessionIfNeeded();
+  }, [user]);
+
   const handleEmailChange = async () => {
     setEmailMessage(null);
 

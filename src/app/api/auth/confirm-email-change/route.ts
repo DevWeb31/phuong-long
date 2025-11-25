@@ -108,6 +108,31 @@ export async function GET(request: NextRequest) {
       .update({ used_at: new Date().toISOString() })
       .eq('token', token);
 
+    // IMPORTANT: Forcer un refresh de la session pour que le nouvel email soit visible
+    // La session contient toujours l'ancien email dans les cookies, il faut la rafraîchir
+    try {
+      // Récupérer la session actuelle avec le refresh token
+      const { data: { session: currentSession } } = await supabase.auth.getSession();
+      
+      if (currentSession?.refresh_token) {
+        // Utiliser refreshSession pour obtenir une nouvelle session avec le nouvel email
+        const { data: { session: refreshedSession }, error: refreshError } = await supabase.auth.refreshSession({
+          refresh_token: currentSession.refresh_token,
+        });
+
+        if (refreshError) {
+          console.error('[EMAIL CHANGE] Erreur refresh session:', refreshError);
+          // Continuer quand même, le refresh se fera côté client
+        } else if (refreshedSession) {
+          // La session a été rafraîchie avec le nouvel email
+          console.log('[EMAIL CHANGE] Session rafraîchie avec nouvel email:', refreshedSession.user.email);
+        }
+      }
+    } catch (refreshError) {
+      console.error('[EMAIL CHANGE] Erreur lors du refresh de la session:', refreshError);
+      // Continuer quand même, le refresh se fera côté client
+    }
+
     // Rediriger vers la page de succès
     let baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
     if (process.env.NODE_ENV === 'production' && !baseUrl.includes('phuong-long-vo-dao.com')) {

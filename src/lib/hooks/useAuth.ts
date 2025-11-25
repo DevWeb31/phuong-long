@@ -44,12 +44,31 @@ export function useAuth() {
 
     // Écouter les changements d'authentification
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        setAuthState({
-          user: session?.user ?? null,
-          session: session ?? null,
-          loading: false,
-        });
+      async (event, session) => {
+        // Si la session change (ex: après changement d'email), forcer un refresh
+        if (event === 'TOKEN_REFRESHED' || event === 'SIGNED_IN' || event === 'USER_UPDATED') {
+          // Récupérer les données utilisateur à jour depuis le serveur
+          if (session) {
+            const { data: { user } } = await supabase.auth.getUser();
+            setAuthState({
+              user: user ?? session.user ?? null,
+              session: session ?? null,
+              loading: false,
+            });
+          } else {
+            setAuthState({
+              user: null,
+              session: null,
+              loading: false,
+            });
+          }
+        } else {
+          setAuthState({
+            user: session?.user ?? null,
+            session: session ?? null,
+            loading: false,
+          });
+        }
         router.refresh();
       }
     );

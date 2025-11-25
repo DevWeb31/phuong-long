@@ -32,31 +32,58 @@ function ConfirmEmailChangeContent() {
       // Forcer un refresh de la session pour récupérer le nouvel email
       const refreshSession = async () => {
         try {
-          // Appeler getUser() qui fait un appel API pour récupérer les infos à jour depuis le serveur
-          // Cela va mettre à jour le user dans le hook useAuth
-          const { data: { user }, error: userError } = await supabase.auth.getUser();
+          // Étape 1: Récupérer la session actuelle
+          const { data: { session: currentSession } } = await supabase.auth.getSession();
           
-          if (userError) {
-            console.error('Erreur lors de la récupération de l\'utilisateur:', userError);
-          } else if (user) {
-            console.log('Email mis à jour dans la session:', user.email);
+          if (currentSession?.refresh_token) {
+            // Étape 2: Forcer un refresh de la session pour obtenir le nouvel email
+            const { data: { session: refreshedSession }, error: refreshError } = await supabase.auth.refreshSession({
+              refresh_token: currentSession.refresh_token,
+            });
+
+            if (refreshError) {
+              console.error('Erreur lors du refresh de la session:', refreshError);
+              // Essayer avec getUser() comme fallback
+              const { data: { user }, error: userError } = await supabase.auth.getUser();
+              if (userError) {
+                console.error('Erreur lors de la récupération de l\'utilisateur:', userError);
+              } else if (user) {
+                console.log('Email mis à jour via getUser():', user.email);
+              }
+            } else if (refreshedSession?.user) {
+              console.log('✅ Session rafraîchie avec nouvel email:', refreshedSession.user.email);
+            }
+          } else {
+            // Pas de refresh token, utiliser getUser() comme fallback
+            const { data: { user }, error: userError } = await supabase.auth.getUser();
+            if (userError) {
+              console.error('Erreur lors de la récupération de l\'utilisateur:', userError);
+            } else if (user) {
+              console.log('Email mis à jour via getUser():', user.email);
+            }
           }
           
-          // Forcer un refresh complet de la page pour mettre à jour l'UI
-          // Cela va déclencher un nouveau getSession() qui récupérera les infos à jour
+          // Étape 3: Forcer un refresh du router pour mettre à jour l'UI
           router.refresh();
           
-          // Attendre un peu pour que le refresh soit pris en compte
+          // Étape 4: Attendre un peu puis rediriger vers la page account
           setTimeout(() => {
             setStatus('success');
-            // Forcer un rechargement complet de la page après 1 seconde pour s'assurer que tout est à jour
+            // Rediriger vers la page account avec un rechargement complet pour forcer la mise à jour
             setTimeout(() => {
-              window.location.href = '/dashboard/account';
-            }, 1000);
+              // Utiliser window.location.href pour forcer un rechargement complet de la page
+              // Ajouter un paramètre pour indiquer que l'email a été mis à jour
+              // Cela garantit que useAuth récupère la session mise à jour
+              window.location.href = '/dashboard/account?emailUpdated=true';
+            }, 800);
           }, 500);
         } catch (error) {
           console.error('Erreur lors du refresh:', error);
           setStatus('success');
+          // Rediriger quand même après un délai
+          setTimeout(() => {
+            window.location.href = '/dashboard/account';
+          }, 1000);
         }
       };
       
