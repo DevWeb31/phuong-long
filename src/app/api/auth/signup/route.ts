@@ -21,7 +21,7 @@ export async function POST(request: Request) {
 
     const adminSupabase = createAdminClient();
     const baseUrl = getAppBaseUrl();
-    const redirectTo = `${baseUrl}/auth/confirm?email=${encodeURIComponent(email)}`;
+    const redirectTo = `${baseUrl}/api/auth/verify?email=${encodeURIComponent(email)}`;
 
     const { data, error } = await adminSupabase.auth.admin.generateLink({
       type: 'signup',
