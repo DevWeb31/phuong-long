@@ -1,5 +1,8 @@
 /**
- * API Signup - Crée un utilisateur Supabase et envoie l'email via Resend.
+ * API Signup - Crée un utilisateur Supabase et envoie l'email UNIQUEMENT via Resend.
+ * 
+ * IMPORTANT: Les emails Supabase sont désactivés dans la config Supabase.
+ * Tous les emails passent par Resend avec nos templates personnalisés.
  */
 
 import { NextResponse } from 'next/server';
@@ -21,7 +24,10 @@ export async function POST(request: Request) {
 
     const adminSupabase = createAdminClient();
     const baseUrl = getAppBaseUrl();
-    const redirectTo = `${baseUrl}/api/auth/verify?email=${encodeURIComponent(email)}`;
+    
+    // Générer le lien de confirmation Supabase (sans envoi d'email automatique)
+    // Le paramètre redirectTo pointe vers notre route qui gère la redirection
+    const redirectTo = `${baseUrl}/api/auth/verify`;
 
     const { data, error } = await adminSupabase.auth.admin.generateLink({
       type: 'signup',
@@ -46,9 +52,37 @@ export async function POST(request: Request) {
       );
     }
 
-    const confirmationUrl =
-      data?.properties?.action_link || redirectTo;
+    // Extraire le token depuis le lien généré par Supabase
+    // Le lien généré ressemble à: https://xxx.supabase.co/auth/v1/verify?token=...&type=signup&redirect_to=...
+    const actionLink = data?.properties?.action_link;
+    
+    if (!actionLink) {
+      console.error('[SIGNUP] No action_link from Supabase');
+      return NextResponse.json(
+        { success: false, error: 'Erreur lors de la génération du lien de confirmation' },
+        { status: 500 }
+      );
+    }
 
+    // Construire notre propre URL de confirmation qui pointe vers notre route
+    // On extrait le token de l'URL Supabase et on le passe à notre route
+    const supabaseUrl = new URL(actionLink);
+    const token = supabaseUrl.searchParams.get('token');
+    const type = supabaseUrl.searchParams.get('type') || 'signup';
+    
+    if (!token) {
+      console.error('[SIGNUP] No token in action_link');
+      return NextResponse.json(
+        { success: false, error: 'Erreur lors de la génération du lien de confirmation' },
+        { status: 500 }
+      );
+    }
+
+    // Construire l'URL finale qui pointe vers notre route de vérification
+    // Cette URL sera utilisée dans l'email Resend
+    const confirmationUrl = `${baseUrl}/api/auth/verify-link?token=${encodeURIComponent(token)}&type=${encodeURIComponent(type)}`;
+
+    // Envoyer l'email UNIQUEMENT via Resend (Supabase n'envoie rien)
     await sendSignupVerificationEmail({
       to: email,
       fullName,
