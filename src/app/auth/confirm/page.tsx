@@ -73,6 +73,16 @@ function ConfirmEmailContent() {
         return;
       }
       
+      // Vérifier si on a le paramètre verified=true (vérification réussie côté serveur)
+      const verified = searchParams.get('verified');
+      if (verified === 'true') {
+        setStatus('success');
+        setTimeout(() => {
+          router.push('/dashboard');
+        }, 3000);
+        return;
+      }
+      
       if (isUserLoggedIn && !isEmailChange && !code && !token_hash) {
         // Pour les autres types, si déjà connecté, c'est bon
         setStatus('success');
