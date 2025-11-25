@@ -21,8 +21,10 @@ const FROM_NAME = process.env.RESEND_FROM_NAME || 'Phuong Long Vo Dao';
 interface SendEmailOptions {
   to: string | string[];
   subject: string;
-  html: string;
+  html?: string;
   text?: string;
+  templateId?: string;
+  templateData?: Record<string, unknown>;
 }
 
 function renderEmailLayout(content: string) {
@@ -100,6 +102,9 @@ function renderLinkFallback(url: string, message = 'Si le bouton ne fonctionne p
 
 /**
  * Envoyer un email via Resend
+ * Supporte deux modes :
+ * - HTML inline (options.html)
+ * - Template Resend (options.templateId + options.templateData)
  */
 export async function sendEmail(options: SendEmailOptions) {
   if (!resend) {
@@ -107,6 +112,31 @@ export async function sendEmail(options: SendEmailOptions) {
   }
 
   try {
+    // Mode template Resend
+    if (options.templateId) {
+      const { data, error } = await resend.emails.send({
+        from: `${FROM_NAME} <${FROM_EMAIL}>`,
+        to: Array.isArray(options.to) ? options.to : [options.to],
+        subject: options.subject,
+        template: {
+          id: options.templateId,
+          variables: (options.templateData || {}) as Record<string, string | number>,
+        },
+      });
+
+      if (error) {
+        console.error('[EMAIL] Erreur Resend:', error);
+        throw new Error(`Erreur d'envoi d'email: ${error.message}`);
+      }
+
+      return data;
+    }
+
+    // Mode HTML inline (fallback)
+    if (!options.html) {
+      throw new Error('Either html or templateId must be provided');
+    }
+
     const { data, error } = await resend.emails.send({
       from: `${FROM_NAME} <${FROM_EMAIL}>`,
       to: Array.isArray(options.to) ? options.to : [options.to],
@@ -180,9 +210,26 @@ export async function sendSignupVerificationEmail(options: {
   to: string;
   fullName?: string;
   confirmationUrl: string;
+  useTemplate?: boolean;
+  templateId?: string;
 }) {
-  const { to, fullName, confirmationUrl } = options;
+  const { to, fullName, confirmationUrl, useTemplate, templateId } = options;
 
+  // Mode template Resend
+  if (useTemplate && templateId) {
+    return sendEmail({
+      to,
+      subject: 'Activez votre compte Phuong Long Vo Dao',
+      templateId,
+      templateData: {
+        fullName: fullName || 'Utilisateur',
+        confirmationUrl,
+        expiryHours: 24,
+      },
+    });
+  }
+
+  // Mode HTML inline (fallback)
   const content = `
 <h2 style="color:#1f2937;margin:0 0 24px 0;font-size:24px;font-weight:600;line-height:1.3;">Activez votre compte</h2>
 <p style="color:#1f2937;margin:0 0 16px 0;font-size:16px;line-height:1.6;">Bonjour${fullName ? ` ${fullName}` : ''},</p>

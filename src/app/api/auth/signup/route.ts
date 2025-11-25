@@ -83,10 +83,14 @@ export async function POST(request: Request) {
     const confirmationUrl = `${baseUrl}/api/auth/verify-link?token=${encodeURIComponent(token)}&type=${encodeURIComponent(type)}`;
 
     // Envoyer l'email UNIQUEMENT via Resend (Supabase n'envoie rien)
+    // Utilise le template Resend si configuré, sinon HTML inline
+    const templateId = process.env.RESEND_SIGNUP_TEMPLATE_ID;
     await sendSignupVerificationEmail({
       to: email,
       fullName,
       confirmationUrl,
+      useTemplate: !!templateId,
+      templateId: templateId || undefined,
     });
 
     return NextResponse.json({ success: true });
