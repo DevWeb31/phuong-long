@@ -160,12 +160,15 @@ export async function sendEmail(options: SendEmailOptions) {
 /**
  * Envoyer un email de confirmation de changement d'email
  */
-export async function sendEmailChangeConfirmation(
-  to: string,
-  oldEmail: string,
-  newEmail: string,
-  confirmationUrl: string
-) {
+export async function sendEmailChangeConfirmation(options: {
+  to: string;
+  oldEmail: string;
+  newEmail: string;
+  confirmationUrl: string;
+  templateId?: string;
+  templateData?: Record<string, string | number>;
+}) {
+  const { to, oldEmail, newEmail, confirmationUrl, templateId, templateData } = options;
   const content = `
 <h2 style="color:#1f2937;margin:0 0 24px 0;font-size:24px;font-weight:600;line-height:1.3;">Confirmez votre changement d'adresse email</h2>
 <p style="color:#1f2937;margin:0 0 16px 0;font-size:16px;line-height:1.6;">Bonjour,</p>
@@ -197,6 +200,23 @@ ${renderLinkFallback(confirmationUrl)}
 </table>
 `;
 
+  // Mode template Resend
+  if (templateId) {
+    return sendEmail({
+      to,
+      subject: 'Confirmation de changement d\'adresse email - Phuong Long Vo Dao',
+      templateId,
+      templateData: {
+        oldEmail,
+        newEmail,
+        confirmationUrl,
+        expiryHours: 24,
+        ...templateData, // Allow overriding or adding more data
+      },
+    });
+  }
+
+  // Mode HTML inline (fallback)
   const html = renderEmailLayout(content);
 
   return sendEmail({

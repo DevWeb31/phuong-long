@@ -24,6 +24,7 @@ export default function AccountPage() {
   const { user, loading, updatePassword, updateEmail, deleteAccount } = useAuth();
   const [emailData, setEmailData] = useState({
     newEmail: '',
+    confirmEmail: '',
   });
   const [emailLoading, setEmailLoading] = useState(false);
   const [emailMessage, setEmailMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
@@ -58,6 +59,16 @@ export default function AccountPage() {
       return;
     }
 
+    if (!emailData.confirmEmail) {
+      setEmailMessage({ type: 'error', text: 'Veuillez confirmer votre nouvelle adresse email' });
+      return;
+    }
+
+    if (emailData.newEmail !== emailData.confirmEmail) {
+      setEmailMessage({ type: 'error', text: 'Les adresses email ne correspondent pas' });
+      return;
+    }
+
     if (emailData.newEmail === user?.email) {
       setEmailMessage({ type: 'error', text: 'La nouvelle adresse email doit être différente de l\'actuelle' });
       return;
@@ -74,13 +85,14 @@ export default function AccountPage() {
     setEmailLoading(true);
 
     try {
-      const { error } = await updateEmail(emailData.newEmail);
+      const { error } = await updateEmail(emailData.newEmail, emailData.confirmEmail);
 
       if (error) {
-        // Gérer spécifiquement les erreurs de rate limit
+        // Gérer spécifiquement les erreurs de rate limit (429) ou limite mensuelle
         const isRateLimit = error.message?.toLowerCase().includes('rate limit') || 
                            error.message?.toLowerCase().includes('too many requests') ||
                            error.message?.toLowerCase().includes('email rate limit') ||
+                           error.message?.toLowerCase().includes('une fois par mois') ||
                            (error as { status?: number }).status === 429 ||
                            (error as { code?: string }).code === '429';
 
@@ -119,7 +131,7 @@ export default function AccountPage() {
           type: 'success', 
           text: 'Un email de confirmation a été envoyé à votre nouvelle adresse email. Veuillez cliquer sur le lien dans cet email. Vous devrez ensuite vous connecter avec votre ancienne adresse email et votre mot de passe pour finaliser le changement.' 
         });
-        setEmailData({ newEmail: '' });
+        setEmailData({ newEmail: '', confirmEmail: '' });
         // Réinitialiser le cooldown en cas de succès
         setCooldownSeconds(0);
       }
@@ -270,19 +282,33 @@ export default function AccountPage() {
                 type="email"
                 id="newEmail"
                 value={emailData.newEmail}
-                onChange={(e) => setEmailData({ newEmail: e.target.value })}
+                onChange={(e) => setEmailData(prev => ({ ...prev, newEmail: e.target.value }))}
+                className="w-full px-4 py-2 border dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent dark:bg-gray-800 dark:text-gray-100"
+                placeholder="nouvelle@email.com"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="confirmEmail" className="block text-sm font-medium dark:text-gray-300 mb-2">
+                Confirmer la nouvelle adresse email
+              </label>
+              <input
+                type="email"
+                id="confirmEmail"
+                value={emailData.confirmEmail}
+                onChange={(e) => setEmailData(prev => ({ ...prev, confirmEmail: e.target.value }))}
                 className="w-full px-4 py-2 border dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent dark:bg-gray-800 dark:text-gray-100"
                 placeholder="nouvelle@email.com"
               />
               <p className="mt-1 text-xs dark:text-gray-500">
-                Un email de confirmation sera envoyé à la nouvelle adresse. Après avoir cliqué sur le lien, vous devrez vous connecter avec votre ancienne adresse email pour finaliser le changement.
+                Un email de confirmation sera envoyé à la nouvelle adresse uniquement. Après avoir cliqué sur le lien, vous devrez vous connecter avec votre ancienne adresse email pour finaliser le changement. Vous ne pouvez changer votre email qu'une fois par mois maximum.
               </p>
             </div>
 
             <Button
               variant="primary"
               onClick={handleEmailChange}
-              disabled={emailLoading || !emailData.newEmail || emailData.newEmail === user.email || cooldownSeconds > 0}
+              disabled={emailLoading || !emailData.newEmail || !emailData.confirmEmail || emailData.newEmail !== emailData.confirmEmail || emailData.newEmail === user.email || cooldownSeconds > 0}
               className="flex items-center justify-center gap-2"
             >
               {emailLoading ? (

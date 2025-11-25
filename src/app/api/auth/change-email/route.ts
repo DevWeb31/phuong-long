@@ -18,6 +18,10 @@ import { randomBytes } from 'crypto';
 // Schema de validation
 const changeEmailSchema = z.object({
   newEmail: z.string().email('Email invalide'),
+  confirmEmail: z.string().email('Email de confirmation invalide'),
+}).refine((data) => data.newEmail === data.confirmEmail, {
+  message: 'Les adresses email ne correspondent pas',
+  path: ['confirmEmail'],
 });
 
 export async function POST(request: NextRequest) {
@@ -37,7 +41,15 @@ export async function POST(request: NextRequest) {
 
     // Valider les données
     const body = await request.json();
-    const { newEmail } = changeEmailSchema.parse(body);
+    const { newEmail, confirmEmail } = changeEmailSchema.parse(body);
+
+    // Vérifier que les deux emails correspondent (double vérification côté serveur)
+    if (newEmail.toLowerCase() !== confirmEmail.toLowerCase()) {
+      return NextResponse.json(
+        { success: false, error: 'Les adresses email ne correspondent pas' },
+        { status: 400 }
+      );
+    }
 
     // Vérifier que la nouvelle adresse est différente
     if (currentUser.email?.toLowerCase() === newEmail.toLowerCase()) {
@@ -47,8 +59,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Vérifier qu'il n'y a pas déjà un token en attente pour cet utilisateur
     const adminSupabase = createAdminClient();
+
+    // Vérifier qu'il n'y a pas déjà un token en attente pour cet utilisateur
     const { data: existingToken } = await adminSupabase
       .from('email_change_tokens')
       .select('id')
@@ -62,6 +75,33 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { success: false, error: 'Un email de confirmation a déjà été envoyé. Vérifiez votre boîte de réception.' },
         { status: 400 }
+      );
+    }
+
+    // Vérifier qu'il n'y a pas eu de changement d'email dans le dernier mois
+    const oneMonthAgo = new Date();
+    oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
+
+    const { data: recentChanges } = await adminSupabase
+      .from('email_change_tokens')
+      .select('used_at')
+      .eq('user_id', currentUser.id)
+      .not('used_at', 'is', null)
+      .gte('used_at', oneMonthAgo.toISOString())
+      .order('used_at', { ascending: false })
+      .limit(1);
+
+    if (recentChanges && recentChanges.length > 0) {
+      const lastChangeDate = new Date(recentChanges[0].used_at);
+      const daysSinceLastChange = Math.ceil((Date.now() - lastChangeDate.getTime()) / (1000 * 60 * 60 * 24));
+      const daysRemaining = 30 - daysSinceLastChange;
+      
+      return NextResponse.json(
+        { 
+          success: false, 
+          error: `Vous ne pouvez changer votre email qu'une fois par mois. Dernier changement il y a ${daysSinceLastChange} jour${daysSinceLastChange > 1 ? 's' : ''}. Réessayez dans ${daysRemaining} jour${daysRemaining > 1 ? 's' : ''}.` 
+        },
+        { status: 429 }
       );
     }
 
@@ -92,14 +132,21 @@ export async function POST(request: NextRequest) {
     const baseUrl = getAppBaseUrl();
     const confirmationUrl = `${baseUrl}/auth/confirm-email-change?token=${token}`;
 
-    // Envoyer l'email de confirmation à la nouvelle adresse
+    // Envoyer l'email de confirmation à la nouvelle adresse uniquement
     try {
-      await sendEmailChangeConfirmation(
+      await sendEmailChangeConfirmation({
+        to: newEmail,
+        oldEmail: currentUser.email || '',
         newEmail,
-        currentUser.email || '',
-        newEmail,
-        confirmationUrl
-      );
+        confirmationUrl,
+        templateId: process.env.RESEND_EMAIL_CHANGE_TEMPLATE_ID,
+        templateData: {
+          oldEmail: currentUser.email || '',
+          newEmail,
+          confirmationUrl,
+          expiryHours: 24,
+        },
+      });
     } catch (emailError) {
       console.error('[EMAIL CHANGE] Erreur envoi email:', emailError);
       // Supprimer le token si l'email n'a pas pu être envoyé

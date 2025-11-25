@@ -159,7 +159,7 @@ export function useAuth() {
     return { data, error };
   };
 
-  const updateEmail = async (newEmail: string) => {
+  const updateEmail = async (newEmail: string, confirmEmail: string) => {
     try {
       // Utiliser la nouvelle API personnalisée pour le changement d'email
       const response = await fetch('/api/auth/change-email', {
@@ -167,7 +167,7 @@ export function useAuth() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ newEmail }),
+        body: JSON.stringify({ newEmail, confirmEmail }),
       });
 
       const result = await response.json();
