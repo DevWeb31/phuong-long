@@ -83,13 +83,17 @@ function ConfirmEmailContent() {
         return;
       }
       
+      // Si l'utilisateur est connecté et que son email est confirmé, c'est bon
+      // (cas où Supabase a déjà vérifié le token et créé la session)
       if (isUserLoggedIn && !isEmailChange && !code && !token_hash) {
-        // Pour les autres types, si déjà connecté, c'est bon
-        setStatus('success');
-        setTimeout(() => {
-          router.push('/dashboard');
-        }, 3000);
-        return;
+        const user = existingSession?.session?.user;
+        if (user?.email_confirmed_at) {
+          setStatus('success');
+          setTimeout(() => {
+            router.push('/dashboard');
+          }, 3000);
+          return;
+        }
       }
 
       // Gérer le format avec code (PKCE flow)
@@ -167,7 +171,17 @@ function ConfirmEmailContent() {
       // Accepter les types 'email' (confirmation inscription) et 'email_change' (changement email)
       // Ne vérifier token_hash que si code n'existe pas (déjà traité ci-dessus)
       if (!code) {
+        // Si pas de token_hash mais qu'on a verified=true ou que l'utilisateur est connecté avec email confirmé, c'est bon
         if (!token_hash) {
+          // Vérifier une dernière fois si l'utilisateur est connecté avec email confirmé
+          if (isUserLoggedIn && existingSession?.session?.user?.email_confirmed_at) {
+            setStatus('success');
+            setTimeout(() => {
+              router.push('/dashboard');
+            }, 3000);
+            return;
+          }
+          
           setStatus('error');
           setErrorMessage('Lien de confirmation invalide. Paramètres manquants.');
           return;
