@@ -26,6 +26,17 @@ interface ProfileData {
 
 export default function ProfilePage() {
   const { user, loading } = useAuth();
+  
+  // DEBUG: Log au montage du composant
+  useEffect(() => {
+    console.log('[PROFILE PAGE DEBUG] Component mounted', {
+      hasUser: !!user,
+      loading,
+      currentPath: typeof window !== 'undefined' ? window.location.pathname : 'SSR',
+      currentUrl: typeof window !== 'undefined' ? window.location.href : 'SSR',
+    });
+  }, [user, loading]);
+  
   const [profileData, setProfileData] = useState<ProfileData>({
     fullName: '',
     username: '',
@@ -94,12 +105,20 @@ export default function ProfilePage() {
   }
 
   if (!user) {
+    console.log('[PROFILE PAGE DEBUG] No user, showing message');
+    console.log('[PROFILE PAGE DEBUG] Current URL:', typeof window !== 'undefined' ? window.location.href : 'SSR');
     return (
       <div className="text-center py-20">
         <p className="text-gray-600 dark:text-gray-500">Vous devez être connecté pour accéder à cette page.</p>
       </div>
     );
   }
+
+  console.log('[PROFILE PAGE DEBUG] User is present, rendering profile page', {
+    userId: user.id,
+    email: user.email,
+    currentUrl: typeof window !== 'undefined' ? window.location.href : 'SSR',
+  });
 
   return (
     <div className="space-y-8">

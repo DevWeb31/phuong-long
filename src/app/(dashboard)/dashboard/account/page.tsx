@@ -1,7 +1,7 @@
 /**
  * Account Settings Page - Paramètres du compte
  * 
- * Page de gestion du compte (email, mot de passe, notifications, suppression)
+ * Page de gestion du compte (email, mot de passe, suppression)
  * 
  * @version 1.0
  * @date 2025-11-05 00:25
@@ -15,13 +15,12 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent, Button } fro
 import { 
   EnvelopeIcon, 
   LockClosedIcon, 
-  BellIcon, 
   TrashIcon 
 } from '@heroicons/react/24/outline';
-import { Loader2, CheckCircle2, AlertTriangle, XCircle, Lock, Trash2, Save } from 'lucide-react';
+import { Loader2, CheckCircle2, AlertTriangle, XCircle, Lock, Trash2 } from 'lucide-react';
 
 export default function AccountPage() {
-  const { user, loading, updatePassword, updateEmail, deleteAccount } = useAuth();
+  const { user, loading, updateEmail, deleteAccount } = useAuth();
   const [emailData, setEmailData] = useState({
     newEmail: '',
     confirmEmail: '',
@@ -29,7 +28,14 @@ export default function AccountPage() {
   const [emailLoading, setEmailLoading] = useState(false);
   const [emailMessage, setEmailMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [cooldownSeconds, setCooldownSeconds] = useState(0);
+  const [emailChangeStatus, setEmailChangeStatus] = useState<{
+    canChange: boolean;
+    lastChangeDate: string | null;
+    nextChangeDate: string | null;
+    daysRemaining: number | null;
+  } | null>(null);
   const [passwordData, setPasswordData] = useState({
+    oldPassword: '',
     newPassword: '',
     confirmPassword: '',
   });
@@ -50,6 +56,27 @@ export default function AccountPage() {
     }
     return undefined;
   }, [cooldownSeconds]);
+
+  // Récupérer le statut du changement d'email
+  useEffect(() => {
+    const fetchEmailChangeStatus = async () => {
+      try {
+        const response = await fetch('/api/auth/email-change-status');
+        if (response.ok) {
+          const result = await response.json();
+          if (result.success) {
+            setEmailChangeStatus(result.data);
+          }
+        }
+      } catch (error) {
+        console.error('Erreur lors de la récupération du statut:', error);
+      }
+    };
+
+    if (user) {
+      fetchEmailChangeStatus();
+    }
+  }, [user]);
 
   // Forcer un refresh de la session au chargement de la page pour s'assurer que l'email est à jour
   useEffect(() => {
@@ -164,6 +191,18 @@ export default function AccountPage() {
         setEmailData({ newEmail: '', confirmEmail: '' });
         // Réinitialiser le cooldown en cas de succès
         setCooldownSeconds(0);
+        // Rafraîchir le statut du changement d'email
+        try {
+          const statusResponse = await fetch('/api/auth/email-change-status');
+          if (statusResponse.ok) {
+            const statusResult = await statusResponse.json();
+            if (statusResult.success) {
+              setEmailChangeStatus(statusResult.data);
+            }
+          }
+        } catch (statusError) {
+          console.error('Erreur lors du rafraîchissement du statut:', statusError);
+        }
       }
     } catch (err) {
       setEmailMessage({ type: 'error', text: 'Une erreur est survenue' });
@@ -172,11 +211,53 @@ export default function AccountPage() {
     setEmailLoading(false);
   };
 
+  // Fonction de validation du mot de passe
+  const validatePassword = (password: string): { valid: boolean; errors: string[] } => {
+    const errors: string[] = [];
+
+    if (password.length < 8) {
+      errors.push('Au moins 8 caractères');
+    }
+
+    if (!/[a-z]/.test(password)) {
+      errors.push('Au moins une lettre minuscule');
+    }
+
+    if (!/[A-Z]/.test(password)) {
+      errors.push('Au moins une lettre majuscule');
+    }
+
+    if (!/[0-9]/.test(password)) {
+      errors.push('Au moins un chiffre');
+    }
+
+    if (!/[^a-zA-Z0-9]/.test(password)) {
+      errors.push('Au moins un symbole (ex: !@#$%^&*)');
+    }
+
+    return {
+      valid: errors.length === 0,
+      errors,
+    };
+  };
+
   const handlePasswordChange = async () => {
+    console.log('[PASSWORD CHANGE] Starting password change process');
     setPasswordMessage(null);
 
-    if (passwordData.newPassword.length < 8) {
-      setPasswordMessage({ type: 'error', text: 'Le mot de passe doit contenir au moins 8 caractères' });
+    // Vérifier que l'ancien mot de passe est fourni
+    if (!passwordData.oldPassword) {
+      setPasswordMessage({ type: 'error', text: 'Veuillez entrer votre ancien mot de passe' });
+      return;
+    }
+
+    // Valider le nouveau mot de passe d'abord
+    const passwordValidation = validatePassword(passwordData.newPassword);
+    if (!passwordValidation.valid) {
+      setPasswordMessage({ 
+        type: 'error', 
+        text: `Le mot de passe doit contenir : ${passwordValidation.errors.join(', ')}` 
+      });
       return;
     }
 
@@ -185,22 +266,93 @@ export default function AccountPage() {
       return;
     }
 
+    if (passwordData.oldPassword === passwordData.newPassword) {
+      setPasswordMessage({ type: 'error', text: 'Le nouveau mot de passe doit être différent de l\'ancien' });
+      return;
+    }
+
+    console.log('[PASSWORD CHANGE] Validation passed, setting loading to true');
     setPasswordLoading(true);
 
     try {
-      const { error } = await updatePassword(passwordData.newPassword);
+      console.log('[PASSWORD CHANGE] Verifying old password...');
+      
+      // Vérifier d'abord que l'utilisateur est bien connecté
+      if (!user || !user.email) {
+        console.error('[PASSWORD CHANGE] No user or email found');
+        setPasswordMessage({ type: 'error', text: 'Vous devez être connecté pour changer votre mot de passe' });
+        setPasswordLoading(false);
+        return;
+      }
 
-      if (error) {
-        setPasswordMessage({ type: 'error', text: error.message });
-      } else {
-        setPasswordMessage({ type: 'success', text: 'Mot de passe mis à jour avec succès !' });
-        setPasswordData({ newPassword: '', confirmPassword: '' });
+      // Vérifier l'ancien mot de passe via une API route pour ne pas perturber la session
+      console.log('[PASSWORD CHANGE] Calling verify-password API...');
+      const verifyResponse = await fetch('/api/auth/verify-password', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ password: passwordData.oldPassword }),
+      });
+
+      const verifyResult = await verifyResponse.json();
+      console.log('[PASSWORD CHANGE] Verify result:', verifyResult);
+
+      if (!verifyResult.success) {
+        console.log('[PASSWORD CHANGE] Old password incorrect, stopping');
+        setPasswordMessage({ type: 'error', text: verifyResult.error || 'Ancien mot de passe incorrect' });
+        setPasswordLoading(false);
+        return;
+      }
+
+      console.log('[PASSWORD CHANGE] Old password verified, updating password...');
+      
+      // Mettre à jour le mot de passe via une API route pour éviter les problèmes de session
+      console.log('[PASSWORD CHANGE] Calling update-password API...');
+      const updateResponse = await fetch('/api/auth/update-password', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ newPassword: passwordData.newPassword }),
+      });
+
+      const updateResult = await updateResponse.json();
+      console.log('[PASSWORD CHANGE] Update result:', updateResult);
+
+      if (!updateResult.success) {
+        console.log('[PASSWORD CHANGE] Update error:', updateResult.error);
+        setPasswordMessage({ type: 'error', text: updateResult.error || 'Erreur lors de la mise à jour du mot de passe' });
+        setPasswordLoading(false);
+        return;
+      }
+
+      // Succès
+      console.log('[PASSWORD CHANGE] Password updated successfully!');
+      setPasswordMessage({ type: 'success', text: 'Mot de passe mis à jour avec succès !' });
+      setPasswordData({ oldPassword: '', newPassword: '', confirmPassword: '' });
+      
+      // Rafraîchir la session côté client pour s'assurer qu'elle est à jour (non-bloquant)
+      // On le fait dans un try/catch séparé pour ne pas bloquer le finally
+      try {
+        const { createClient } = await import('@/lib/supabase/client');
+        const supabase = createClient();
+        // Ne pas await pour ne pas bloquer, mais on peut quand même essayer
+        supabase.auth.refreshSession().catch((refreshErr) => {
+          console.warn('[PASSWORD CHANGE] Session refresh failed (non-critical):', refreshErr);
+        });
+      } catch (refreshErr) {
+        console.warn('[PASSWORD CHANGE] Could not refresh session (non-critical):', refreshErr);
       }
     } catch (err) {
-      setPasswordMessage({ type: 'error', text: 'Une erreur est survenue' });
+      console.error('[PASSWORD CHANGE] Unexpected error:', err);
+      const errorMessage = err instanceof Error ? err.message : 'Une erreur est survenue lors du changement de mot de passe';
+      setPasswordMessage({ type: 'error', text: errorMessage });
+    } finally {
+      // Toujours réinitialiser le loading, même en cas d'erreur
+      console.log('[PASSWORD CHANGE] Finally block: setting loading to false');
+      setPasswordLoading(false);
     }
-
-    setPasswordLoading(false);
   };
 
   const handleDeleteAccount = async () => {
@@ -261,7 +413,7 @@ export default function AccountPage() {
       <div>
         <h1 className="text-3xl font-bold dark:text-gray-100 mb-2">Paramètres du compte</h1>
         <p className="text-gray-600 dark:text-gray-500">
-          Gérez votre email, mot de passe, notifications et options de compte.
+          Gérez votre email, mot de passe et options de compte.
         </p>
       </div>
 
@@ -288,6 +440,26 @@ export default function AccountPage() {
                   ? <span className="flex items-center gap-1 text-green-600 dark:text-green-400"><CheckCircle2 className="w-3.5 h-3.5" /> Email vérifié</span>
                   : <span className="flex items-center gap-1 text-amber-600 dark:text-amber-400"><AlertTriangle className="w-3.5 h-3.5" /> Email non vérifié - Consultez vos emails</span>}
               </p>
+              {emailChangeStatus && !emailChangeStatus.canChange && emailChangeStatus.nextChangeDate && (
+                <div className="mt-3 p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
+                  <p className="text-sm text-amber-800 dark:text-amber-200 flex items-center gap-2">
+                    <AlertTriangle className="w-4 h-4 flex-shrink-0" />
+                    <span>
+                      Vous pourrez changer votre email le{' '}
+                      <strong>
+                        {new Date(emailChangeStatus.nextChangeDate).toLocaleDateString('fr-FR', {
+                          day: 'numeric',
+                          month: 'long',
+                          year: 'numeric',
+                        })}
+                      </strong>
+                      {emailChangeStatus.daysRemaining !== null && emailChangeStatus.daysRemaining > 0 && (
+                        <span> (dans {emailChangeStatus.daysRemaining} jour{emailChangeStatus.daysRemaining > 1 ? 's' : ''})</span>
+                      )}
+                    </span>
+                  </p>
+                </div>
+              )}
             </div>
 
             {emailMessage && (
@@ -313,7 +485,12 @@ export default function AccountPage() {
                 id="newEmail"
                 value={emailData.newEmail}
                 onChange={(e) => setEmailData(prev => ({ ...prev, newEmail: e.target.value }))}
-                className="w-full px-4 py-2 border dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent dark:bg-gray-800 dark:text-gray-100"
+                disabled={emailChangeStatus !== null && !emailChangeStatus.canChange}
+                className={`w-full px-4 py-2 border dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent dark:bg-gray-800 dark:text-gray-100 ${
+                  emailChangeStatus !== null && !emailChangeStatus.canChange
+                    ? 'opacity-50 cursor-not-allowed bg-gray-100 dark:bg-gray-900'
+                    : ''
+                }`}
                 placeholder="nouvelle@email.com"
               />
             </div>
@@ -327,7 +504,12 @@ export default function AccountPage() {
                 id="confirmEmail"
                 value={emailData.confirmEmail}
                 onChange={(e) => setEmailData(prev => ({ ...prev, confirmEmail: e.target.value }))}
-                className="w-full px-4 py-2 border dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent dark:bg-gray-800 dark:text-gray-100"
+                disabled={emailChangeStatus !== null && !emailChangeStatus.canChange}
+                className={`w-full px-4 py-2 border dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent dark:bg-gray-800 dark:text-gray-100 ${
+                  emailChangeStatus !== null && !emailChangeStatus.canChange
+                    ? 'opacity-50 cursor-not-allowed bg-gray-100 dark:bg-gray-900'
+                    : ''
+                }`}
                 placeholder="nouvelle@email.com"
               />
               <p className="mt-1 text-xs dark:text-gray-500">
@@ -338,13 +520,23 @@ export default function AccountPage() {
             <Button
               variant="primary"
               onClick={handleEmailChange}
-              disabled={emailLoading || !emailData.newEmail || !emailData.confirmEmail || emailData.newEmail !== emailData.confirmEmail || emailData.newEmail === user.email || cooldownSeconds > 0}
+              disabled={
+                emailLoading || 
+                !emailData.newEmail || 
+                !emailData.confirmEmail || 
+                emailData.newEmail !== emailData.confirmEmail || 
+                emailData.newEmail === user.email || 
+                cooldownSeconds > 0 ||
+                (emailChangeStatus !== null && !emailChangeStatus.canChange)
+              }
               className="flex items-center justify-center gap-2"
             >
               {emailLoading ? (
                 <><Loader2 className="w-4 h-4 animate-spin" /> Envoi en cours...</>
               ) : cooldownSeconds > 0 ? (
                 <><Loader2 className="w-4 h-4 animate-spin" /> Attente... ({cooldownSeconds}s)</>
+              ) : emailChangeStatus !== null && !emailChangeStatus.canChange ? (
+                <><EnvelopeIcon className="w-4 h-4" /> Changement d'email indisponible</>
               ) : (
                 <><EnvelopeIcon className="w-4 h-4" /> Changer l'email</>
               )}
@@ -383,6 +575,20 @@ export default function AccountPage() {
 
           <div className="space-y-4">
             <div>
+              <label htmlFor="oldPassword" className="block text-sm font-medium dark:text-gray-300 mb-2">
+                Ancien mot de passe
+              </label>
+              <input
+                type="password"
+                id="oldPassword"
+                value={passwordData.oldPassword}
+                onChange={(e) => setPasswordData(prev => ({ ...prev, oldPassword: e.target.value }))}
+                className="w-full px-4 py-2 border dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent dark:bg-gray-800 dark:text-gray-100"
+                placeholder="••••••••"
+              />
+            </div>
+
+            <div>
               <label htmlFor="newPassword" className="block text-sm font-medium dark:text-gray-300 mb-2">
                 Nouveau mot de passe
               </label>
@@ -395,7 +601,9 @@ export default function AccountPage() {
                 placeholder="••••••••"
                 minLength={8}
               />
-              <p className="mt-1 text-xs dark:text-gray-500">Minimum 8 caractères</p>
+              <p className="mt-1 text-xs dark:text-gray-500">
+                Le mot de passe doit contenir : au moins 8 caractères, une lettre minuscule, une lettre majuscule, un chiffre et un symbole
+              </p>
             </div>
 
             <div>
@@ -415,7 +623,7 @@ export default function AccountPage() {
             <Button
               variant="primary"
               onClick={handlePasswordChange}
-              disabled={passwordLoading || !passwordData.newPassword || !passwordData.confirmPassword}
+              disabled={passwordLoading || !passwordData.oldPassword || !passwordData.newPassword || !passwordData.confirmPassword}
               className="flex items-center justify-center gap-2"
             >
               {passwordLoading ? (
@@ -423,64 +631,6 @@ export default function AccountPage() {
               ) : (
                 <><Lock className="w-4 h-4" /> Changer le mot de passe</>
               )}
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Notifications Section */}
-      <Card variant="bordered">
-        <CardHeader>
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-accent/10 rounded-lg flex items-center justify-center">
-              <BellIcon className="w-6 h-6 text-accent" />
-            </div>
-            <div>
-              <CardTitle>Notifications</CardTitle>
-              <CardDescription>Gérez vos préférences de notifications</CardDescription>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <label className="flex items-center justify-between cursor-pointer">
-              <div>
-                <p className="font-medium text-gray-900 dark:text-gray-100">Événements</p>
-                <p className="text-sm dark:text-gray-500">Recevoir des emails sur les nouveaux événements</p>
-              </div>
-              <input
-                type="checkbox"
-                defaultChecked
-                className="w-5 h-5 text-primary rounded focus:ring-2 focus:ring-primary"
-              />
-            </label>
-
-            <label className="flex items-center justify-between cursor-pointer">
-              <div>
-                <p className="font-medium text-gray-900 dark:text-gray-100">Blog</p>
-                <p className="text-sm dark:text-gray-500">Recevoir les nouveaux articles du blog</p>
-              </div>
-              <input
-                type="checkbox"
-                defaultChecked
-                className="w-5 h-5 text-primary rounded focus:ring-2 focus:ring-primary"
-              />
-            </label>
-
-            <label className="flex items-center justify-between cursor-pointer">
-              <div>
-                <p className="font-medium text-gray-900 dark:text-gray-100">Promotions</p>
-                <p className="text-sm dark:text-gray-500">Recevoir les offres spéciales et promotions</p>
-              </div>
-              <input
-                type="checkbox"
-                className="w-5 h-5 text-primary rounded focus:ring-2 focus:ring-primary"
-              />
-            </label>
-
-            <Button variant="primary" size="sm" disabled className="flex items-center gap-2">
-              <Save className="w-4 h-4" />
-              Enregistrer les préférences (bientôt)
             </Button>
           </div>
         </CardContent>

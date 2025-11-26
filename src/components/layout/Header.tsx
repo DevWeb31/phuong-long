@@ -18,14 +18,12 @@ import { UserMenu } from './UserMenu';
 import { CartButton } from './CartButton';
 // import { SearchBar } from './SearchBar'; // Désactivé
 import { ThemeToggle } from './ThemeToggle';
-import { MegaMenu, MegaMenuSection, shopMegaMenu } from './MegaMenu';
+import { MegaMenu, MegaMenuSection } from './MegaMenu';
 import { cn } from '@/lib/utils/cn';
-import { createClient } from '@/lib/supabase/client';
 import { 
   Users, 
   Calendar, 
   BookOpen, 
-  ShoppingBag, 
   Mail,
   History,
   Menu,
@@ -50,7 +48,6 @@ const navigation: NavItem[] = [
   { name: 'Clubs', href: '/clubs', icon: Users, hasMegaMenu: true },
   { name: 'Événements', href: '/events', icon: Calendar },
   { name: 'Blog', href: '/blog', icon: BookOpen },
-  { name: 'Boutique', href: '/shop', icon: ShoppingBag, hasMegaMenu: true },
   { name: 'Contact', href: '/contact', icon: Mail },
   { name: 'Notre histoire', href: '/notre-histoire', icon: History },
 ];
@@ -69,48 +66,9 @@ export function Header() {
   const [activeMegaMenu, setActiveMegaMenu] = useState<string | null>(null);
   const [hoveredItem, setHoveredItem] = useState<string | null>(null);
   const [clubs, setClubs] = useState<Club[]>([]);
-  const [isShopHidden, setIsShopHidden] = useState(false);
-  const [isDeveloper, setIsDeveloper] = useState(false);
   const pathname = usePathname();
   const megaMenuTimeout = useRef<NodeJS.Timeout>();
 
-  // Vérifier si la boutique est masquée
-  useEffect(() => {
-    const checkShopVisibility = async () => {
-      try {
-        const supabase = createClient();
-        const { data: { user } } = await supabase.auth.getUser();
-        
-        if (user) {
-          // Vérifier si l'utilisateur est développeur
-          const { data: userRoles } = await supabase
-            .from('user_roles')
-            .select('role_id, roles!inner(name)')
-            .eq('user_id', user.id);
-
-          const roles = (userRoles as any[])?.map(ur => ur.roles?.name) || [];
-          setIsDeveloper(roles.includes('developer'));
-
-          // Si développeur, vérifier quand même si la boutique est masquée (pour affichage visuel)
-          // Ne pas masquer pour les développeurs, mais garder l'info pour le style
-        }
-
-        // Vérifier le paramètre shop.hidden
-        const response = await fetch('/api/developer-settings/public');
-        if (response.ok) {
-          const settings = await response.json();
-          const shopHiddenValue = settings['shop.hidden'];
-          // Vérifier si value est true (booléen) ou "true" (string JSON)
-          setIsShopHidden(shopHiddenValue === true || shopHiddenValue === 'true' || shopHiddenValue === '"true"');
-        }
-      } catch (error) {
-        console.error('Error checking shop visibility:', error);
-        setIsShopHidden(false);
-      }
-    };
-
-    checkShopVisibility();
-  }, []);
 
   // Charger les clubs depuis l'API
   useEffect(() => {
@@ -170,7 +128,7 @@ export function Header() {
       clearTimeout(megaMenuTimeout.current);
     }
     setHoveredItem(itemName);
-    if (itemName === 'Clubs' || itemName === 'Boutique') {
+    if (itemName === 'Clubs') {
       setActiveMegaMenu(itemName);
     }
   };
@@ -229,17 +187,11 @@ export function Header() {
         },
       ];
     }
-    if (itemName === 'Boutique') return shopMegaMenu;
     return [];
   };
 
-  // Filtrer la navigation pour masquer la boutique si nécessaire
-  const filteredNavigation = navigation.filter(item => {
-    if (item.name === 'Boutique' && isShopHidden && !isDeveloper) {
-      return false;
-    }
-    return true;
-  });
+  // Navigation filtrée
+  const filteredNavigation = navigation;
 
   return (
     <>
@@ -282,10 +234,6 @@ export function Header() {
               const isHovered = hoveredItem === item.name;
               const hasMega = item.hasMegaMenu;
               
-              // Vérifier si c'est la boutique et si elle est masquée pour les développeurs
-              const isShopItem = item.name === 'Boutique';
-              const isShopHiddenForDev = isShopItem && isShopHidden && isDeveloper;
-              
               return (
                 <div
                   key={item.href}
@@ -296,27 +244,22 @@ export function Header() {
                     href={item.href}
                     className={cn(
                       'group relative flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200',
-                      isShopHiddenForDev
-                        ? 'text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-700 dark:hover:text-red-300'
-                        : active
-                          ? 'text-primary bg-gradient-to-r from-primary/10 to-transparent'
-                          : 'text-slate-900 dark:text-gray-300 hover:text-primary hover:bg-gradient-to-r hover:from-gray-50 dark:hover:from-gray-800 hover:to-transparent',
-                      isHovered && !isShopHiddenForDev && 'bg-gradient-to-r from-gray-50 dark:from-gray-800 to-transparent'
+                      active
+                        ? 'text-primary bg-gradient-to-r from-primary/10 to-transparent'
+                        : 'text-slate-900 dark:text-gray-300 hover:text-primary hover:bg-gradient-to-r hover:from-gray-50 dark:hover:from-gray-800 hover:to-transparent',
+                      isHovered && 'bg-gradient-to-r from-gray-50 dark:from-gray-800 to-transparent'
                     )}
-                    title={isShopHiddenForDev ? '⚠️ La boutique est actuellement masquée pour les autres utilisateurs' : undefined}
                   >
                     <Icon 
                       className={cn(
                         'w-4 h-4 transition-all duration-200',
-                        isShopHiddenForDev
-                          ? 'text-red-600 dark:text-red-400'
-                          : active 
-                            ? 'scale-110' 
-                            : 'group-hover:scale-110',
-                        isHovered && !isShopHiddenForDev && 'scale-110 text-primary'
+                        active 
+                          ? 'scale-110' 
+                          : 'group-hover:scale-110',
+                        isHovered && 'scale-110 text-primary'
                       )} 
                     />
-                    <span className={isShopHiddenForDev ? 'text-red-600 dark:text-red-400' : ''}>{item.name}</span>
+                    <span>{item.name}</span>
                     
                     {hasMega && (
                       <ChevronDown 
@@ -328,7 +271,7 @@ export function Header() {
                     )}
                     
                     {/* Indicateur actif avec effet shimmer */}
-                    {active && !isShopHiddenForDev && (
+                    {active && (
                       <span 
                         className={cn(
                           'absolute bottom-0 left-1/2 -translate-x-1/2 w-8 h-0.5 rounded-full',
@@ -338,14 +281,6 @@ export function Header() {
                       />
                     )}
                   </Link>
-                  
-                  {/* Tooltip personnalisé pour développeur si boutique masquée */}
-                  {isShopHiddenForDev && (
-                    <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 px-3 py-2 bg-gray-900 dark:bg-gray-800 text-white text-xs rounded-lg shadow-lg opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity duration-200 whitespace-nowrap z-50">
-                      ⚠️ La boutique est masquée pour les autres utilisateurs
-                      <div className="absolute left-1/2 -translate-x-1/2 top-full border-4 border-transparent border-t-gray-900 dark:border-t-gray-800"></div>
-                    </div>
-                  )}
                 </div>
               );
             })}
@@ -373,25 +308,7 @@ export function Header() {
           {/* Desktop Actions */}
           <div className="hidden lg:flex items-center gap-3">
             <ThemeToggle />
-            {/* Séparateur avant panier - masqué si boutique masquée et pas développeur */}
-            {!(isShopHidden && !isDeveloper) && (
-              <div className={cn(
-                "w-px h-8",
-                isShopHidden && isDeveloper
-                  ? "bg-red-300 dark:bg-red-700"
-                  : "bg-gray-200 dark:bg-gray-700"
-              )} />
-            )}
             <CartButton />
-            {/* Séparateur après panier - masqué si boutique masquée et pas développeur */}
-            {!(isShopHidden && !isDeveloper) && (
-              <div className={cn(
-                "w-px h-8",
-                isShopHidden && isDeveloper
-                  ? "bg-red-300 dark:bg-red-700"
-                  : "bg-gray-200 dark:bg-gray-700"
-              )} />
-            )}
             <UserMenu />
           </div>
 
@@ -462,43 +379,32 @@ export function Header() {
               const Icon = item.icon;
               const active = isActive(item.href);
               
-              // Vérifier si c'est la boutique et si elle est masquée pour les développeurs
-              const isShopItem = item.name === 'Boutique';
-              const isShopHiddenForDev = isShopItem && isShopHidden && isDeveloper;
-              
               return (
                 <div key={item.href} className="relative">
                   <Link
                     href={item.href}
                     className={cn(
                       'flex items-center gap-3 px-4 py-3 rounded-lg text-base font-medium transition-all duration-200',
-                      isShopHiddenForDev
-                        ? 'text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20'
-                        : active
-                          ? 'bg-gradient-to-r from-primary/10 to-transparent text-primary'
-                          : 'text-slate-900 dark:text-gray-300 hover:bg-gradient-to-r hover:from-gray-50 dark:hover:from-gray-800 hover:to-transparent'
+                      active
+                        ? 'bg-gradient-to-r from-primary/10 to-transparent text-primary'
+                        : 'text-slate-900 dark:text-gray-300 hover:bg-gradient-to-r hover:from-gray-50 dark:hover:from-gray-800 hover:to-transparent'
                     )}
                     onClick={() => setMobileMenuOpen(false)}
-                    title={isShopHiddenForDev ? '⚠️ La boutique est actuellement masquée pour les autres utilisateurs' : undefined}
                   >
                     <div className={cn(
                       'p-1.5 rounded-lg transition-all',
-                      isShopHiddenForDev
-                        ? 'bg-red-100 dark:bg-red-900/30'
-                        : active 
-                          ? 'bg-primary/10' 
-                          : 'bg-gray-100 dark:bg-gray-800'
+                      active 
+                        ? 'bg-primary/10' 
+                        : 'bg-gray-100 dark:bg-gray-800'
                     )}>
                       <Icon className={cn(
                         'w-5 h-5 transition-transform',
-                        isShopHiddenForDev
-                          ? 'text-red-600 dark:text-red-400'
-                          : active && 'scale-110 text-primary'
+                        active && 'scale-110 text-primary'
                       )} />
                     </div>
-                    <span className={cn('flex-1', isShopHiddenForDev && 'text-red-600 dark:text-red-400')}>{item.name}</span>
+                    <span className="flex-1">{item.name}</span>
                     
-                    {active && !isShopHiddenForDev && (
+                    {active && (
                       <div className="w-2 h-2 rounded-full bg-gradient-to-r from-primary to-primary-dark animate-pulse shadow-lg shadow-primary/50" />
                     )}
                   </Link>

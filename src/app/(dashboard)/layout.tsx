@@ -36,6 +36,9 @@ export default function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
+  // DEBUG: Log côté serveur (visible dans le terminal)
+  console.log('[DASHBOARD LAYOUT DEBUG] Layout rendered');
+  
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Simple Header */}

@@ -29,9 +29,46 @@ export default function SignInPage() {
   const [loading, setLoading] = useState(false);
   const [isMaintenanceEnabled, setIsMaintenanceEnabled] = useState(false);
   
-  const { signIn, signOut } = useAuth();
+  const { signIn, signOut, user } = useAuth();
   const router = useRouter();
   const supabase = createClient();
+
+  // DEBUG: Vérifier l'état d'authentification
+  useEffect(() => {
+    console.log('[SIGNIN PAGE DEBUG] Component mounted', {
+      hasUser: !!user,
+      redirectTo,
+      currentPath: window.location.pathname,
+      currentUrl: window.location.href,
+      searchParams: Object.fromEntries(searchParams.entries()),
+    });
+    
+    const checkSession = async () => {
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      const { data: { user: currentUser }, error: userError } = await supabase.auth.getUser();
+      const now = Math.floor(Date.now() / 1000);
+      const isSessionValid = session && session.expires_at && session.expires_at > now;
+      
+      console.log('[SIGNIN PAGE DEBUG] Session check', {
+        hasSession: !!session,
+        hasUser: !!currentUser,
+        isSessionValid,
+        sessionExpiresAt: session?.expires_at || null,
+        currentTime: now,
+        timeUntilExpiry: session?.expires_at ? session.expires_at - now : null,
+        sessionError: sessionError?.message || null,
+        userError: userError?.message || null,
+      });
+      
+      // Si l'utilisateur est authentifié, on devrait être redirigé par le middleware
+      // Mais si on arrive ici, c'est qu'il y a un problème
+      if (currentUser && session && isSessionValid) {
+        console.warn('[SIGNIN PAGE DEBUG] ⚠️ User is authenticated but still on signin page! This should not happen.');
+      }
+    };
+    
+    checkSession();
+  }, [user, searchParams, supabase]);
 
   // Vérifier si le site est en maintenance
   useEffect(() => {

@@ -72,7 +72,28 @@ export async function middleware(request: NextRequest) {
     }
   );
 
-  const { data: { user } } = await supabase.auth.getUser();
+  const { data: { user }, error: userError } = await supabase.auth.getUser();
+  const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+
+  // Vérifier si la session est vraiment valide en vérifiant l'access_token
+  const isSessionReallyValid = session && 
+                                session.access_token && 
+                                session.expires_at && 
+                                session.expires_at > Math.floor(Date.now() / 1000) &&
+                                !sessionError;
+
+  // DEBUG: Log des informations d'authentification
+  console.log('[MIDDLEWARE DEBUG]', {
+    pathname: request.nextUrl.pathname,
+    hasUser: !!user,
+    hasSession: !!session,
+    isSessionReallyValid,
+    hasAccessToken: !!session?.access_token,
+    userError: userError?.message || null,
+    sessionError: sessionError?.message || null,
+    userId: user?.id || null,
+    sessionExpiresAt: session?.expires_at || null,
+  });
 
   // Vérifier le mode maintenance (sauf pour les routes admin, API, signin et maintenance)
   if (!request.nextUrl.pathname.startsWith('/admin') && 
@@ -135,18 +156,57 @@ export async function middleware(request: NextRequest) {
 
   // Protéger les routes /dashboard/*
   if (request.nextUrl.pathname.startsWith('/dashboard')) {
-    if (!user) {
+    // Vérifier que la session existe, n'est pas expirée, a un access_token, et qu'il n'y a pas d'erreur
+    const now = Math.floor(Date.now() / 1000);
+    const isSessionValid = session && 
+                           session.expires_at && 
+                           session.expires_at > now &&
+                           session.access_token &&
+                           !sessionError;
+    // IMPORTANT: Vérifier explicitement que TOUS les critères sont remplis
+    const isAuthenticated = !!(user && session && isSessionValid && !userError);
+    
+    console.log('[MIDDLEWARE DEBUG] /dashboard check', {
+      pathname: request.nextUrl.pathname,
+      isAuthenticated,
+      hasUser: !!user,
+      hasSession: !!session,
+      isSessionValid,
+      hasAccessToken: !!session?.access_token,
+      sessionExpiresAt: session?.expires_at || null,
+      currentTime: now,
+      timeUntilExpiry: session?.expires_at ? session.expires_at - now : null,
+      hasError: !!userError,
+      hasSessionError: !!sessionError,
+      userError: userError?.message || null,
+      sessionError: sessionError?.message || null,
+    });
+    
+    // Si PAS authentifié, rediriger vers signin
+    if (!isAuthenticated) {
       // Rediriger vers signin avec redirect URL
       const url = request.nextUrl.clone();
       url.pathname = '/signin';
       url.searchParams.set('redirect', request.nextUrl.pathname);
+      console.log('[MIDDLEWARE DEBUG] ❌ NOT authenticated, redirecting to signin:', url.toString());
+      console.log('[MIDDLEWARE DEBUG] Reason:', {
+        noUser: !user,
+        noSession: !session,
+        sessionExpired: session && session.expires_at && session.expires_at <= now,
+        noAccessToken: session && !session.access_token,
+        hasUserError: !!userError,
+        hasSessionError: !!sessionError,
+      });
       return NextResponse.redirect(url);
+    } else {
+      console.log('[MIDDLEWARE DEBUG] ✅ Authenticated, allowing access to', request.nextUrl.pathname);
     }
   }
 
   // Protéger les routes /admin/* (admin uniquement)
   if (request.nextUrl.pathname.startsWith('/admin')) {
-    if (!user) {
+    // Vérifier à la fois l'utilisateur ET la session valide
+    if (!user || !session || userError) {
       const url = request.nextUrl.clone();
       url.pathname = '/signin';
       url.searchParams.set('redirect', request.nextUrl.pathname);
@@ -224,8 +284,53 @@ export async function middleware(request: NextRequest) {
 
   // Rediriger les utilisateurs connectés qui vont sur /signin ou /signup
   // Mais permettre /auth/confirm même si connecté (pour renvoyer l'email)
-  if (user && (request.nextUrl.pathname === '/signin' || request.nextUrl.pathname === '/signup')) {
-    return NextResponse.redirect(new URL('/dashboard', request.url));
+  // Vérifier à la fois l'utilisateur ET la session valide ET que la session n'est pas expirée
+  if (request.nextUrl.pathname === '/signin' || request.nextUrl.pathname === '/signup') {
+    // Vérifier que la session existe, n'est pas expirée, a un access_token, et qu'il n'y a pas d'erreur
+    const now = Math.floor(Date.now() / 1000);
+    const isSessionValid = session && 
+                           session.expires_at && 
+                           session.expires_at > now &&
+                           session.access_token &&
+                           !sessionError;
+    // IMPORTANT: Vérifier explicitement que TOUS les critères sont remplis
+    const isAuthenticated = !!(user && session && isSessionValid && !userError);
+    
+    console.log('[MIDDLEWARE DEBUG] /signin or /signup check', {
+      pathname: request.nextUrl.pathname,
+      isAuthenticated,
+      hasUser: !!user,
+      hasSession: !!session,
+      isSessionValid,
+      hasAccessToken: !!session?.access_token,
+      sessionExpiresAt: session?.expires_at || null,
+      currentTime: now,
+      timeUntilExpiry: session?.expires_at ? session.expires_at - now : null,
+      hasError: !!userError,
+      hasSessionError: !!sessionError,
+      userError: userError?.message || null,
+      sessionError: sessionError?.message || null,
+    });
+    
+    // SEULEMENT si vraiment authentifié avec une session VALIDE, rediriger vers /dashboard
+    // Si la session n'est pas valide, on laisse l'utilisateur accéder à la page de connexion
+    // pour qu'il puisse se reconnecter
+    if (isAuthenticated) {
+      console.log('[MIDDLEWARE DEBUG] ✅ User is authenticated with valid session, redirecting to /dashboard');
+      return NextResponse.redirect(new URL('/dashboard', request.url));
+    } else {
+      console.log('[MIDDLEWARE DEBUG] ❌ User is NOT authenticated or session invalid, ALLOWING access to', request.nextUrl.pathname);
+      console.log('[MIDDLEWARE DEBUG] Reason:', {
+        noUser: !user,
+        noSession: !session,
+        sessionExpired: session && session.expires_at && session.expires_at <= now,
+        noAccessToken: session && !session.access_token,
+        hasUserError: !!userError,
+        hasSessionError: !!sessionError,
+      });
+      // Ne pas rediriger - laisser l'accès à la page de connexion
+      // Continuer normalement sans redirection
+    }
   }
 
   // Permettre /auth/confirm pour tous (nécessaire pour la confirmation d'email)
