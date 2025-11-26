@@ -45,7 +45,6 @@ function ConfirmEmailContent() {
       
       // Log pour débogage (à retirer en production)
       if (process.env.NODE_ENV === 'development') {
-        console.log('Email confirmation params:', { token_hash: !!token_hash, type, code: !!code, message, isUserLoggedIn, isEmailChange });
       }
       
       // Gérer le cas spécial du changement d'email en deux étapes
@@ -111,10 +110,6 @@ function ConfirmEmailContent() {
             }
 
             if (exchangeData?.user) {
-              // Vérifier que l'email a bien été mis à jour
-              const newEmail = exchangeData.user.email;
-              console.log('Email après confirmation:', newEmail);
-              
               // Rafraîchir la session pour s'assurer que les données sont à jour
               await supabase.auth.refreshSession();
               
@@ -229,12 +224,8 @@ function ConfirmEmailContent() {
 
         // Succès
         if (data?.user) {
-          // Pour email_change, vérifier que l'email a bien été mis à jour
+          // Pour email_change, rafraîchir la session pour s'assurer que les données sont à jour
           if (isEmailChange) {
-            const updatedEmail = data.user.email;
-            console.log('Email après confirmation (token_hash):', updatedEmail);
-            
-            // Rafraîchir la session pour s'assurer que les données sont à jour
             await supabase.auth.refreshSession();
           }
           

@@ -43,8 +43,6 @@ export async function POST(request: Request) {
     // Exclure display_order, id, created_at, updated_at
     const { display_order, id, created_at, updated_at, ...coachData } = body;
     
-    console.log('Création coach:', coachData);
-    
     // @ts-ignore - Supabase insert type incompatibility
     const { data: coach, error } = await supabase.from('coaches').insert([coachData]).select().single();
     

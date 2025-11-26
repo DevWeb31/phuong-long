@@ -10,8 +10,6 @@ import { createAPIClient } from '@/lib/supabase/server';
 
 export async function POST(request: NextRequest) {
   try {
-    console.log('[UPDATE PASSWORD API] Starting password update...');
-    
     const supabase = await createAPIClient();
     // Utiliser getUser() au lieu de getSession() pour authentifier les données
     // getUser() contacte le serveur Supabase Auth pour vérifier l'authenticité
@@ -24,8 +22,6 @@ export async function POST(request: NextRequest) {
         { status: 401 }
       );
     }
-
-    console.log('[UPDATE PASSWORD API] User authenticated:', { userId: user.id, email: user.email });
 
     const { newPassword } = await request.json();
 
@@ -46,8 +42,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.log('[UPDATE PASSWORD API] Calling supabase.auth.updateUser...');
-    
     // Mettre à jour le mot de passe
     const { data, error: updateError } = await supabase.auth.updateUser({
       password: newPassword,
@@ -61,24 +55,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.log('[UPDATE PASSWORD API] Password updated successfully, refreshing session...');
-    
     // Rafraîchir la session pour s'assurer qu'elle est à jour
     const { error: refreshError } = await supabase.auth.refreshSession();
-    
-    if (refreshError) {
-      console.warn('[UPDATE PASSWORD API] Warning: Session refresh failed:', refreshError);
-      // On continue quand même car le mot de passe a été mis à jour
-    } else {
-      console.log('[UPDATE PASSWORD API] Session refreshed successfully');
-    }
 
-    console.log('[UPDATE PASSWORD API] ✅ Password update completed successfully');
-    
-    return NextResponse.json(
-      { success: true, data },
-      { status: 200 }
-    );
+    const responsePayload = refreshError
+      ? { success: true, data, warning: 'Session refresh failed' }
+      : { success: true, data };
+
+    return NextResponse.json(responsePayload, { status: 200 });
 
   } catch (error) {
     console.error('[UPDATE PASSWORD API] Unexpected error:', error);

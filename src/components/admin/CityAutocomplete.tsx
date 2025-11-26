@@ -69,19 +69,11 @@ export function CityAutocomplete({
 
       if (response.ok) {
         const data = await response.json();
-        console.log('CityAutocomplete - API response:', data);
         // Grouper par nom de ville et combiner les codes postaux
         const cityMap = new Map<string, City>();
         
         data.forEach((commune: any) => {
           const nom = commune.nom;
-          console.log('CityAutocomplete - Processing commune:', { 
-            nom, 
-            codesPostaux: commune.codesPostaux, 
-            codePostal: commune.codePostal,
-            type: typeof commune.codesPostaux, 
-            isArray: Array.isArray(commune.codesPostaux) 
-          });
           
           // L'API retourne codesPostaux (au pluriel) comme array
           let codesPostaux: string[] = [];
@@ -95,8 +87,6 @@ export function CityAutocomplete({
               codesPostaux = [commune.codePostal];
             }
           }
-          
-          console.log('CityAutocomplete - codesPostaux after processing:', codesPostaux);
           
           // Si pas de code postal, on crée quand même une entrée
           if (codesPostaux.length === 0) {
@@ -119,7 +109,6 @@ export function CityAutocomplete({
                     codePostal: cpStr,
                     codeCommune: commune.code || '',
                   };
-                  console.log('CityAutocomplete - Adding city:', city);
                   cityMap.set(key, city);
                 }
               }
@@ -128,7 +117,6 @@ export function CityAutocomplete({
         });
 
         const suggestionsList = Array.from(cityMap.values());
-        console.log('CityAutocomplete - Final suggestions:', suggestionsList);
         setSuggestions(suggestionsList);
       }
     } catch (error) {
@@ -167,7 +155,6 @@ export function CityAutocomplete({
     setShowSuggestions(false);
     setSuggestions([]);
     const postalCode = city.codePostal ? String(city.codePostal).trim() : '';
-    console.log('CityAutocomplete - selectCity:', { city, postalCode, codePostal: city.codePostal });
     // Appeler onChange avec la ville et le code postal
     onChange(city.nom, postalCode);
     // Appeler aussi onPostalCodeChange si fourni (même si vide)

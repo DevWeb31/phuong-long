@@ -29,7 +29,6 @@ export async function POST(request: Request) {
 
     if (error) {
       // Pour éviter l'énumération des emails on reste vague côté client.
-      console.warn('[RESET PASSWORD] Supabase error:', error);
       return NextResponse.json({ success: true });
     }
 

@@ -379,7 +379,6 @@ export function ClubFormModal({ isOpen, onClose, onSubmit, club, isLoading = fal
     // Supprimer l'ancienne image du storage si elle existe et que l'image a été supprimée
     if (originalCoverImageUrl && !finalCoverImageUrl && originalCoverImageUrl.includes('/storage/v1/object/public/clubs/')) {
       try {
-        console.log('🗑️ Suppression de l\'ancienne image lors de la sauvegarde:', originalCoverImageUrl);
         const deleteResponse = await fetch('/api/admin/delete-image', {
           method: 'DELETE',
           headers: {
@@ -390,15 +389,10 @@ export function ClubFormModal({ isOpen, onClose, onSubmit, club, isLoading = fal
           }),
         });
 
-        if (deleteResponse.ok) {
-          console.log('✅ Ancienne image supprimée du storage avec succès');
-        } else {
-          const errorData = await deleteResponse.json();
-          console.warn('⚠️ Erreur lors de la suppression de l\'ancienne image:', errorData);
+        if (!deleteResponse.ok) {
           // Ne pas bloquer la sauvegarde si la suppression échoue
         }
-      } catch (error) {
-        console.warn('⚠️ Erreur lors de la suppression de l\'ancienne image:', error);
+      } catch {
         // Ne pas bloquer la sauvegarde si la suppression échoue
       }
     }
@@ -413,11 +407,6 @@ export function ClubFormModal({ isOpen, onClose, onSubmit, club, isLoading = fal
         ? cleanedSocialMediaFiltered as { facebook?: string; instagram?: string; youtube?: string }
         : undefined,
     };
-    
-    console.log('📤 Envoi des données du club:', { 
-      ...cleanedData, 
-      cover_image_url: finalCoverImageUrl === null ? 'NULL (suppression)' : finalCoverImageUrl 
-    });
     
     await onSubmit(cleanedData);
     
@@ -832,16 +821,11 @@ export function ClubFormModal({ isOpen, onClose, onSubmit, club, isLoading = fal
                 <CityAutocomplete
                   value={formData.city || ''}
                   onChange={(city, postalCode) => {
-                    console.log('ClubFormModal - onChange:', { city, postalCode });
-                    setFormData(prev => {
-                      const newData = {
-                        ...prev,
-                        city,
-                        postal_code: postalCode,
-                      };
-                      console.log('ClubFormModal - new formData:', newData);
-                      return newData;
-                    });
+                    setFormData(prev => ({
+                      ...prev,
+                      city,
+                      postal_code: postalCode,
+                    }));
                     // Effacer les erreurs de validation si elles existent
                     if (validationErrors.city || validationErrors.postal_code) {
                       setValidationErrors(prev => {

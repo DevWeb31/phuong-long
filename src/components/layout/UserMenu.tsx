@@ -69,18 +69,11 @@ export function UserMenu() {
   }, []);
 
   if (!user) {
-    console.log('[USERMENU DEBUG] No user, showing signin link');
     return (
       <div className="flex items-center gap-3">
         <Link
           href="/signin"
           className="text-sm font-medium dark:text-gray-300 hover:text-primary transition-colors"
-          onClick={(e) => {
-            console.log('[USERMENU DEBUG] Signin link clicked, href:', e.currentTarget.href);
-            console.log('[USERMENU DEBUG] Current URL:', window.location.href);
-            console.log('[USERMENU DEBUG] Will navigate to:', '/signin');
-            // Ne pas empêcher la navigation par défaut
-          }}
         >
           Connexion
         </Link>
@@ -148,7 +141,7 @@ export function UserMenu() {
             {/* Menu Items */}
             <div className="py-2">
               <Link
-                href="/dashboard"
+                href="/dashboard/home"
                 className={cn(
                   'flex items-center gap-3 px-4 py-2.5 text-sm',
                   'hover:bg-primary/5 hover:text-primary transition-all duration-200',

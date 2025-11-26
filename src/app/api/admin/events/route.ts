@@ -59,8 +59,6 @@ export async function POST(request: Request) {
 
     const body = await request.json();
     
-    console.log('[DEBUG] Event data received:', body);
-
     // @ts-ignore - Supabase insert type incompatibility
     const { data, error } = await supabase.from('events').insert([body]).select().single();
 

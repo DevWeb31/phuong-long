@@ -242,7 +242,6 @@ export default function AccountPage() {
   };
 
   const handlePasswordChange = async () => {
-    console.log('[PASSWORD CHANGE] Starting password change process');
     setPasswordMessage(null);
 
     // Vérifier que l'ancien mot de passe est fourni
@@ -271,12 +270,9 @@ export default function AccountPage() {
       return;
     }
 
-    console.log('[PASSWORD CHANGE] Validation passed, setting loading to true');
     setPasswordLoading(true);
 
     try {
-      console.log('[PASSWORD CHANGE] Verifying old password...');
-      
       // Vérifier d'abord que l'utilisateur est bien connecté
       if (!user || !user.email) {
         console.error('[PASSWORD CHANGE] No user or email found');
@@ -286,7 +282,6 @@ export default function AccountPage() {
       }
 
       // Vérifier l'ancien mot de passe via une API route pour ne pas perturber la session
-      console.log('[PASSWORD CHANGE] Calling verify-password API...');
       const verifyResponse = await fetch('/api/auth/verify-password', {
         method: 'POST',
         headers: {
@@ -296,19 +291,14 @@ export default function AccountPage() {
       });
 
       const verifyResult = await verifyResponse.json();
-      console.log('[PASSWORD CHANGE] Verify result:', verifyResult);
 
       if (!verifyResult.success) {
-        console.log('[PASSWORD CHANGE] Old password incorrect, stopping');
         setPasswordMessage({ type: 'error', text: verifyResult.error || 'Ancien mot de passe incorrect' });
         setPasswordLoading(false);
         return;
       }
 
-      console.log('[PASSWORD CHANGE] Old password verified, updating password...');
-      
       // Mettre à jour le mot de passe via une API route pour éviter les problèmes de session
-      console.log('[PASSWORD CHANGE] Calling update-password API...');
       const updateResponse = await fetch('/api/auth/update-password', {
         method: 'POST',
         headers: {
@@ -318,17 +308,13 @@ export default function AccountPage() {
       });
 
       const updateResult = await updateResponse.json();
-      console.log('[PASSWORD CHANGE] Update result:', updateResult);
 
       if (!updateResult.success) {
-        console.log('[PASSWORD CHANGE] Update error:', updateResult.error);
         setPasswordMessage({ type: 'error', text: updateResult.error || 'Erreur lors de la mise à jour du mot de passe' });
         setPasswordLoading(false);
         return;
       }
 
-      // Succès
-      console.log('[PASSWORD CHANGE] Password updated successfully!');
       setPasswordMessage({ type: 'success', text: 'Mot de passe mis à jour avec succès !' });
       setPasswordData({ oldPassword: '', newPassword: '', confirmPassword: '' });
       
@@ -337,20 +323,17 @@ export default function AccountPage() {
       try {
         const { createClient } = await import('@/lib/supabase/client');
         const supabase = createClient();
-        // Ne pas await pour ne pas bloquer, mais on peut quand même essayer
-        supabase.auth.refreshSession().catch((refreshErr) => {
-          console.warn('[PASSWORD CHANGE] Session refresh failed (non-critical):', refreshErr);
+        supabase.auth.refreshSession().catch(() => {
+          /* best-effort refresh */
         });
-      } catch (refreshErr) {
-        console.warn('[PASSWORD CHANGE] Could not refresh session (non-critical):', refreshErr);
+      } catch {
+        /* ignore refresh errors */
       }
     } catch (err) {
       console.error('[PASSWORD CHANGE] Unexpected error:', err);
       const errorMessage = err instanceof Error ? err.message : 'Une erreur est survenue lors du changement de mot de passe';
       setPasswordMessage({ type: 'error', text: errorMessage });
     } finally {
-      // Toujours réinitialiser le loading, même en cas d'erreur
-      console.log('[PASSWORD CHANGE] Finally block: setting loading to false');
       setPasswordLoading(false);
     }
   };

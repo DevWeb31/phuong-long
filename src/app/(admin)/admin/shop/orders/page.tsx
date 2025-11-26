@@ -197,13 +197,11 @@ export default function AdminShopOrdersPage() {
     },
   ];
 
-  const handleEdit = (order: Order) => {
-    console.log('Edit order:', order);
+  const handleEdit = (_order: Order) => {
     // TODO: Ouvrir modal ou page détails commande
   };
 
-  const handleView = (order: Order) => {
-    console.log('View order:', order);
+  const handleView = (_order: Order) => {
     // TODO: Ouvrir modal détails commande
   };
 

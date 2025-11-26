@@ -44,22 +44,18 @@ function ConfirmEmailChangeContent() {
             if (refreshError) {
               console.error('Erreur lors du refresh de la session:', refreshError);
               // Essayer avec getUser() comme fallback
-              const { data: { user }, error: userError } = await supabase.auth.getUser();
+              const { error: userError } = await supabase.auth.getUser();
               if (userError) {
                 console.error('Erreur lors de la récupération de l\'utilisateur:', userError);
-              } else if (user) {
-                console.log('Email mis à jour via getUser():', user.email);
               }
             } else if (refreshedSession?.user) {
-              console.log('✅ Session rafraîchie avec nouvel email:', refreshedSession.user.email);
+              // Session rafraîchie avec nouvel email
             }
           } else {
             // Pas de refresh token, utiliser getUser() comme fallback
-            const { data: { user }, error: userError } = await supabase.auth.getUser();
+            const { error: userError } = await supabase.auth.getUser();
             if (userError) {
               console.error('Erreur lors de la récupération de l\'utilisateur:', userError);
-            } else if (user) {
-              console.log('Email mis à jour via getUser():', user.email);
             }
           }
           

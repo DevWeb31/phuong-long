@@ -100,8 +100,6 @@ export async function PUT(
       ...media.values,
     };
     
-    console.log('Mise à jour hero slide:', { id, body });
-    
     // @ts-ignore - Supabase update type incompatibility
     const { data: slide, error } = await supabase
       .from('hero_slides')

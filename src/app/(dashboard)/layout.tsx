@@ -26,7 +26,7 @@ export const metadata: Metadata = {
 };
 
 const navigation = [
-  { name: 'Tableau de bord', href: '/dashboard', icon: HomeIcon },
+  { name: 'Tableau de bord', href: '/dashboard/home', icon: HomeIcon },
   { name: 'Mon profil', href: '/dashboard/profile', icon: UserIcon },
   { name: 'Paramètres', href: '/dashboard/account', icon: Cog6ToothIcon },
 ];
@@ -36,9 +36,6 @@ export default function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  // DEBUG: Log côté serveur (visible dans le terminal)
-  console.log('[DASHBOARD LAYOUT DEBUG] Layout rendered');
-  
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Simple Header */}

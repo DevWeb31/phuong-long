@@ -25,8 +25,6 @@ export async function PUT(
     // Exclure display_order, id, created_at, updated_at
     const { display_order, id: _id, created_at, updated_at, ...coachData } = body;
     
-    console.log('Mise à jour coach:', { id, coachData });
-    
     // @ts-ignore - Supabase update type incompatibility
     const { data: coach, error } = await supabase.from('coaches').update(coachData).eq('id', id).select().single();
     

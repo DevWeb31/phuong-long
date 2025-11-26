@@ -69,8 +69,6 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: media.error }, { status: 400 });
     }
     
-    console.log('Création hero slide:', body);
-    
     if (!body.title) {
       return NextResponse.json(
         { error: 'Le titre est obligatoire' },

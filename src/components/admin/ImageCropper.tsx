@@ -145,7 +145,6 @@ export function ImageCropper({
             resolve(dataUrl);
           } catch (error) {
             // Si CORS bloque, on utilise directement l'URL
-            console.warn('CORS bloqué, utilisation directe de l\'URL:', error);
             setImageSrc(imageUrl);
             setZoom(1);
             setPosition({ x: 0, y: 0 });
@@ -334,24 +333,6 @@ export function ImageCropper({
         const sourceWidth = cropWidthNormal * scaleX;
         const sourceHeight = cropHeightNormal * scaleY;
 
-        // Logs de débogage (uniquement en développement)
-        if (process.env.NODE_ENV === 'development') {
-          console.log('🔍 Calculs de recadrage:', {
-            containerSize: `${containerRect.width.toFixed(2)}x${containerRect.height.toFixed(2)}`,
-            imageSource: `${img.width}x${img.height}`,
-            displayedImage: `${displayedWidth.toFixed(2)}x${displayedHeight.toFixed(2)}`,
-            offset: `X:${offsetX.toFixed(2)}, Y:${offsetY.toFixed(2)}`,
-            scale: `X:${scaleX.toFixed(4)}, Y:${scaleY.toFixed(4)}`,
-            zoom,
-            position: `X:${position.x.toFixed(2)}, Y:${position.y.toFixed(2)}`,
-            cropCenterRelative: `X:${cropCenterXRelative.toFixed(2)}, Y:${cropCenterYRelative.toFixed(2)}`,
-            cropAfterScale: `X:${cropXAfterScale.toFixed(2)}, Y:${cropYAfterScale.toFixed(2)}`,
-            cropNormal: `X:${cropXNormal.toFixed(2)}, Y:${cropYNormal.toFixed(2)}`,
-            cropSizeNormal: `${cropWidthNormal.toFixed(2)}x${cropHeightNormal.toFixed(2)}`,
-            source: `X:${sourceX.toFixed(2)}, Y:${sourceY.toFixed(2)}, W:${sourceWidth.toFixed(2)}, H:${sourceHeight.toFixed(2)}`,
-          });
-        }
-
         // S'assurer que les coordonnées sont valides
         const clampedSourceX = Math.max(0, Math.min(sourceX, img.width - sourceWidth));
         const clampedSourceY = Math.max(0, Math.min(sourceY, img.height - sourceHeight));
@@ -432,12 +413,10 @@ export function ImageCropper({
   const handleCrop = useCallback(async () => {
     setIsCropping(true);
     try {
-      console.log('Début du recadrage et conversion en WebP...');
       
       // Supprimer l'ancienne image si elle existe et vient d'un bucket autorisé
       const imageToDelete = uploadedImageUrl || value;
       if (isBucketUrl(imageToDelete)) {
-        console.log('🗑️ Suppression de l\'ancienne image:', imageToDelete);
         try {
           const deleteResponse = await fetch('/api/admin/delete-image', {
             method: 'DELETE',
@@ -449,21 +428,17 @@ export function ImageCropper({
             }),
           });
 
-          if (deleteResponse.ok) {
-            console.log('✅ Ancienne image supprimée avec succès');
-          } else {
+          if (!deleteResponse.ok) {
             // Ne pas bloquer l'upload si la suppression échoue (l'image peut déjà être supprimée)
-            console.warn('⚠️ Impossible de supprimer l\'ancienne image (peut-être déjà supprimée)');
           }
         } catch (deleteError) {
           // Ne pas bloquer l'upload si la suppression échoue
-          console.warn('⚠️ Erreur lors de la suppression de l\'ancienne image:', deleteError);
+          // (erreur ignorée volontairement)
         }
       }
 
       const croppedDataUrl = await getCroppedImage();
       if (croppedDataUrl) {
-        console.log(`Image recadrée obtenue, upload vers Supabase Storage (bucket: ${bucket})...`);
         // Upload vers Supabase Storage (optimisé en WebP automatiquement)
         const response = await fetch('/api/admin/upload-image', {
           method: 'POST',
@@ -479,10 +454,6 @@ export function ImageCropper({
 
         if (response.ok) {
           const data = await response.json();
-          const sizeInfo = imageType === 'cover' ? '1200x675px' : '400x400px';
-          console.log('✅ Image convertie en WebP et uploadée avec succès:', data.url);
-          console.log(`📦 Bucket Supabase: ${bucket}`);
-          console.log(`📏 Taille optimisée: ${sizeInfo}`);
           setUploadedImageUrl(data.url); // Mémoriser l'URL uploadée
           onChange(data.url);
           setIsCropping(false);
@@ -508,7 +479,6 @@ export function ImageCropper({
     const imageToDelete = uploadedImageUrl || value;
     if (isBucketUrl(imageToDelete)) {
       try {
-        console.log('🗑️ Suppression de l\'image lors de la suppression:', imageToDelete);
         await fetch('/api/admin/delete-image', {
           method: 'DELETE',
           headers: {
@@ -518,9 +488,8 @@ export function ImageCropper({
             imageUrl: imageToDelete,
           }),
         });
-        console.log('✅ Image supprimée du storage');
       } catch (error) {
-        console.warn('⚠️ Erreur lors de la suppression de l\'image:', error);
+        // Erreur ignorée pour éviter de bloquer l'utilisateur
       }
     }
 

@@ -93,7 +93,6 @@ export function CoverImageUploader({
 
         if (response.ok) {
           const data = await response.json();
-          console.log('✅ Image convertie en WebP et uploadée avec succès:', data.url);
           onChange(data.url);
           setImageUrl('');
         } else {
@@ -161,7 +160,6 @@ export function CoverImageUploader({
 
         if (response.ok) {
           const data = await response.json();
-          console.log('✅ Image téléchargée, convertie en WebP et uploadée avec succès:', data.url);
           onChange(data.url);
           setImageUrl('');
         } else {

@@ -156,8 +156,6 @@ export default function AdminCoachesPage() {
   const handleSubmit = async (coachData: Partial<Coach>) => {
     try {
       setIsSubmitting(true);
-      console.log('handleSubmit appelé avec:', coachData);
-      console.log('photo_url dans coachData:', coachData.photo_url);
       
       const url = selectedCoach
         ? `/api/admin/coaches/${selectedCoach.id}`
@@ -185,8 +183,6 @@ export default function AdminCoachesPage() {
         delete (dataToSend as any).updated_at;
       }
       
-      console.log('Données envoyées à l\'API:', dataToSend);
-      console.log('photo_url dans dataToSend:', dataToSend.photo_url);
       
       const response = await fetch(url, {
         method,

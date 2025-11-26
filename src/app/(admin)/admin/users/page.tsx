@@ -300,8 +300,7 @@ export default function AdminUsersPage() {
     }
   };
 
-  const handleView = (user: User) => {
-    console.log('View user:', user);
+  const handleView = (_user: User) => {
     // TODO: Ouvrir modal ou page détails utilisateur
   };
 

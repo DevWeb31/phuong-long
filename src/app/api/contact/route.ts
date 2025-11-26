@@ -30,9 +30,8 @@ const contactSchema = z.object({
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    
-    // Validation des données
-    const validatedData = contactSchema.parse(body);
+    // Validation des données (déclenche une erreur Zod si invalide)
+    contactSchema.parse(body);
 
     // TODO: Implémenter l'envoi d'email
     // Options possibles :
@@ -41,14 +40,6 @@ export async function POST(request: NextRequest) {
     // - AWS SES
     // - Nodemailer avec SMTP
     
-    // Pour l'instant, on simule un succès et on log les données
-    console.log('[EMAIL] Nouveau message de contact:', {
-      from: validatedData.email,
-      name: validatedData.name,
-      subject: validatedData.subject,
-      timestamp: new Date().toISOString(),
-    });
-
     // TODO: Enregistrer le message dans Supabase (table contact_messages)
     // const supabase = await createServerClient();
     // await supabase.from('contact_messages').insert({

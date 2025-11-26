@@ -63,8 +63,6 @@ export async function POST(request: Request) {
     }
 
     // Télécharger l'image depuis l'URL
-    console.log('📥 Téléchargement de l\'image depuis:', imageUrl);
-    
     const imageResponse = await fetch(imageUrl, {
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
@@ -140,16 +138,7 @@ export async function POST(request: Request) {
     // Générer un nom de fichier unique en WebP
     const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.webp`;
 
-    // Upload vers Supabase Storage (toujours en WebP maintenant)
-    console.log('📤 Tentative d\'upload vers Supabase Storage:', {
-      bucket: bucketName,
-      fileName,
-      format: 'WebP',
-      bufferSize: `${(optimizedBuffer.length / 1024).toFixed(2)} KB`,
-      user: user.id,
-    });
-
-    const { data, error } = await supabase.storage
+    const { error } = await supabase.storage
       .from(bucketName)
       .upload(fileName, optimizedBuffer, {
         contentType: 'image/webp',
@@ -172,20 +161,10 @@ export async function POST(request: Request) {
       );
     }
 
-    console.log('✅ Upload réussi vers Supabase Storage:', data);
-
     // Obtenir l'URL publique
     const { data: urlData } = supabase.storage
       .from(bucketName)
       .getPublicUrl(fileName);
-
-    console.log('✅ Image téléchargée, convertie en WebP et uploadée avec succès:', {
-      fileName,
-      url: urlData.publicUrl,
-      bucket: bucketName,
-      format: 'WebP',
-      size: `${(optimizedBuffer.length / 1024).toFixed(2)} KB`,
-    });
 
     return NextResponse.json({
       url: urlData.publicUrl,

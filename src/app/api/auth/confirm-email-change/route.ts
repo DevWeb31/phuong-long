@@ -125,7 +125,7 @@ export async function GET(request: NextRequest) {
           // Continuer quand même, le refresh se fera côté client
         } else if (refreshedSession) {
           // La session a été rafraîchie avec le nouvel email
-          console.log('[EMAIL CHANGE] Session rafraîchie avec nouvel email:', refreshedSession.user.email);
+          // Session rafraîchie avec nouvel email
         }
       }
     } catch (refreshError) {
