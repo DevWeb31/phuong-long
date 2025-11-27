@@ -124,30 +124,35 @@ export default function DashboardHomePage() {
 
   // Charger les clubs et le statut d'adhésion
   useEffect(() => {
+    if (authLoading) {
+      return;
+    }
+
     const loadData = async () => {
-      if (!user) return;
 
       try {
         setIsLoading(true);
 
-        // Charger les clubs
-        const clubsResponse = await fetch('/api/clubs');
+        const [clubsResponse, statusResponse] = await Promise.all([
+          fetch('/api/clubs', { cache: 'no-store', credentials: 'include' }),
+          fetch('/api/clubs/membership-status', { cache: 'no-store', credentials: 'include' }),
+        ]);
+
         if (clubsResponse.ok) {
           const clubsData = await clubsResponse.json();
           setClubs(clubsData);
         }
 
-        // Charger le statut d'adhésion
-        const statusResponse = await fetch('/api/clubs/membership-status');
         if (statusResponse.ok) {
           const statusData = await statusResponse.json();
           if (statusData.success) {
             setMembershipStatus(statusData.data);
             
-            // Si l'utilisateur a un club (via favorite_club_id ou demande approuvée), charger les informations
-            if (statusData.data.hasClub || 
-                statusData.data.favoriteClubId || 
-                (statusData.data.approvedRequests && statusData.data.approvedRequests.length > 0)) {
+            if (
+              statusData.data.hasClub ||
+              statusData.data.favoriteClubId ||
+              (statusData.data.approvedRequests && statusData.data.approvedRequests.length > 0)
+            ) {
               await loadClubInfo();
             }
           }
@@ -160,7 +165,7 @@ export default function DashboardHomePage() {
     };
 
     loadData();
-  }, [user]);
+  }, [authLoading, user?.id]);
 
   const handleClubSelect = (clubId: string) => {
     const club = clubs.find(c => c.id === clubId);

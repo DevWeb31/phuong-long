@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Roboto } from 'next/font/google';
 import { ThemeProvider } from '@/lib/contexts/ThemeContext';
 import { CartProvider } from '@/lib/contexts/CartContext';
+import { AuthProvider } from '@/lib/hooks/useAuth';
 import './globals.css';
 
 const roboto = Roboto({
@@ -83,11 +84,13 @@ export default function RootLayout({
   return (
     <html lang="fr" className={`${roboto.variable} ${heading.variable}`} suppressHydrationWarning>
       <body className="font-sans antialiased flex flex-col min-h-screen" suppressHydrationWarning>
-        <ThemeProvider>
-          <CartProvider>
-            {children}
-          </CartProvider>
-        </ThemeProvider>
+        <AuthProvider>
+          <ThemeProvider>
+            <CartProvider>
+              {children}
+            </CartProvider>
+          </ThemeProvider>
+        </AuthProvider>
       </body>
     </html>
   );

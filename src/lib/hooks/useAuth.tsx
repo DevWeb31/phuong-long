@@ -1,17 +1,14 @@
 /**
  * useAuth Hook
- * 
- * Hook personnalisé pour gérer l'authentification
- * 
- * @version 1.0
- * @date 2025-11-04 23:35
+ *
+ * Gestion centralisée de l'authentification (context + provider)
  */
 
 'use client';
 
-import { useEffect, useState, useMemo } from 'react';
+import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
-import { User, Session } from '@supabase/supabase-js';
+import type { Session, User, AuthError, AuthResponse } from '@supabase/supabase-js';
 import { createClient } from '@/lib/supabase/client';
 
 interface AuthState {
@@ -20,56 +17,60 @@ interface AuthState {
   loading: boolean;
 }
 
-export function useAuth() {
+interface AuthContextValue extends AuthState {
+  signIn: (email: string, password: string) => Promise<{ data: AuthResponse['data']; error: AuthError | null }>;
+  signUp: (email: string, password: string, metadata?: Record<string, unknown>) => Promise<{ data: unknown; error: { message: string; status?: number } | null }>;
+  signOut: () => Promise<{ error: { message: string } | null }>;
+  resetPassword: (email: string) => Promise<{ data: { success: boolean } | null; error: { message: string; status?: number } | null }>;
+  updatePassword: (newPassword: string) => Promise<{ data: Session | null; error: AuthError | null }>;
+  updateEmail: (newEmail: string, confirmEmail: string) => Promise<{ data: unknown; error: { message: string; status?: number } | null }>;
+  deleteAccount: (confirmEmail: string) => Promise<{ data: unknown; error: { message: string; status?: number } | null }>;
+  isAuthenticated: boolean;
+}
+
+const AuthContext = createContext<AuthContextValue | undefined>(undefined);
+
+export function AuthProvider({ children }: { children: ReactNode }) {
   const [authState, setAuthState] = useState<AuthState>({
     user: null,
     session: null,
     loading: true,
   });
   const router = useRouter();
-  // Utiliser useMemo pour créer le client une seule fois
-  const supabase = useMemo(() => createClient(), []);
+  const supabaseRef = useRef<ReturnType<typeof createClient> | null>(null);
+
+  if (!supabaseRef.current) {
+    supabaseRef.current = createClient();
+  }
+
+  const supabase = supabaseRef.current;
 
   useEffect(() => {
     let mounted = true;
 
-    // Récupérer la session initiale
     const getSession = async () => {
       try {
-        // Essayer d'abord getSession (rapide, depuis le cache)
         const { data: { session } } = await supabase.auth.getSession();
 
         if (mounted) {
           if (session?.user) {
             setAuthState({
               user: session.user,
-              session: session,
+              session,
               loading: false,
             });
           } else {
-            // Si pas de session dans le cache, essayer getUser() qui force une vérification serveur
-            const { data: { user: serverUser } } = await supabase.auth.getUser();
-            
+            const { data: { user } } = await supabase.auth.getUser();
             if (mounted) {
-              if (serverUser) {
-                // Récupérer la session complète si on a un user
-                const { data: { session: newSession } } = await supabase.auth.getSession();
-                setAuthState({
-                  user: serverUser,
-                  session: newSession ?? null,
-                  loading: false,
-                });
-              } else {
-                setAuthState({
-                  user: null,
-                  session: null,
-                  loading: false,
-                });
-              }
+              setAuthState({
+                user: user ?? null,
+                session: session ?? null,
+                loading: false,
+              });
             }
           }
         }
-      } catch (err) {
+      } catch {
         if (mounted) {
           setAuthState({
             user: null,
@@ -80,51 +81,35 @@ export function useAuth() {
       }
     };
 
-    getSession();
+    void getSession();
 
-    // Écouter les changements d'authentification
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        // Si la session change (ex: après changement d'email), forcer un refresh
-        if (event === 'TOKEN_REFRESHED' || event === 'SIGNED_IN' || event === 'USER_UPDATED') {
-          // Récupérer les données utilisateur à jour depuis le serveur
-          if (session) {
-            const { data: { user } } = await supabase.auth.getUser();
-            setAuthState({
-              user: user ?? session.user ?? null,
-              session: session ?? null,
-              loading: false,
-            });
-          } else {
-            setAuthState({
-              user: null,
-              session: null,
-              loading: false,
-            });
-          }
-        } else {
-          setAuthState({
-            user: session?.user ?? null,
-            session: session ?? null,
-            loading: false,
-          });
-        }
-        router.refresh();
-      }
-    );
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setAuthState({
+        user: session?.user ?? null,
+        session: session ?? null,
+        loading: false,
+      });
+    });
 
     return () => {
       mounted = false;
       subscription.unsubscribe();
     };
-  }, [router, supabase]);
+  }, [supabase]);
 
   const signIn = async (email: string, password: string) => {
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-    return { data, error };
+    const result = await supabase.auth.signInWithPassword({ email, password });
+
+    if (!result.error && result.data.session) {
+      setAuthState({
+        user: result.data.session.user,
+        session: result.data.session,
+        loading: false,
+      });
+      router.refresh();
+    }
+
+    return result;
   };
 
   const signUp = async (email: string, password: string, metadata?: Record<string, unknown>) => {
@@ -173,30 +158,37 @@ export function useAuth() {
   };
 
   const signOut = async () => {
-    try {
-      // Déconnecter de Supabase
-      const { error } = await supabase.auth.signOut();
-      
-      if (error) {
-        return { error };
-      }
+    await supabase.auth.signOut().catch(() => undefined);
 
-      // Mettre à jour l'état local immédiatement
-      setAuthState({
-        user: null,
-        session: null,
-        loading: false,
+    setAuthState({
+      user: null,
+      session: null,
+      loading: false,
+    });
+
+    try {
+      const response = await fetch('/api/auth/signout', {
+        method: 'POST',
+        cache: 'no-store',
+        credentials: 'same-origin',
       });
 
-      // Rediriger vers la page d'accueil
+      if (!response.ok) {
+        const data = (await response.json().catch(() => null)) as { error?: string } | null;
+        return {
+          error: {
+            message: data?.error || 'Impossible de terminer la déconnexion',
+          },
+        };
+      }
+
       router.push('/');
       router.refresh();
-      
       return { error: null };
-    } catch (err) {
+    } catch (error) {
       return {
         error: {
-          message: err instanceof Error ? err.message : 'Erreur lors de la déconnexion',
+          message: error instanceof Error ? error.message : 'Erreur lors de la déconnexion',
         },
       };
     }
@@ -243,7 +235,6 @@ export function useAuth() {
 
   const updateEmail = async (newEmail: string, confirmEmail: string) => {
     try {
-      // Utiliser la nouvelle API personnalisée pour le changement d'email
       const response = await fetch('/api/auth/change-email', {
         method: 'POST',
         headers: {
@@ -300,7 +291,6 @@ export function useAuth() {
         };
       }
 
-      // Déconnecter l'utilisateur et rediriger vers la page d'accueil
       await supabase.auth.signOut();
       router.push('/');
 
@@ -318,7 +308,7 @@ export function useAuth() {
     }
   };
 
-  return {
+  const value: AuthContextValue = {
     user: authState.user,
     session: authState.session,
     loading: authState.loading,
@@ -331,5 +321,21 @@ export function useAuth() {
     deleteAccount,
     isAuthenticated: !!authState.user,
   };
+
+  return (
+    <AuthContext.Provider value={value}>
+      {children}
+    </AuthContext.Provider>
+  );
+}
+
+export function useAuth() {
+  const context = useContext(AuthContext);
+
+  if (!context) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+
+  return context;
 }
 

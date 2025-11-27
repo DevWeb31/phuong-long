@@ -289,7 +289,10 @@ export function UserMenu() {
             <button
               onClick={async () => {
                 setIsOpen(false);
-                await signOut();
+                const result = await signOut();
+                if (result?.error) {
+                  console.error('[UserMenu] Erreur logout', result.error);
+                }
               }}
               className={cn(
                 'flex items-center gap-3 px-4 py-3 text-sm font-medium w-full',

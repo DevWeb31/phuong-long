@@ -178,19 +178,21 @@ export default function AdminSettingsPage() {
     return acc;
   }, {} as Record<string, SiteSetting[]>);
 
-  const categories = ['developer', ...Object.keys(groupedSettings)].sort((a, b) => {
-    if (a === 'developer') return -1; // "Développeur" en premier
-    if (a === 'general') return -1;
-    if (b === 'general') return 1;
-    return a.localeCompare(b);
-  });
+  const baseCategories = Object.keys(groupedSettings);
+  const categories = [
+    'general',
+    ...baseCategories.filter((category) => category !== 'general' && category !== 'developer'),
+    'developer',
+  ].filter((category, index, self) => self.indexOf(category) === index);
 
   useEffect(() => {
-    if (categories.length > 0 && !categories.includes(activeCategory)) {
-      const firstCategory = categories[0];
-      if (firstCategory) {
-        setActiveCategory(firstCategory);
-      }
+    if (!categories.length) {
+      return;
+    }
+
+    const hasActiveCategory = categories.includes(activeCategory);
+    if (!hasActiveCategory) {
+      setActiveCategory(categories[0]);
     }
   }, [categories, activeCategory]);
 

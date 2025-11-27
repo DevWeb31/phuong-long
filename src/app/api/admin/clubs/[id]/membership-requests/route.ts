@@ -8,6 +8,86 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createAPIClient, createAdminClient } from '@/lib/supabase/server';
 import { checkAdminRole } from '@/lib/utils/check-admin-role';
 
+interface UserProfile {
+  id: string;
+  full_name: string | null;
+  username: string | null;
+}
+
+interface UserMetadata {
+  full_name?: string;
+  fullName?: string;
+  name?: string;
+  first_name?: string;
+  firstName?: string;
+  prenom?: string;
+  last_name?: string;
+  lastName?: string;
+  nom?: string;
+  [key: string]: unknown;
+}
+
+interface AuthUserSnapshot {
+  id: string;
+  email: string;
+  metadata: UserMetadata | null;
+}
+
+const pickFirstString = (metadata: UserMetadata | null, keys: string[]): string | null => {
+  if (!metadata) {
+    return null;
+  }
+
+  for (const key of keys) {
+    const value = metadata[key];
+    if (typeof value === 'string' && value.trim().length > 0) {
+      return value.trim();
+    }
+  }
+
+  return null;
+};
+
+const resolveMetadataFullName = (metadata: UserMetadata | null): string | null => {
+  const directMatch = pickFirstString(metadata, ['full_name', 'fullName', 'name']);
+  if (directMatch) {
+    return directMatch;
+  }
+
+  const firstName = pickFirstString(metadata, ['first_name', 'firstName', 'prenom']);
+  const lastName = pickFirstString(metadata, ['last_name', 'lastName', 'nom']);
+
+  const combined = [firstName, lastName].filter(Boolean).join(' ').trim();
+  return combined.length > 0 ? combined : null;
+};
+
+const buildDisplayName = (
+  profile: UserProfile | undefined,
+  authSnapshot: AuthUserSnapshot | undefined,
+): string => {
+  const profileName = profile?.full_name?.trim();
+  if (profileName) {
+    return profileName;
+  }
+
+  const metadataName = resolveMetadataFullName(authSnapshot?.metadata ?? null);
+  if (metadataName) {
+    return metadataName;
+  }
+
+  const username = profile?.username?.trim();
+  if (username) {
+    return username;
+  }
+
+  const emailLocalPart = authSnapshot?.email?.split('@')[0];
+  if (emailLocalPart) {
+    return emailLocalPart;
+  }
+
+  return 'Utilisateur';
+};
+
 export async function GET(
   _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -79,11 +159,10 @@ export async function GET(
       console.error('Error fetching user profiles:', profilesError);
     }
 
-    type UserProfile = { id: string; full_name: string | null; username: string | null };
     const typedProfiles = (profiles || []) as UserProfile[];
 
     // Récupérer les emails depuis auth.users
-    const usersWithEmail = await Promise.all(
+    const usersWithEmail = await Promise.all<AuthUserSnapshot>(
       userIds.map(async (userId) => {
         try {
           const { data: authUser, error: authError } = await adminSupabase.auth.admin.getUserById(userId);
@@ -92,17 +171,20 @@ export async function GET(
             return {
               id: userId,
               email: '',
+              metadata: null,
             };
           }
           return {
             id: userId,
             email: authUser?.user?.email || '',
+            metadata: (authUser?.user?.user_metadata as UserMetadata | null) || null,
           };
         } catch (err) {
           console.error(`Exception fetching user ${userId}:`, err);
           return {
             id: userId,
             email: '',
+            metadata: null,
           };
         }
       })
@@ -110,14 +192,14 @@ export async function GET(
 
     // Combiner les données
     const requestsWithEmail = typedRequests.map((request) => {
-      const userEmail = usersWithEmail.find(u => u.id === request.user_id)?.email || '';
+      const authSnapshot = usersWithEmail.find(u => u.id === request.user_id);
       const profile = typedProfiles.find(p => p.id === request.user_id);
       
       return {
         id: request.id,
         userId: request.user_id,
-        fullName: profile?.full_name || profile?.username || 'Utilisateur',
-        email: userEmail,
+        fullName: buildDisplayName(profile, authSnapshot),
+        email: authSnapshot?.email || '',
         requestedAt: request.requested_at,
       };
     });
