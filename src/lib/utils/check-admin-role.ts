@@ -209,19 +209,22 @@ export async function getCoachClubId(userId: string): Promise<string | null> {
       .eq('id', userId)
       .single();
 
-    if (!profileError && userProfile) {
+    type UserProfileWithClub = { full_name: string | null; favorite_club_id: string | null };
+    const typedUserProfile = userProfile as UserProfileWithClub | null;
+
+    if (!profileError && typedUserProfile) {
       // Si le profil a un favorite_club_id, l'utiliser
-      if (userProfile.favorite_club_id) {
-        console.log('[getCoachClubId] Using favorite_club_id from profile:', userProfile.favorite_club_id);
-        return userProfile.favorite_club_id;
+      if (typedUserProfile.favorite_club_id) {
+        console.log('[getCoachClubId] Using favorite_club_id from profile:', typedUserProfile.favorite_club_id);
+        return typedUserProfile.favorite_club_id;
       }
 
       // Si le profil a un full_name, chercher dans la table coaches
-      if (userProfile.full_name) {
+      if (typedUserProfile.full_name) {
         const { data: coaches, error: coachesError } = await supabase
           .from('coaches')
           .select('club_id, name')
-          .ilike('name', `%${userProfile.full_name}%`)
+          .ilike('name', `%${typedUserProfile.full_name}%`)
           .eq('active', true)
           .limit(1);
 

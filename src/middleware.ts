@@ -9,7 +9,7 @@
 
 import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
-import { hasRoleLevel, checkCoachRole } from '@/lib/utils/check-admin-role';
+import { hasRoleLevel } from '@/lib/utils/check-admin-role';
 
 export async function middleware(request: NextRequest) {
   let response = NextResponse.next({
