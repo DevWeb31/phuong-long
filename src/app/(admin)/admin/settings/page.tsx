@@ -192,7 +192,7 @@ export default function AdminSettingsPage() {
 
     const hasActiveCategory = categories.includes(activeCategory);
     if (!hasActiveCategory) {
-      setActiveCategory(categories[0]);
+      setActiveCategory(categories[0] || 'general');
     }
   }, [categories, activeCategory]);
 

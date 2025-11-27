@@ -226,11 +226,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const updatePassword = async (newPassword: string) => {
-    const { data, error } = await supabase.auth.updateUser({
+  const updatePassword = async (newPassword: string): Promise<{ data: Session | null; error: AuthError | null }> => {
+    const result = await supabase.auth.updateUser({
       password: newPassword,
     });
-    return { data, error };
+    // updateUser retourne { user, session }, on retourne seulement la session
+    const session = (result.data as { user: User; session: Session | null } | null)?.session ?? null;
+    return { data: session, error: result.error };
   };
 
   const updateEmail = async (newEmail: string, confirmEmail: string) => {
