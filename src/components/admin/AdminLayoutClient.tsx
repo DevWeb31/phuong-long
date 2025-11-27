@@ -93,7 +93,6 @@ export function AdminLayoutClient({
   const [isDeveloper, setIsDeveloper] = useState(false);
   const [isDeveloperLoading, setIsDeveloperLoading] = useState(true);
   const [isCoach, setIsCoach] = useState(false);
-  const [isCoachLoading, setIsCoachLoading] = useState(true);
   const pathname = usePathname();
 
   // Vérifier si l'utilisateur est développeur ou coach
@@ -119,7 +118,6 @@ export function AdminLayoutClient({
         setIsCoach(false);
       } finally {
         setIsDeveloperLoading(false);
-        setIsCoachLoading(false);
       }
     }
 
