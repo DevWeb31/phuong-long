@@ -13,6 +13,7 @@ import { useState, useEffect } from 'react';
 import { DataTable, DataTableColumn } from '@/components/admin';
 import { UserFormModal } from '@/components/admin/UserFormModal';
 import { Badge } from '@/components/common';
+import { useAuth } from '@/lib/hooks/useAuth';
 
 interface User {
   id: string;
@@ -20,6 +21,8 @@ interface User {
   email: string;
   role: string;
   club: string | null;
+  club_city?: string | null;
+  favorite_club_id?: string | null;
   status: 'active' | 'inactive' | 'suspended';
   last_login: string | null;
   created_at: string;
@@ -62,6 +65,7 @@ const statusColors: Record<string, 'success' | 'default' | 'danger'> = {
 };
 
 export default function AdminUsersPage() {
+  const { user: currentUser } = useAuth();
   const [users, setUsers] = useState<User[]>([]);
   const [clubs, setClubs] = useState<Array<{ id: string; name: string; city: string }>>([]);
   const [loading, setLoading] = useState(true);
@@ -94,13 +98,13 @@ export default function AdminUsersPage() {
             email: user.email || '',
             role: user.primary_role || 'user',
             club: user.club_city || user.club || null, // Utiliser club_city si disponible
+            club_city: user.club_city || null,
+            favorite_club_id: user.favorite_club_id || null,
             status: 'active' as const, // Par défaut actif, à adapter selon vos besoins
             last_login: user.last_sign_in_at || null,
             created_at: user.created_at,
             user_roles: user.user_roles || [],
-            // Ajouter club_city pour l'affichage
-            club_city: user.club_city || null,
-          } as User & { club_city?: string | null };
+          } as User;
         });
 
         setUsers(transformedUsers);
@@ -190,6 +194,11 @@ export default function AdminUsersPage() {
   ];
 
   const handleEdit = (user: User) => {
+    // Empêcher la modification de l'utilisateur courant
+    if (currentUser && user.id === currentUser.id) {
+      alert('Vous ne pouvez pas modifier votre propre compte depuis cette interface.');
+      return;
+    }
     setSelectedUser(user);
     setIsFormOpen(true);
   };
@@ -212,8 +221,16 @@ export default function AdminUsersPage() {
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Erreur lors de la mise à jour');
+        let errorMessage = 'Erreur lors de la mise à jour';
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.error || errorData.details || errorMessage;
+          console.error('API Error:', errorData);
+        } catch (e) {
+          console.error('Error parsing response:', e);
+          errorMessage = `Erreur ${response.status}: ${response.statusText}`;
+        }
+        throw new Error(errorMessage);
       }
 
       // Recharger la liste des utilisateurs
@@ -249,6 +266,12 @@ export default function AdminUsersPage() {
   };
 
   const handleDelete = async (user: User) => {
+    // Empêcher la suppression de l'utilisateur courant
+    if (currentUser && user.id === currentUser.id) {
+      alert('Vous ne pouvez pas supprimer votre propre compte.');
+      return;
+    }
+
     // Double confirmation pour une action critique
     const confirmed = confirm(
       `⚠️ ATTENTION : Cette action est irréversible !\n\n` +
@@ -300,9 +323,6 @@ export default function AdminUsersPage() {
     }
   };
 
-  const handleView = (_user: User) => {
-    // TODO: Ouvrir modal ou page détails utilisateur
-  };
 
   return (
     <div className="space-y-4">
@@ -330,9 +350,10 @@ export default function AdminUsersPage() {
         isLoading={loading}
         onEdit={handleEdit}
         onDelete={handleDelete}
-        onView={handleView}
         searchPlaceholder="Rechercher un utilisateur..."
         emptyMessage="Aucun utilisateur trouvé"
+        canEdit={(user) => currentUser ? user.id !== currentUser.id : true}
+        canDelete={(user) => currentUser ? user.id !== currentUser.id : true}
       />
 
       {/* User Form Modal */}

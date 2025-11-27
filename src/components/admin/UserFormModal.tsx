@@ -29,6 +29,8 @@ interface User {
   email: string;
   role: string;
   club: string | null;
+  club_city?: string | null;
+  favorite_club_id?: string | null;
   user_roles?: Array<{
     role_id: string;
     role_name: string;
@@ -105,28 +107,34 @@ export function UserFormModal({
   useEffect(() => {
     if (isOpen) {
       loadRoles();
+      // Réinitialiser à la première étape quand on ouvre la modale
+      setCurrentStep('info');
+      setCompletedSteps(new Set());
+      setShowValidationErrors(false);
+      setValidationErrors({});
     }
   }, [isOpen]);
 
+  // Initialiser les données du formulaire quand l'utilisateur change ou quand les rôles sont chargés
   useEffect(() => {
-    if (user) {
-      const primaryRole = user.user_roles?.[0];
-      setFormData({
-        role_id: primaryRole?.role_id || '',
-        club_id: primaryRole?.club_id || '',
-      });
-    } else {
+    if (!isOpen) {
+      return;
+    }
+    
+    if (!user) {
       setFormData({
         role_id: '',
         club_id: '',
       });
+      return;
     }
-    // Réinitialiser à la première étape quand on ouvre la modale
-    if (isOpen) {
-      setCurrentStep('info');
-      setCompletedSteps(new Set());
+    
+    // Si les rôles sont déjà chargés et les clubs sont disponibles, initialiser immédiatement
+    if (roles.length > 0 && !loadingRoles && clubs.length > 0) {
+      initializeFormData(user, roles);
     }
-  }, [user, isOpen]);
+    // Sinon, l'initialisation se fera dans loadRoles après le chargement
+  }, [user, roles, loadingRoles, isOpen, clubs]);
 
   const loadRoles = async () => {
     try {
@@ -137,12 +145,67 @@ export function UserFormModal({
         // Exclure le rôle "developer"
         const filteredRoles = data.filter((r: Role) => r.name !== 'developer');
         setRoles(filteredRoles);
+        
+        // Initialiser les données du formulaire après le chargement des rôles
+        // (les clubs doivent déjà être chargés depuis la page parente)
+        if (user && clubs.length > 0) {
+          initializeFormData(user, filteredRoles);
+        }
       }
     } catch (error) {
       console.error('Error loading roles:', error);
     } finally {
       setLoadingRoles(false);
     }
+  };
+
+  const initializeFormData = (currentUser: User, availableRoles: Role[]) => {
+    const primaryRole = currentUser.user_roles?.[0];
+    
+    // Utiliser favorite_club_id pour le club, sinon le club_id du rôle
+    let clubId = currentUser.favorite_club_id || primaryRole?.club_id || '';
+    
+    // Si on n'a pas de club_id mais qu'on a un nom de club, chercher le club correspondant
+    if (!clubId && currentUser.club && clubs.length > 0) {
+      // Le champ "club" contient le nom de la ville, on doit trouver le club correspondant
+      // On peut aussi chercher par nom si le format est "Nom - Ville"
+      const clubParts = currentUser.club.split(' - ');
+      const clubName = clubParts[0];
+      const clubCity = clubParts[1] || currentUser.club;
+      
+      const foundClub = clubs.find(c => 
+        c.name === clubName || 
+        c.city === clubCity || 
+        `${c.name} - ${c.city}` === currentUser.club
+      );
+      
+      if (foundClub) {
+        clubId = foundClub.id;
+      }
+    }
+    
+    // Vérifier que le role_id existe dans la liste des rôles
+    let validRoleId = '';
+    
+    // Si on a un role_id depuis user_roles, l'utiliser
+    if (primaryRole?.role_id) {
+      const roleExists = availableRoles.some(r => r.id === primaryRole.role_id);
+      if (roleExists) {
+        validRoleId = primaryRole.role_id;
+      }
+    } 
+    // Sinon, si on a un primary_role (nom du rôle), chercher le role_id correspondant
+    else if (currentUser.role) {
+      const roleByName = availableRoles.find(r => r.name === currentUser.role);
+      if (roleByName) {
+        validRoleId = roleByName.id;
+      }
+    }
+    
+    setFormData({
+      role_id: validRoleId,
+      club_id: clubId,
+    });
   };
 
   // Validation des étapes avec messages d'erreur
@@ -292,9 +355,10 @@ export function UserFormModal({
       return;
     }
 
+    // Normaliser les valeurs : convertir les chaînes vides en null
     await onSubmit({
-      role_id: formData.role_id || null,
-      club_id: formData.club_id || null,
+      role_id: formData.role_id && formData.role_id.trim() !== '' ? formData.role_id : null,
+      club_id: formData.club_id && formData.club_id.trim() !== '' ? formData.club_id : null,
     });
   };
 

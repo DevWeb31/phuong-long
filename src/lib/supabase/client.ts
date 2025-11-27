@@ -12,8 +12,12 @@
 import { createBrowserClient } from '@supabase/ssr';
 import type { Database } from './database.types';
 
+// Singleton pour le client Supabase côté client
+let browserClient: ReturnType<typeof createBrowserClient<Database>> | null = null;
+
 /**
- * Créer un nouveau client Supabase pour le navigateur
+ * Créer ou récupérer le client Supabase pour le navigateur
+ * Utilise un singleton pour éviter de créer plusieurs instances
  * 
  * @example
  * ```tsx
@@ -30,9 +34,13 @@ import type { Database } from './database.types';
  * ```
  */
 export function createClient() {
-  return createBrowserClient<Database>(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  );
+  // Créer le client une seule fois (singleton)
+  if (!browserClient) {
+    browserClient = createBrowserClient<Database>(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    );
+  }
+  return browserClient;
 }
 

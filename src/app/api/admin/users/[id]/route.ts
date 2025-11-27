@@ -44,39 +44,67 @@ export async function PATCH(
     }
 
     // Mettre à jour les rôles si fournis
-    if (body.role_id !== undefined) {
-      // Supprimer tous les rôles existants de l'utilisateur
-      const { error: deleteRolesError } = await supabase
+    if (body.role_id !== undefined && body.role_id !== null) {
+      // Normaliser role_id (convertir chaîne vide en null)
+      const roleId = body.role_id && String(body.role_id).trim() !== '' ? body.role_id : null;
+      
+      // Supprimer tous les rôles existants de l'utilisateur (utiliser client admin pour contourner RLS)
+      const { error: deleteRolesError } = await adminSupabase
         .from('user_roles')
         .delete()
         .eq('user_id', userId);
 
       if (deleteRolesError) {
         console.error('Error deleting user roles:', deleteRolesError);
-        return NextResponse.json({ error: 'Erreur lors de la mise à jour des rôles' }, { status: 500 });
+        return NextResponse.json({ 
+          error: 'Erreur lors de la mise à jour des rôles',
+          details: deleteRolesError.message 
+        }, { status: 500 });
       }
 
-      // Ajouter le nouveau rôle
-      if (body.role_id) {
-        const { error: insertRoleError } = await supabase
+      // Ajouter le nouveau rôle si un role_id valide est fourni
+      if (roleId) {
+        // Normaliser club_id (convertir chaîne vide en null)
+        const clubId = body.club_id && String(body.club_id).trim() !== '' ? body.club_id : null;
+        
+        const { error: insertRoleError } = await adminSupabase
           .from('user_roles')
           .insert({
             user_id: userId,
-            role_id: body.role_id,
-            club_id: body.club_id || null,
+            role_id: roleId,
+            club_id: clubId,
             granted_by: user.id,
           } as any);
 
         if (insertRoleError) {
           console.error('Error inserting user role:', insertRoleError);
-          return NextResponse.json({ error: 'Erreur lors de la mise à jour des rôles' }, { status: 500 });
+          return NextResponse.json({ 
+            error: 'Erreur lors de la mise à jour des rôles',
+            details: insertRoleError.message 
+          }, { status: 500 });
         }
       }
     }
 
+    // Récupérer le profil existant pour préserver les valeurs non modifiées
+    const { data: existingProfile } = await adminSupabase
+      .from('user_profiles')
+      .select('*')
+      .eq('id', userId)
+      .single();
+
     // Mettre à jour le profil utilisateur (seulement les champs autorisés)
-    const profileUpdates: Record<string, unknown> = {};
+    const profileUpdates: Record<string, unknown> = {
+      // Préserver les valeurs existantes pour les champs obligatoires
+      id: userId,
+      username: existingProfile?.username || authUser.user.email?.split('@')[0] || `user_${userId.substring(0, 8)}`,
+      full_name: existingProfile?.full_name || null,
+      avatar_url: existingProfile?.avatar_url || null,
+      bio: existingProfile?.bio || null,
+      preferences: existingProfile?.preferences || {},
+    };
     
+    // Mettre à jour uniquement les champs fournis
     if (body.username !== undefined) {
       profileUpdates.username = body.username;
     }
@@ -86,32 +114,44 @@ export async function PATCH(
     if (body.avatar_url !== undefined) {
       profileUpdates.avatar_url = body.avatar_url;
     }
-
-    if (Object.keys(profileUpdates).length > 0) {
-      const { error: profileError } = await supabase
-        .from('user_profiles')
-        .upsert({
-          id: userId,
-          ...profileUpdates,
-          updated_at: new Date().toISOString(),
-        } as any, {
-          onConflict: 'id',
-        });
-
-      if (profileError) {
-        console.error('Error updating user profile:', profileError);
-        return NextResponse.json({ error: 'Erreur lors de la mise à jour du profil' }, { status: 500 });
-      }
+    
+    // Mettre à jour favorite_club_id si un club_id est fourni
+    // Normaliser club_id (convertir chaîne vide en null)
+    if (body.club_id !== undefined) {
+      const clubId = body.club_id && String(body.club_id).trim() !== '' ? body.club_id : null;
+      profileUpdates.favorite_club_id = clubId;
+    } else if (existingProfile?.favorite_club_id !== undefined) {
+      // Préserver le favorite_club_id existant si non fourni
+      profileUpdates.favorite_club_id = existingProfile.favorite_club_id;
     }
 
-    // Récupérer les données mises à jour
-    const { data: updatedProfile } = await supabase
+    // Utiliser le client admin pour contourner RLS lors de la mise à jour du profil
+    const { error: profileError } = await adminSupabase
+      .from('user_profiles')
+      .upsert({
+        ...profileUpdates,
+        updated_at: new Date().toISOString(),
+      } as any, {
+        onConflict: 'id',
+      });
+
+    if (profileError) {
+      console.error('Error updating user profile:', profileError);
+      return NextResponse.json({ 
+        error: 'Erreur lors de la mise à jour du profil',
+        details: profileError.message,
+        code: profileError.code,
+      }, { status: 500 });
+    }
+
+    // Récupérer les données mises à jour (utiliser client admin pour contourner RLS)
+    const { data: updatedProfile } = await adminSupabase
       .from('user_profiles')
       .select('*')
       .eq('id', userId)
       .single();
 
-    const { data: updatedRoles } = await supabase
+    const { data: updatedRoles } = await adminSupabase
       .from('user_roles')
       .select(`
         role_id,

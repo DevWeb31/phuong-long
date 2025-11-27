@@ -45,6 +45,44 @@ export async function GET() {
 
     if (profilesError) throw profilesError;
 
+    // Récupérer tous les clubs référencés dans les profils
+    const favoriteClubIds = (profiles || [])
+      .map((p: any) => p.favorite_club_id)
+      .filter((id: string | null) => id !== null) as string[];
+
+    let clubsMap = new Map<string, { name: string; city: string }>();
+    if (favoriteClubIds.length > 0) {
+      const { data: clubs, error: clubsError } = await supabase
+        .from('clubs')
+        .select('id, name, city')
+        .in('id', favoriteClubIds);
+
+      if (clubsError) throw clubsError;
+      clubsMap = new Map((clubs || []).map((c: any) => [c.id, { name: c.name, city: c.city }]));
+    }
+
+    // Récupérer les demandes d'adhésion approuvées pour les utilisateurs sans club favori
+    const { data: approvedRequests, error: requestsError } = await supabase
+      .from('club_membership_requests')
+      .select('user_id, club_id, clubs!inner(id, name, city)')
+      .eq('status', 'approved')
+      .in('user_id', userIds)
+      .order('requested_at', { ascending: false });
+
+    if (requestsError) throw requestsError;
+
+    // Créer un map pour les demandes approuvées (garder seulement la plus récente par utilisateur)
+    const approvedRequestsMap = new Map<string, { club_id: string; name: string; city: string }>();
+    (approvedRequests || []).forEach((req: any) => {
+      if (!approvedRequestsMap.has(req.user_id) && req.clubs) {
+        approvedRequestsMap.set(req.user_id, {
+          club_id: req.club_id || req.clubs.id,
+          name: req.clubs.name,
+          city: req.clubs.city,
+        });
+      }
+    });
+
     // Récupérer les rôles de tous les utilisateurs
     const { data: userRolesData, error: rolesError } = await supabase
       .from('user_roles')
@@ -82,9 +120,29 @@ export async function GET() {
           return null;
         }
 
-        // Récupérer le club du premier rôle (ou null)
-        const clubName = roles[0]?.clubs?.name || null;
-        const clubCity = roles[0]?.clubs?.city || null;
+        // Récupérer le club favori depuis le profil
+        let favoriteClubId = (profile as any)?.favorite_club_id;
+        let clubName = null;
+        let clubCity = null;
+
+        if (favoriteClubId) {
+          const club = clubsMap.get(favoriteClubId);
+          if (club) {
+            clubName = club.name;
+            clubCity = club.city;
+          }
+        }
+
+        // Si pas de club favori, vérifier les demandes d'adhésion approuvées
+        if (!clubName) {
+          const approvedRequest = approvedRequestsMap.get(authUser.id);
+          if (approvedRequest) {
+            clubName = approvedRequest.name;
+            clubCity = approvedRequest.city;
+            // Utiliser le club_id de la demande approuvée comme favorite_club_id
+            favoriteClubId = approvedRequest.club_id;
+          }
+        }
 
         return {
           id: authUser.id,
@@ -105,6 +163,7 @@ export async function GET() {
           primary_role: roleNames[0] || 'user',
           club: clubName,
           club_city: clubCity,
+          favorite_club_id: favoriteClubId || null,
         };
       })
       .filter(Boolean)

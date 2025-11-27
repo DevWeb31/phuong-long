@@ -21,7 +21,8 @@ import {
   CalendarIcon,
   NewspaperIcon,
 } from '@heroicons/react/24/outline';
-import { FileText, Check, Calendar } from 'lucide-react';
+import { FileText, Check, Calendar, UserPlus } from 'lucide-react';
+import { ClubMembershipRequestsModal } from '@/components/admin/ClubMembershipRequestsModal';
 
 interface DashboardStats {
   users: {
@@ -40,9 +41,26 @@ interface DashboardStats {
   };
 }
 
+interface ClubMembershipRequest {
+  clubId: string;
+  clubName: string;
+  clubCity: string;
+  clubSlug: string;
+  count: number;
+}
+
+interface MembershipRequestsStats {
+  totalPending: number;
+  byClub: ClubMembershipRequest[];
+}
+
 export default function AdminDashboardPage() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [membershipRequests, setMembershipRequests] = useState<MembershipRequestsStats | null>(null);
   const [loading, setLoading] = useState(true);
+  const [loadingMembershipRequests, setLoadingMembershipRequests] = useState(true);
+  const [selectedClubForRequests, setSelectedClubForRequests] = useState<{ id: string; name: string } | null>(null);
+  const [isMembershipRequestsModalOpen, setIsMembershipRequestsModalOpen] = useState(false);
   
   // États pour les modales
   const [isClubModalOpen, setIsClubModalOpen] = useState(false);
@@ -56,6 +74,39 @@ export default function AdminDashboardPage() {
   
   // Clubs pour EventFormModal
   const [clubs, setClubs] = useState<Array<{ id: string; name: string; city: string }>>([]);
+
+  const fetchMembershipRequests = async () => {
+    try {
+      const response = await fetch('/api/admin/clubs/membership-requests');
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success) {
+          setMembershipRequests(data.data);
+        } else {
+          // Si l'API retourne une erreur, initialiser avec des valeurs par défaut
+          setMembershipRequests({
+            totalPending: 0,
+            byClub: [],
+          });
+        }
+      } else {
+        // Si la réponse n'est pas OK, initialiser avec des valeurs par défaut
+        setMembershipRequests({
+          totalPending: 0,
+          byClub: [],
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching membership requests:', error);
+      // En cas d'erreur, initialiser avec des valeurs par défaut
+      setMembershipRequests({
+        totalPending: 0,
+        byClub: [],
+      });
+    } finally {
+      setLoadingMembershipRequests(false);
+    }
+  };
 
   useEffect(() => {
     async function fetchStats() {
@@ -87,6 +138,7 @@ export default function AdminDashboardPage() {
 
     fetchStats();
     fetchClubs();
+    fetchMembershipRequests();
   }, []);
 
   const reloadStats = async () => {
@@ -307,6 +359,77 @@ export default function AdminDashboardPage() {
         </div>
       </div>
 
+      {/* Demandes d'adhésion en attente */}
+      <div>
+        <h2 className="text-lg font-semibold text-secondary dark:text-secondary-light mb-3 flex items-center gap-2">
+          <div className="w-1 h-5 bg-gradient-to-b from-secondary to-accent rounded-full"></div>
+          Demandes d'adhésion en attente
+        </h2>
+        <Card variant="bordered" className="border-orange-200 dark:border-orange-800 bg-gradient-to-br from-orange-50/50 to-transparent dark:from-orange-950/20 dark:to-transparent">
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="text-base flex items-center gap-2 text-orange-700 dark:text-orange-400">
+                  <UserPlus className="w-5 h-5" />
+                  <span className="font-semibold">
+                    {loadingMembershipRequests 
+                      ? 'Chargement...' 
+                      : membershipRequests 
+                        ? `${membershipRequests.totalPending} demande${membershipRequests.totalPending > 1 ? 's' : ''} en attente`
+                        : '0 demande en attente'}
+                  </span>
+                </CardTitle>
+                <CardDescription className="text-xs mt-1 text-orange-600/70 dark:text-orange-400/70">
+                  Répartition par club
+                </CardDescription>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent className="pt-0">
+            <div className="space-y-2">
+              {loadingMembershipRequests ? (
+                <div className="text-center py-4 text-gray-500 dark:text-gray-400">
+                  Chargement...
+                </div>
+              ) : !membershipRequests ? (
+                <div className="text-center py-4 text-gray-500 dark:text-gray-400">
+                  Erreur lors du chargement des données
+                </div>
+              ) : membershipRequests.byClub.length === 0 ? (
+                <div className="text-center py-4 text-gray-500 dark:text-gray-400">
+                  Aucune demande en attente
+                </div>
+                ) : (
+                  membershipRequests.byClub.map((club) => (
+                    <div
+                      key={club.clubId}
+                      onClick={() => {
+                        setSelectedClubForRequests({ id: club.clubId, name: club.clubName });
+                        setIsMembershipRequestsModalOpen(true);
+                      }}
+                      className="flex items-center justify-between p-3 rounded-lg bg-white dark:bg-gray-800/50 border border-orange-200 dark:border-orange-800/50 hover:bg-orange-50 dark:hover:bg-orange-950/30 transition-colors cursor-pointer"
+                    >
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">
+                          {club.clubName}
+                        </p>
+                        <p className="text-xs text-gray-600 dark:text-gray-400 mt-0.5">
+                          {club.clubCity}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-2 ml-4">
+                        <span className="px-3 py-1 rounded-full bg-orange-100 dark:bg-orange-900/40 text-orange-700 dark:text-orange-400 text-sm font-semibold">
+                          {club.count}
+                        </span>
+                      </div>
+                    </div>
+                  ))
+                )}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
       {/* Activité Récente */}
       <div>
         <h2 className="text-lg font-semibold text-secondary dark:text-secondary-light mb-3 flex items-center gap-2">
@@ -373,6 +496,20 @@ export default function AdminDashboardPage() {
         onClose={() => setIsBlogModalOpen(false)}
         onSubmit={handleBlogSubmit}
         isLoading={isSubmittingBlog}
+      />
+
+      <ClubMembershipRequestsModal
+        isOpen={isMembershipRequestsModalOpen}
+        onClose={() => {
+          setIsMembershipRequestsModalOpen(false);
+          setSelectedClubForRequests(null);
+        }}
+        clubId={selectedClubForRequests?.id || null}
+        clubName={selectedClubForRequests?.name || null}
+        onRequestUpdated={() => {
+          // Rafraîchir les statistiques après une mise à jour
+          fetchMembershipRequests();
+        }}
       />
     </div>
   );

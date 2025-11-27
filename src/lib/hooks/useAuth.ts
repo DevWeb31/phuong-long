@@ -9,7 +9,7 @@
 
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { User, Session } from '@supabase/supabase-js';
 import { createClient } from '@/lib/supabase/client';
@@ -27,17 +27,57 @@ export function useAuth() {
     loading: true,
   });
   const router = useRouter();
-  const supabase = createClient();
+  // Utiliser useMemo pour créer le client une seule fois
+  const supabase = useMemo(() => createClient(), []);
 
   useEffect(() => {
+    let mounted = true;
+
     // Récupérer la session initiale
     const getSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      setAuthState({
-        user: session?.user ?? null,
-        session: session ?? null,
-        loading: false,
-      });
+      try {
+        // Essayer d'abord getSession (rapide, depuis le cache)
+        const { data: { session } } = await supabase.auth.getSession();
+
+        if (mounted) {
+          if (session?.user) {
+            setAuthState({
+              user: session.user,
+              session: session,
+              loading: false,
+            });
+          } else {
+            // Si pas de session dans le cache, essayer getUser() qui force une vérification serveur
+            const { data: { user: serverUser } } = await supabase.auth.getUser();
+            
+            if (mounted) {
+              if (serverUser) {
+                // Récupérer la session complète si on a un user
+                const { data: { session: newSession } } = await supabase.auth.getSession();
+                setAuthState({
+                  user: serverUser,
+                  session: newSession ?? null,
+                  loading: false,
+                });
+              } else {
+                setAuthState({
+                  user: null,
+                  session: null,
+                  loading: false,
+                });
+              }
+            }
+          }
+        }
+      } catch (err) {
+        if (mounted) {
+          setAuthState({
+            user: null,
+            session: null,
+            loading: false,
+          });
+        }
+      }
     };
 
     getSession();
@@ -74,9 +114,10 @@ export function useAuth() {
     );
 
     return () => {
+      mounted = false;
       subscription.unsubscribe();
     };
-  }, [router, supabase.auth]);
+  }, [router, supabase]);
 
   const signIn = async (email: string, password: string) => {
     const { data, error } = await supabase.auth.signInWithPassword({
@@ -132,11 +173,33 @@ export function useAuth() {
   };
 
   const signOut = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (!error) {
+    try {
+      // Déconnecter de Supabase
+      const { error } = await supabase.auth.signOut();
+      
+      if (error) {
+        return { error };
+      }
+
+      // Mettre à jour l'état local immédiatement
+      setAuthState({
+        user: null,
+        session: null,
+        loading: false,
+      });
+
+      // Rediriger vers la page d'accueil
       router.push('/');
+      router.refresh();
+      
+      return { error: null };
+    } catch (err) {
+      return {
+        error: {
+          message: err instanceof Error ? err.message : 'Erreur lors de la déconnexion',
+        },
+      };
     }
-    return { error };
   };
 
   const resetPassword = async (email: string) => {

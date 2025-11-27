@@ -17,7 +17,7 @@ import { PricingEditor } from './PricingEditor';
 import { LocationMapPicker } from './LocationMapPicker';
 import { CityAutocomplete } from './CityAutocomplete';
 import { CoverImageUploader } from './CoverImageUploader';
-import { Image as ImageIcon, Map as MapIcon, Calendar as CalendarIcon, Euro, Facebook, Instagram, Youtube, CheckCircle2, Info, AlertCircle, XCircle } from 'lucide-react';
+import { Image as ImageIcon, Map as MapIcon, Calendar as CalendarIcon, Euro, Facebook, Instagram, Youtube, MessageCircle, CheckCircle2, Info, AlertCircle, XCircle } from 'lucide-react';
 
 export interface CourseSession {
   time: string;
@@ -46,6 +46,7 @@ export interface Club {
     facebook?: string;
     instagram?: string;
     youtube?: string;
+    discord?: string;
   } | null;
   active: boolean;
   members_count?: number;
@@ -101,6 +102,7 @@ export function ClubFormModal({ isOpen, onClose, onSubmit, club, isLoading = fal
       facebook: '',
       instagram: '',
       youtube: '',
+      discord: '',
     },
     active: true,
   });
@@ -113,6 +115,7 @@ export function ClubFormModal({ isOpen, onClose, onSubmit, club, isLoading = fal
           facebook: '',
           instagram: '',
           youtube: '',
+          discord: '',
         },
       });
       // Mémoriser l'URL de l'image originale pour pouvoir la supprimer si nécessaire
@@ -1333,6 +1336,48 @@ export function ClubFormModal({ isOpen, onClose, onSubmit, club, isLoading = fal
                   <p className="mt-1.5 text-xs text-red-600 dark:text-red-400 flex items-center gap-1">
                     <XCircle className="w-3 h-3" />
                     {validationErrors.social_youtube}
+                  </p>
+                )}
+              </div>
+
+              {/* Discord */}
+              <div>
+                <label htmlFor="social_discord" className="block text-sm font-semibold dark:text-gray-300 mb-2 flex items-center gap-2">
+                  <MessageCircle className="w-4 h-4 text-indigo-600" />
+                  Discord
+                </label>
+                <input
+                  type="url"
+                  id="social_discord"
+                  value={formData.social_media?.discord || ''}
+                  onChange={(e) => {
+                    setFormData(prev => ({
+                      ...prev,
+                      social_media: {
+                        ...prev.social_media,
+                        discord: e.target.value,
+                      } as Club['social_media'],
+                    }));
+                    // Effacer l'erreur si elle existe
+                    if (validationErrors.social_discord) {
+                      setValidationErrors(prev => {
+                        const newErrors = { ...prev };
+                        delete newErrors.social_discord;
+                        return newErrors;
+                      });
+                    }
+                  }}
+                  className={`w-full px-4 py-2.5 border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all bg-white dark:bg-gray-800 ${
+                    showValidationErrors && validationErrors.social_discord
+                      ? 'border-red-500 dark:border-red-500 focus:ring-red-500'
+                      : 'dark:border-gray-700'
+                  }`}
+                  placeholder="https://discord.gg/phuonglongvodao"
+                />
+                {showValidationErrors && validationErrors.social_discord && (
+                  <p className="mt-1.5 text-xs text-red-600 dark:text-red-400 flex items-center gap-1">
+                    <XCircle className="w-3 h-3" />
+                    {validationErrors.social_discord}
                   </p>
                 )}
               </div>

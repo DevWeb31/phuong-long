@@ -10,7 +10,7 @@
 
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/lib/hooks/useAuth';
 import { 
@@ -26,23 +26,91 @@ import { createClient } from '@/lib/supabase/client';
 import { cn } from '@/lib/utils/cn';
 
 export function UserMenu() {
-  const { user, signOut } = useAuth();
+  const { user, signOut, loading } = useAuth();
   const [isAdmin, setIsAdmin] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const [forceShow, setForceShow] = useState(false);
+  const [localUser, setLocalUser] = useState(user);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const checkedRef = useRef(false);
+  // Créer le client Supabase une seule fois
+  const supabase = useMemo(() => createClient(), []);
+
+  // Synchroniser localUser avec user du hook
+  useEffect(() => {
+    setLocalUser(user);
+  }, [user]);
+
+
+  // Fallback : vérifier directement la session Supabase si le hook ne répond pas
+  // Vérifier aussi si loading est false mais user est null (cas où le hook n'a pas propagé la session)
+  useEffect(() => {
+    // Vérifier la session si :
+    // 1. On est en train de charger ET pas de user ET pas de localUser
+    // 2. OU si le chargement est terminé mais qu'on n'a toujours pas de user ET pas de localUser
+    if ((loading || (!loading && !user)) && !localUser) {
+      const checkSession = async () => {
+        try {
+          // Essayer d'abord getSession (rapide)
+          const { data: { session } } = await supabase.auth.getSession();
+          
+          if (session?.user) {
+            setLocalUser(session.user);
+          } else {
+            // Si pas de session, essayer getUser() qui force une vérification serveur
+            const { data: { user: serverUser } } = await supabase.auth.getUser();
+            
+            if (serverUser) {
+              setLocalUser(serverUser);
+            }
+          }
+        } catch (err) {
+          // Ignorer les erreurs silencieusement
+        }
+      };
+      checkSession();
+    }
+  }, [loading, user, localUser, supabase]);
+
+  // Écouter directement les changements d'authentification Supabase comme fallback
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (session?.user) {
+        setLocalUser(session.user);
+      } else if (event === 'SIGNED_OUT') {
+        setLocalUser(null);
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [supabase]);
+
+  // Timeout de sécurité : forcer l'affichage après 2 secondes même si loading est true
+  useEffect(() => {
+    if (loading) {
+      const timeout = setTimeout(() => {
+        setForceShow(true);
+      }, 2000);
+      return () => clearTimeout(timeout);
+    } else {
+      setForceShow(false);
+      return undefined;
+    }
+  }, [loading]);
 
   // Vérifier le rôle admin ou developer une seule fois
   useEffect(() => {
-    if (!user || checkedRef.current) return;
+    const currentUser = localUser || user;
+    if (!currentUser || checkedRef.current) return;
 
     const checkAdmin = async () => {
       try {
-        const supabase = createClient();
         const { data: userRoles } = await supabase
           .from('user_roles')
           .select('role_id, roles(name)')
-          .eq('user_id', user.id);
+          .eq('user_id', currentUser.id);
 
         // Vérifier si l'utilisateur a le rôle admin OU developer
         const roles = (userRoles as any[])?.map(ur => ur.roles?.name).filter(Boolean) || [];
@@ -55,7 +123,7 @@ export function UserMenu() {
     };
 
     checkAdmin();
-  }, [user?.id]);
+  }, [localUser?.id, user?.id, supabase]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -68,7 +136,20 @@ export function UserMenu() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  if (!user) {
+  // Pendant le chargement initial, afficher un placeholder discret pour éviter le flash
+  // Mais seulement si on n'a pas forcé l'affichage
+  if (loading && !forceShow) {
+    return (
+      <div className="flex items-center gap-3">
+        <div className="h-8 w-20 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+      </div>
+    );
+  }
+
+  // Utiliser localUser comme fallback si user n'est pas disponible
+  const currentUser = localUser || user;
+
+  if (!currentUser) {
     return (
       <div className="flex items-center gap-3">
         <Link
@@ -94,7 +175,7 @@ export function UserMenu() {
     );
   }
 
-  const userName = user.user_metadata?.full_name || user.email?.split('@')[0] || 'Utilisateur';
+  const userName = currentUser.user_metadata?.full_name || currentUser.email?.split('@')[0] || 'Utilisateur';
 
   return (
     <div className="relative" ref={dropdownRef}>
@@ -134,7 +215,7 @@ export function UserMenu() {
             <div className="px-4 py-3 bg-gradient-to-br from-gray-50 to-white dark:from-gray-800 dark:to-gray-800 border-b dark:border-gray-700">
               <div className="flex flex-col">
                 <div className="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">{userName}</div>
-                <div className="text-xs text-gray-500 dark:text-gray-400 truncate">{user.email}</div>
+                <div className="text-xs text-gray-500 dark:text-gray-400 truncate">{currentUser.email}</div>
               </div>
             </div>
 
@@ -206,13 +287,13 @@ export function UserMenu() {
 
             {/* Logout */}
             <button
-              onClick={() => {
-                signOut();
+              onClick={async () => {
                 setIsOpen(false);
+                await signOut();
               }}
               className={cn(
                 'flex items-center gap-3 px-4 py-3 text-sm font-medium w-full',
-                'text-red-600 hover:bg-red-50 transition-all duration-200',
+                'text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all duration-200',
                 'group'
               )}
             >

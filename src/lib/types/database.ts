@@ -29,6 +29,7 @@ export interface Club {
     facebook?: string;
     instagram?: string;
     youtube?: string;
+    discord?: string;
   } | null;
   latitude: number | null;
   longitude: number | null;

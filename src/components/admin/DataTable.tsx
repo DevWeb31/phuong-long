@@ -18,7 +18,6 @@ import {
   MagnifyingGlassIcon,
   PencilIcon,
   TrashIcon,
-  EyeIcon,
   PlusIcon,
 } from '@heroicons/react/24/outline';
 
@@ -46,6 +45,8 @@ interface DataTableProps<T> {
   onEdit?: (row: T) => void;
   onDelete?: (row: T) => void;
   onView?: (row: T) => void;
+  canEdit?: (row: T) => boolean;
+  canDelete?: (row: T) => boolean;
   searchable?: boolean;
   searchPlaceholder?: string;
   itemsPerPage?: number;
@@ -67,7 +68,8 @@ export function DataTable<T extends { id: string | number }>({
   actions,
   onEdit,
   onDelete,
-  onView,
+  canEdit,
+  canDelete,
   searchable = true,
   searchPlaceholder = 'Rechercher...',
   itemsPerPage = 8,
@@ -194,14 +196,7 @@ export function DataTable<T extends { id: string | number }>({
   // Actions par défaut
   const defaultActions: DataTableAction<T>[] = [];
   
-  if (onView) {
-    defaultActions.push({
-      label: 'Voir',
-      icon: <EyeIcon className="w-4 h-4" />,
-      onClick: onView,
-      variant: 'secondary',
-    });
-  }
+  // Supprimer l'action "Voir" (onView n'est plus utilisé)
 
   if (onEdit) {
     defaultActions.push({
@@ -209,6 +204,7 @@ export function DataTable<T extends { id: string | number }>({
       icon: <PencilIcon className="w-4 h-4" />,
       onClick: onEdit,
       variant: 'primary',
+      show: canEdit || (() => true), // Utiliser canEdit si fourni, sinon toujours afficher
     });
   }
 
@@ -218,6 +214,7 @@ export function DataTable<T extends { id: string | number }>({
       icon: <TrashIcon className="w-4 h-4" />,
       onClick: onDelete,
       variant: 'danger',
+      show: canDelete || (() => true), // Utiliser canDelete si fourni, sinon toujours afficher
     });
   }
 
