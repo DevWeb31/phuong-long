@@ -134,8 +134,11 @@ export async function getUserClubId(userId: string): Promise<string | null> {
       .eq('id', userId)
       .single();
     
-    if (!profileError && profile?.favorite_club_id) {
-      return profile.favorite_club_id;
+    type UserProfile = { favorite_club_id: string | null };
+    const typedProfile = profile as UserProfile | null;
+    
+    if (!profileError && typedProfile?.favorite_club_id) {
+      return typedProfile.favorite_club_id;
     }
     
     return null;
