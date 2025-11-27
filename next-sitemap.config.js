@@ -1,6 +1,7 @@
 /** @type {import('next-sitemap').IConfig} */
 module.exports = {
-  siteUrl: process.env.NEXT_PUBLIC_APP_URL || 'https://phuong-long-vo-dao.fr',
+  // Prioriser l'URL officielle du site en production
+  siteUrl: process.env.NEXT_PUBLIC_APP_URL || 'https://www.phuong-long-vo-dao.com',
   generateRobotsTxt: true,
   generateIndexSitemap: false,
   exclude: ['/admin/*', '/dashboard/*', '/api/*', '/signin', '/signup'],
