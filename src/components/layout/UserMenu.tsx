@@ -100,7 +100,7 @@ export function UserMenu() {
     }
   }, [loading]);
 
-  // Vérifier le rôle admin ou developer une seule fois
+  // Vérifier le rôle admin, developer ou coach une seule fois
   useEffect(() => {
     const currentUser = localUser || user;
     if (!currentUser || checkedRef.current) return;
@@ -112,9 +112,9 @@ export function UserMenu() {
           .select('role_id, roles(name)')
           .eq('user_id', currentUser.id);
 
-        // Vérifier si l'utilisateur a le rôle admin OU developer
+        // Vérifier si l'utilisateur a le rôle admin, developer OU coach
         const roles = (userRoles as any[])?.map(ur => ur.roles?.name).filter(Boolean) || [];
-        setIsAdmin(roles.includes('admin') || roles.includes('developer'));
+        setIsAdmin(roles.includes('admin') || roles.includes('developer') || roles.includes('coach'));
         checkedRef.current = true;
       } catch {
         setIsAdmin(false);

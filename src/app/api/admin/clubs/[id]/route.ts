@@ -9,7 +9,7 @@
 
 import { NextResponse } from 'next/server';
 import { createServerClient } from '@/lib/supabase/server';
-import { checkAdminRole } from '@/lib/utils/check-admin-role';
+import { checkAdminRole, checkCoachRole, getCoachClubId } from '@/lib/utils/check-admin-role';
 
 export const runtime = 'nodejs';
 
@@ -17,6 +17,67 @@ interface RouteParams {
   params: Promise<{
     id: string;
   }>;
+}
+
+// GET - Get club by ID
+export async function GET(_request: Request, { params }: RouteParams) {
+  try {
+    const { id } = await params;
+    const supabase = await createServerClient();
+    
+    // Vérifier l'authentification
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      return NextResponse.json({ error: 'Non authentifié' }, { status: 401 });
+    }
+
+    // Vérifier que l'utilisateur est admin ou coach
+    const isAdmin = await checkAdminRole(user.id);
+    const isCoach = await checkCoachRole(user.id);
+    
+    if (!isAdmin && !isCoach) {
+      return NextResponse.json({ error: 'Non autorisé' }, { status: 403 });
+    }
+
+    // Si coach, vérifier que le club_id correspond à son club
+    if (isCoach) {
+      const coachClubId = await getCoachClubId(user.id);
+      if (!coachClubId || coachClubId !== id) {
+        return NextResponse.json({ error: 'Accès non autorisé à ce club' }, { status: 403 });
+      }
+    }
+
+    const { data, error } = await supabase
+      .from('clubs')
+      .select('*')
+      .eq('id', id)
+      .single();
+
+    if (error) {
+      console.error('Supabase error:', error);
+      return NextResponse.json(
+        { 
+          error: 'Erreur lors de la récupération',
+          details: error.message,
+          code: error.code 
+        },
+        { status: 500 }
+      );
+    }
+
+    if (!data) {
+      return NextResponse.json({ error: 'Club introuvable' }, { status: 404 });
+    }
+
+    return NextResponse.json(data);
+  } catch (error) {
+    console.error('Error fetching club:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Erreur serveur';
+    return NextResponse.json(
+      { error: 'Erreur serveur', details: errorMessage },
+      { status: 500 }
+    );
+  }
 }
 
 // PATCH - Update club

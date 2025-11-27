@@ -9,7 +9,7 @@
 
 import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
-import { hasRoleLevel } from '@/lib/utils/check-admin-role';
+import { hasRoleLevel, checkCoachRole } from '@/lib/utils/check-admin-role';
 
 export async function middleware(request: NextRequest) {
   let response = NextResponse.next({
@@ -156,7 +156,7 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  // Protéger les routes /admin/* (admin uniquement)
+  // Protéger les routes /admin/* (admin, developer ou coach)
   if (request.nextUrl.pathname.startsWith('/admin')) {
     // Vérifier à la fois l'utilisateur ET la session valide
     if (!user || !session || userError) {
@@ -166,28 +166,37 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(url);
     }
 
-    // Vérifier le rôle admin ou developer (jointure avec table roles)
+    // Vérifier le rôle admin, developer ou coach (jointure avec table roles)
     try {
       const { data: userRoles, error: roleError } = await supabase
         .from('user_roles')
         .select('role_id, roles(name)')
         .eq('user_id', user.id);
 
-      // Vérifier si l'utilisateur a le rôle admin OU developer
+      // Vérifier si l'utilisateur a le rôle admin, developer ou coach
       const roles = (userRoles as any[])?.map(ur => ur.roles?.name).filter(Boolean) || [];
       const isAdminOrDeveloper = roles.includes('admin') || roles.includes('developer');
+      const isCoach = roles.includes('coach');
 
-      // Si pas de rôle admin ou developer, rediriger vers le dashboard user
-      if (roleError || !isAdminOrDeveloper) {
+      // Si l'utilisateur est coach, vérifier qu'il accède uniquement au dashboard
+      if (isCoach && !request.nextUrl.pathname.match(/^\/admin\/?$/)) {
+        // Les coaches ne peuvent accéder qu'à /admin (dashboard)
+        const url = request.nextUrl.clone();
+        url.pathname = '/admin';
+        return NextResponse.redirect(url);
+      }
+
+      // Si pas de rôle admin, developer ou coach, rediriger vers le dashboard user
+      if (roleError || (!isAdminOrDeveloper && !isCoach)) {
         const url = request.nextUrl.clone();
         url.pathname = '/dashboard';
         url.searchParams.set('error', 'unauthorized');
         return NextResponse.redirect(url);
       }
 
-      // Admin access OK (log removed for clean console)
+      // Access OK (admin, developer ou coach)
     } catch (error) {
-      console.error('Error checking admin role:', error);
+      console.error('Error checking admin/coach role:', error);
       // En cas d'erreur, on redirige par sécurité
       const url = request.nextUrl.clone();
       url.pathname = '/dashboard';

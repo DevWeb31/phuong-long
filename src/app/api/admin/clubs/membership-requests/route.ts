@@ -6,7 +6,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createAPIClient } from '@/lib/supabase/server';
-import { checkAdminRole } from '@/lib/utils/check-admin-role';
+import { checkAdminRole, checkCoachRole, getCoachClubId } from '@/lib/utils/check-admin-role';
 
 export async function GET(_request: NextRequest) {
   try {
@@ -20,21 +20,43 @@ export async function GET(_request: NextRequest) {
       );
     }
 
-    // Vérifier que l'utilisateur est admin
+    // Vérifier que l'utilisateur est admin ou coach
     const isAdmin = await checkAdminRole(user.id);
-    if (!isAdmin) {
+    const isCoach = await checkCoachRole(user.id);
+    
+    if (!isAdmin && !isCoach) {
       return NextResponse.json(
         { success: false, error: 'Accès non autorisé' },
         { status: 403 }
       );
     }
 
-    // Récupérer les demandes d'adhésion en attente groupées par club
-    const { data: requests, error: requestsError } = await supabase
+    // Si coach, récupérer son club_id
+    let coachClubId: string | null = null;
+    if (isCoach) {
+      coachClubId = await getCoachClubId(user.id);
+      console.log('[API membership-requests] Coach club_id:', coachClubId, 'for user:', user.id);
+      if (!coachClubId) {
+        console.error('[API membership-requests] Coach has no club_id associated');
+        return NextResponse.json(
+          { success: false, error: 'Aucun club associé' },
+          { status: 403 }
+        );
+      }
+    }
+
+    // Construire la requête selon le rôle
+    let query = supabase
       .from('club_membership_requests')
       .select('club_id, clubs(id, name, city, slug)')
-      .eq('status', 'pending')
-      .order('requested_at', { ascending: false });
+      .eq('status', 'pending');
+
+    // Si coach, filtrer par son club uniquement
+    if (isCoach && coachClubId) {
+      query = query.eq('club_id', coachClubId);
+    }
+
+    const { data: requests, error: requestsError } = await query.order('requested_at', { ascending: false });
 
     if (requestsError) {
       // Si la table n'existe pas encore, retourner une réponse vide

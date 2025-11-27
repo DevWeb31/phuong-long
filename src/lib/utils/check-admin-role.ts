@@ -110,6 +110,41 @@ export async function getStudentClubId(userId: string): Promise<string | null> {
   }
 }
 
+/**
+ * Récupère le club principal d'un utilisateur
+ * Priorité : user_roles.club_id (rôle student) > favorite_club_id > null
+ * 
+ * Cette fonction centralise la logique de récupération du club pour éviter
+ * les incohérences entre favorite_club_id et user_roles.club_id
+ */
+export async function getUserClubId(userId: string): Promise<string | null> {
+  try {
+    const supabase = await createServerClient();
+    
+    // 1. Priorité : Récupérer le club depuis le rôle student
+    const studentClubId = await getStudentClubId(userId);
+    if (studentClubId) {
+      return studentClubId;
+    }
+    
+    // 2. Fallback : Récupérer le favorite_club_id depuis le profil
+    const { data: profile, error: profileError } = await supabase
+      .from('user_profiles')
+      .select('favorite_club_id')
+      .eq('id', userId)
+      .single();
+    
+    if (!profileError && profile?.favorite_club_id) {
+      return profile.favorite_club_id;
+    }
+    
+    return null;
+  } catch (error) {
+    console.error('[getUserClubId] Exception:', error);
+    return null;
+  }
+}
+
 export async function hasRoleLevel(userId: string, maxLevel: number): Promise<boolean> {
   try {
     const supabase = await createServerClient();
@@ -132,6 +167,76 @@ export async function hasRoleLevel(userId: string, maxLevel: number): Promise<bo
   } catch (error) {
     console.error('Exception checking role level:', error);
     return false;
+  }
+}
+
+export async function checkCoachRole(userId: string): Promise<boolean> {
+  return hasRole(userId, 'coach');
+}
+
+export async function getCoachClubId(userId: string): Promise<string | null> {
+  try {
+    const supabase = await createServerClient();
+    
+    // Méthode 1: Récupérer le club_id depuis user_roles
+    const { data: userRoles, error: rolesError } = await supabase
+      .from('user_roles')
+      .select('club_id, role_id, roles(name)')
+      .eq('user_id', userId);
+
+    if (!rolesError && userRoles && userRoles.length > 0) {
+      // Filtrer pour trouver le rôle coach avec un club_id
+      const coachRoles = (userRoles as any[]).filter((ur: any) => {
+        const roleName = ur.roles?.name;
+        return roleName === 'coach' && ur.club_id !== null;
+      });
+
+      if (coachRoles.length > 0) {
+        const clubId = (coachRoles[0] as any)?.club_id;
+        console.log('[getCoachClubId] Found club_id from user_roles:', clubId);
+        return clubId || null;
+      }
+    }
+
+    // Méthode 2: Si pas trouvé dans user_roles, essayer de trouver via le profil utilisateur
+    // Récupérer le profil utilisateur pour obtenir favorite_club_id
+    const { data: userProfile, error: profileError } = await supabase
+      .from('user_profiles')
+      .select('full_name, favorite_club_id')
+      .eq('id', userId)
+      .single();
+
+    if (!profileError && userProfile) {
+      // Si le profil a un favorite_club_id, l'utiliser
+      if (userProfile.favorite_club_id) {
+        console.log('[getCoachClubId] Using favorite_club_id from profile:', userProfile.favorite_club_id);
+        return userProfile.favorite_club_id;
+      }
+
+      // Si le profil a un full_name, chercher dans la table coaches
+      if (userProfile.full_name) {
+        const { data: coaches, error: coachesError } = await supabase
+          .from('coaches')
+          .select('club_id, name')
+          .ilike('name', `%${userProfile.full_name}%`)
+          .eq('active', true)
+          .limit(1);
+
+        if (!coachesError && coaches && coaches.length > 0) {
+          const clubId = (coaches[0] as any)?.club_id;
+          if (clubId) {
+            console.log('[getCoachClubId] Found club_id from coaches table:', clubId);
+            return clubId;
+          }
+        }
+      }
+    }
+
+    console.log('[getCoachClubId] No club_id found for coach user:', userId);
+    return null;
+  } catch (error) {
+    console.error('[getCoachClubId] Exception fetching coach club:', error);
+    return null;
   }
 }
 

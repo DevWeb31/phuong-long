@@ -15,6 +15,7 @@ import { createServerClient } from '@/lib/supabase/server';
 import type { Club } from '@/lib/types';
 import { ClubsHeroContent } from '@/components/marketing/ClubsHeroContent';
 import { ClubsMap } from '@/components/marketing/ClubsMap';
+import { canViewClubContact } from '@/lib/utils/check-contact-visibility';
 
 export const metadata: Metadata = {
   title: 'Nos Clubs',
@@ -35,6 +36,9 @@ export default async function ClubsPage() {
   }
   
   const typedClubs = (clubs || []) as unknown as Club[];
+  
+  // Vérifier si l'utilisateur peut voir les informations de contact
+  const canViewContact = await canViewClubContact();
 
   return (
     <>
@@ -129,7 +133,7 @@ export default async function ClubsPage() {
                     )}
 
                     {/* Phone */}
-                    {club.phone && (() => {
+                    {canViewContact && club.phone && (() => {
                       // Séparer les numéros de téléphone par virgule
                       const phoneNumbers = club.phone.split(',').map(phone => phone.trim()).filter(phone => phone);
                       
@@ -165,7 +169,7 @@ export default async function ClubsPage() {
                     })()}
 
                     {/* Email */}
-                    {club.email && (
+                    {canViewContact && club.email && (
                       <div className="flex items-center gap-3">
                         <div className="flex-shrink-0">
                           <Mail className="w-4 h-4 text-primary" />

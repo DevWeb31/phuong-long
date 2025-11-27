@@ -92,11 +92,13 @@ export function AdminLayoutClient({
   const [windowWidth, setWindowWidth] = useState(0);
   const [isDeveloper, setIsDeveloper] = useState(false);
   const [isDeveloperLoading, setIsDeveloperLoading] = useState(true);
+  const [isCoach, setIsCoach] = useState(false);
+  const [isCoachLoading, setIsCoachLoading] = useState(true);
   const pathname = usePathname();
 
-  // Vérifier si l'utilisateur est développeur
+  // Vérifier si l'utilisateur est développeur ou coach
   useEffect(() => {
-    async function checkDeveloperRole() {
+    async function checkUserRoles() {
       try {
         const supabase = createClient();
         const { data: { user } } = await supabase.auth.getUser();
@@ -109,16 +111,19 @@ export function AdminLayoutClient({
 
           const roles = (userRoles as any[])?.map(ur => ur.roles?.name) || [];
           setIsDeveloper(roles.includes('developer'));
+          setIsCoach(roles.includes('coach'));
         }
       } catch (error) {
-        console.error('Error checking developer role:', error);
+        console.error('Error checking user roles:', error);
         setIsDeveloper(false);
+        setIsCoach(false);
       } finally {
         setIsDeveloperLoading(false);
+        setIsCoachLoading(false);
       }
     }
 
-    checkDeveloperRole();
+    checkUserRoles();
   }, []);
 
   // Détecter la largeur de la fenêtre et ajuster la sidebar
@@ -246,65 +251,80 @@ export function AdminLayoutClient({
           )}
         >
           <nav className="p-6 space-y-2 h-full overflow-y-auto overflow-x-hidden">
-            {navigation.map((item) => {
-              const Icon = item.icon;
-              const active = isActive(item.href);
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  onClick={() => {
-                    if (windowWidth < 1350) {
-                      setSidebarOpen(false);
-                    } else {
-                      setMobileMenuOpen(false);
-                    }
-                  }}
-                  className={cn(
-                    'flex items-center gap-3 px-4 py-3 text-sm font-semibold rounded-xl transition-all duration-300 group',
-                    active
-                      ? 'bg-gradient-to-r from-primary/10 to-primary/5 dark:from-primary/20 dark:to-primary/10 text-primary dark:text-primary-light shadow-md'
-                      : 'text-gray-700 dark:text-gray-300 hover:bg-gradient-to-r hover:from-primary/10 hover:to-primary/5 dark:hover:from-primary/20 dark:hover:to-primary/10 hover:text-primary dark:hover:text-primary-light hover:shadow-md'
-                  )}
-                >
-                  <Icon className="w-5 h-5 group-hover:scale-110 transition-transform" />
-                  {item.name}
-                </Link>
-              );
-            })}
+            {navigation
+              .filter((item) => {
+                // Si coach, ne montrer que le Dashboard
+                if (isCoach) {
+                  return item.href === '/admin';
+                }
+                // Sinon, montrer tous les éléments
+                return true;
+              })
+              .map((item) => {
+                const Icon = item.icon;
+                const active = isActive(item.href);
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    onClick={() => {
+                      if (windowWidth < 1350) {
+                        setSidebarOpen(false);
+                      } else {
+                        setMobileMenuOpen(false);
+                      }
+                    }}
+                    className={cn(
+                      'flex items-center gap-3 px-4 py-3 text-sm font-semibold rounded-xl transition-all duration-300 group',
+                      active
+                        ? 'bg-gradient-to-r from-primary/10 to-primary/5 dark:from-primary/20 dark:to-primary/10 text-primary dark:text-primary-light shadow-md'
+                        : 'text-gray-700 dark:text-gray-300 hover:bg-gradient-to-r hover:from-primary/10 hover:to-primary/5 dark:hover:from-primary/20 dark:hover:to-primary/10 hover:text-primary dark:hover:text-primary-light hover:shadow-md'
+                    )}
+                  >
+                    <Icon className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                    {item.name}
+                  </Link>
+                );
+              })}
 
-            {/* Utilisateurs - Visible uniquement pour admin et développeur */}
-            <div onClick={() => {
-              if (windowWidth < 1350) {
-                setSidebarOpen(false);
-              } else {
-                setMobileMenuOpen(false);
-              }
-            }}>
-              <UsersNavLink />
-            </div>
+            {/* Utilisateurs - Visible uniquement pour admin et développeur (pas pour coach) */}
+            {!isCoach && (
+              <div onClick={() => {
+                if (windowWidth < 1350) {
+                  setSidebarOpen(false);
+                } else {
+                  setMobileMenuOpen(false);
+                }
+              }}>
+                <UsersNavLink />
+              </div>
+            )}
 
-            {/* Boutique - Conditionnel selon paramètre développeur */}
-            <div onClick={() => {
-              if (windowWidth < 1300) {
-                setSidebarOpen(false);
-              } else {
-                setMobileMenuOpen(false);
-              }
-            }}>
-              <ShopNavLink />
-            </div>
+            {/* Boutique - Conditionnel selon paramètre développeur (pas pour coach) */}
+            {!isCoach && (
+              <div onClick={() => {
+                if (windowWidth < 1300) {
+                  setSidebarOpen(false);
+                } else {
+                  setMobileMenuOpen(false);
+                }
+              }}>
+                <ShopNavLink />
+              </div>
+            )}
 
-            {/* Analytics - Conditionnel selon paramètre développeur */}
-            <div onClick={() => {
-              if (windowWidth < 1300) {
-                setSidebarOpen(false);
-              } else {
-                setMobileMenuOpen(false);
-              }
-            }}>
-              <AnalyticsNavLink />
-            </div>
+            {/* Analytics - Conditionnel selon paramètre développeur (pas pour coach) */}
+            {!isCoach && (
+              <div onClick={() => {
+                if (windowWidth < 1300) {
+                  setSidebarOpen(false);
+                } else {
+                  setMobileMenuOpen(false);
+                }
+              }}>
+                <AnalyticsNavLink />
+              </div>
+            )}
 
             {/* Separator - Visible uniquement pour les développeurs */}
             {!isDeveloperLoading && isDeveloper && (

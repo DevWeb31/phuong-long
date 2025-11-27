@@ -6,7 +6,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createAPIClient, createAdminClient } from '@/lib/supabase/server';
-import { checkAdminRole } from '@/lib/utils/check-admin-role';
+import { checkAdminRole, checkCoachRole, getCoachClubId } from '@/lib/utils/check-admin-role';
 
 interface UserProfile {
   id: string;
@@ -103,9 +103,11 @@ export async function GET(
       );
     }
 
-    // Vérifier que l'utilisateur est admin
+    // Vérifier que l'utilisateur est admin ou coach
     const isAdmin = await checkAdminRole(user.id);
-    if (!isAdmin) {
+    const isCoach = await checkCoachRole(user.id);
+    
+    if (!isAdmin && !isCoach) {
       return NextResponse.json(
         { success: false, error: 'Accès non autorisé' },
         { status: 403 }
@@ -114,21 +116,41 @@ export async function GET(
 
     const { id: clubId } = await params;
 
+    // Si coach, vérifier que le club_id correspond à son club
+    if (isCoach) {
+      const coachClubId = await getCoachClubId(user.id);
+      if (!coachClubId || coachClubId !== clubId) {
+        return NextResponse.json(
+          { success: false, error: 'Accès non autorisé à ce club' },
+          { status: 403 }
+        );
+      }
+    }
+
     // Récupérer les demandes d'adhésion en attente pour ce club
+    console.log('[API] Fetching membership requests for club:', clubId);
     const { data: requests, error: requestsError } = await supabase
       .from('club_membership_requests')
       .select(`
         id,
         user_id,
         status,
-        requested_at
+        requested_at,
+        club_id
       `)
       .eq('club_id', clubId)
       .eq('status', 'pending')
       .order('requested_at', { ascending: false });
 
+    console.log('[API] Membership requests query result:', {
+      clubId,
+      requestsCount: requests?.length || 0,
+      requests: requests,
+      error: requestsError
+    });
+
     if (requestsError) {
-      console.error('Error fetching membership requests:', requestsError);
+      console.error('[API] Error fetching membership requests:', requestsError);
       return NextResponse.json(
         { success: false, error: 'Erreur lors de la récupération des demandes', details: requestsError.message },
         { status: 500 }

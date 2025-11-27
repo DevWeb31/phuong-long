@@ -162,25 +162,56 @@ export function UserFormModal({
   const initializeFormData = (currentUser: User, availableRoles: Role[]) => {
     const primaryRole = currentUser.user_roles?.[0];
     
-    // Utiliser favorite_club_id pour le club, sinon le club_id du rôle
+    // Priorité 1: favorite_club_id (peut venir de user_profiles ou club_membership_requests)
+    // Priorité 2: club_id du rôle (user_roles)
+    // Priorité 3: chercher par nom de club
     let clubId = currentUser.favorite_club_id || primaryRole?.club_id || '';
     
+    console.log('[UserFormModal] Initialisation formData:', {
+      favorite_club_id: currentUser.favorite_club_id,
+      role_club_id: primaryRole?.club_id,
+      club_name: currentUser.club,
+      club_city: currentUser.club_city,
+      initial_clubId: clubId,
+    });
+    
     // Si on n'a pas de club_id mais qu'on a un nom de club, chercher le club correspondant
-    if (!clubId && currentUser.club && clubs.length > 0) {
-      // Le champ "club" contient le nom de la ville, on doit trouver le club correspondant
-      // On peut aussi chercher par nom si le format est "Nom - Ville"
-      const clubParts = currentUser.club.split(' - ');
+    if (!clubId && (currentUser.club || currentUser.club_city) && clubs.length > 0) {
+      // Le champ "club" peut contenir le nom de la ville ou "Nom - Ville"
+      const clubCity = currentUser.club_city || currentUser.club;
+      const clubParts = (currentUser.club || '').split(' - ');
       const clubName = clubParts[0];
-      const clubCity = clubParts[1] || currentUser.club;
       
-      const foundClub = clubs.find(c => 
-        c.name === clubName || 
-        c.city === clubCity || 
-        `${c.name} - ${c.city}` === currentUser.club
-      );
+      console.log('[UserFormModal] Recherche du club par nom/ville:', {
+        clubCity,
+        clubName,
+        club: currentUser.club,
+      });
+      
+      // Chercher par ville d'abord (plus fiable)
+      let foundClub = clubs.find(c => c.city === clubCity);
+      
+      // Si pas trouvé par ville, chercher par nom
+      if (!foundClub && clubName) {
+        foundClub = clubs.find(c => c.name === clubName);
+      }
+      
+      // Si toujours pas trouvé, chercher par format complet "Nom - Ville"
+      if (!foundClub && currentUser.club) {
+        foundClub = clubs.find(c => `${c.name} - ${c.city}` === currentUser.club);
+      }
       
       if (foundClub) {
         clubId = foundClub.id;
+        console.log('[UserFormModal] Club trouvé:', foundClub);
+      } else {
+        console.warn('[UserFormModal] Club not found:', {
+          clubName: currentUser.club,
+          clubCity: currentUser.club_city,
+          favorite_club_id: currentUser.favorite_club_id,
+          role_club_id: primaryRole?.club_id,
+          availableClubs: clubs.map(c => ({ id: c.id, name: c.name, city: c.city })),
+        });
       }
     }
     
@@ -356,9 +387,19 @@ export function UserFormModal({
     }
 
     // Normaliser les valeurs : convertir les chaînes vides en null
+    const normalizedClubId = formData.club_id && formData.club_id.trim() !== '' ? formData.club_id : null;
+    const normalizedRoleId = formData.role_id && formData.role_id.trim() !== '' ? formData.role_id : null;
+    
+    console.log('[UserFormModal] Données avant soumission:', {
+      formData_club_id: formData.club_id,
+      formData_role_id: formData.role_id,
+      normalized_club_id: normalizedClubId,
+      normalized_role_id: normalizedRoleId,
+    });
+    
     await onSubmit({
-      role_id: formData.role_id && formData.role_id.trim() !== '' ? formData.role_id : null,
-      club_id: formData.club_id && formData.club_id.trim() !== '' ? formData.club_id : null,
+      role_id: normalizedRoleId,
+      club_id: normalizedClubId,
     });
   };
 
@@ -370,6 +411,8 @@ export function UserFormModal({
   const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const { name, value } = e.target;
     
+    console.log('[UserFormModal] handleChange:', { name, value, type: typeof value });
+    
     // Effacer l'erreur de validation pour ce champ
     if (validationErrors[name]) {
       setValidationErrors(prev => {
@@ -379,7 +422,11 @@ export function UserFormModal({
       });
     }
     
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData(prev => {
+      const newData = { ...prev, [name]: value };
+      console.log('[UserFormModal] Nouveau formData:', newData);
+      return newData;
+    });
   };
 
   const currentStepIndex = STEPS.findIndex(s => s.id === currentStep);

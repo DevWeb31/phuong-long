@@ -212,12 +212,24 @@ export default function AdminUsersPage() {
   }) => {
     if (!selectedUser) return;
 
+    console.log('[AdminUsersPage] handleSubmit appelé avec:', {
+      userId: selectedUser.id,
+      userData,
+      userDataStringified: JSON.stringify(userData),
+    });
+
     try {
       setIsSubmitting(true);
       const response = await fetch(`/api/admin/users/${selectedUser.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(userData),
+      });
+      
+      console.log('[AdminUsersPage] Réponse API:', {
+        status: response.status,
+        statusText: response.statusText,
+        ok: response.ok,
       });
 
       if (!response.ok) {

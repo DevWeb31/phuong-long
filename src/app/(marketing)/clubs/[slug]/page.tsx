@@ -16,6 +16,7 @@ import { createServerClient } from '@/lib/supabase/server';
 import type { Club, Coach, Event } from '@/lib/types';
 import { MapPinIcon, PhoneIcon, EnvelopeIcon, ClockIcon, CurrencyEuroIcon } from '@heroicons/react/24/outline';
 import { Lightbulb, Check, Facebook, Instagram, Youtube } from 'lucide-react';
+import { canViewClubContact } from '@/lib/utils/check-contact-visibility';
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -90,6 +91,9 @@ export default async function ClubDetailPage({ params }: Props) {
   
   const typedEvents = (events || []) as unknown as Pick<Event, 'id' | 'title' | 'slug' | 'start_date' | 'event_type' | 'location' | 'price_cents'>[];
 
+  // Vérifier si l'utilisateur peut voir les informations de contact
+  const canViewContact = await canViewClubContact();
+
   return (
     <>
       {/* Hero */}
@@ -159,7 +163,7 @@ export default async function ClubDetailPage({ params }: Props) {
                     </div>
                   )}
                   
-                  {typedClub.phone && (() => {
+                  {canViewContact && typedClub.phone && (() => {
                     // Séparer les numéros de téléphone par virgule
                     const phoneNumbers = typedClub.phone.split(',').map(phone => phone.trim()).filter(phone => phone);
                     
@@ -186,7 +190,7 @@ export default async function ClubDetailPage({ params }: Props) {
                     );
                   })()}
                   
-                  {typedClub.email && (
+                  {canViewContact && typedClub.email && (
                     <div className="flex items-start gap-3">
                       <EnvelopeIcon className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
                       <div>
@@ -406,25 +410,13 @@ export default async function ClubDetailPage({ params }: Props) {
                       <p className="text-sm text-slate-500 dark:text-slate-500 mb-4">
                         Contactez le club pour connaître nos tarifs et nos formules d'abonnement
                       </p>
-                      <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                        {typedClub.phone && (
-                          <a 
-                            href={`tel:${typedClub.phone}`}
-                            className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors duration-300 text-sm font-medium"
-                          >
-                            <PhoneIcon className="w-4 h-4" />
-                            Appeler
-                          </a>
-                        )}
-                        {typedClub.email && (
-                          <a 
-                            href={`mailto:${typedClub.email}`}
-                            className="inline-flex items-center justify-center gap-2 px-4 py-2 border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors duration-300 text-sm font-medium"
-                          >
-                            <EnvelopeIcon className="w-4 h-4" />
-                            Envoyer un email
-                          </a>
-                        )}
+                      <div className="flex justify-center">
+                        <Link href={`/contact?club=${typedClub.slug}`}>
+                          <Button className="bg-primary text-white hover:bg-primary-dark transition-colors duration-300">
+                            <EnvelopeIcon className="w-4 h-4 mr-2" />
+                            Contacter le Club
+                          </Button>
+                        </Link>
                       </div>
                     </div>
                   )}
@@ -453,14 +445,6 @@ export default async function ClubDetailPage({ params }: Props) {
                         Réserver mon Essai Gratuit
                       </Button>
                     </Link>
-                    {typedClub.phone && (
-                      <a href={`tel:${typedClub.phone}`}>
-                        <Button fullWidth className="bg-white/10 backdrop-blur-sm text-white border-2 border-white/30 hover:bg-white/20 hover:border-white/50 font-semibold transition-all duration-300">
-                          <PhoneIcon className="w-4 h-4 mr-2" />
-                          Appeler le Club
-                        </Button>
-                      </a>
-                    )}
                   </div>
                 </CardContent>
               </Card>

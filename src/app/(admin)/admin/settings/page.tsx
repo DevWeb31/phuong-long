@@ -12,6 +12,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/common';
 import { X, MessageCircle, Mail, Phone, MapPin, ExternalLink } from 'lucide-react';
+import { EmailsSettingsSection } from './EmailsSettingsSection';
 
 interface SiteSetting {
   id: string;
@@ -181,7 +182,8 @@ export default function AdminSettingsPage() {
   const baseCategories = Object.keys(groupedSettings);
   const categories = [
     'general',
-    ...baseCategories.filter((category) => category !== 'general' && category !== 'developer'),
+    'emails',
+    ...baseCategories.filter((category) => category !== 'general' && category !== 'developer' && category !== 'emails'),
     'developer',
   ].filter((category, index, self) => self.indexOf(category) === index);
 
@@ -240,7 +242,7 @@ export default function AdminSettingsPage() {
                   : 'text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-primary-light'
               }`}
             >
-              {category === 'general' ? 'Général' : category === 'developer' ? 'Développeur' : category}
+              {category === 'general' ? 'Général' : category === 'emails' ? 'Clubs' : category === 'developer' ? 'Développeur' : category}
             </button>
           ))}
         </div>
@@ -249,6 +251,8 @@ export default function AdminSettingsPage() {
       {/* Active category content */}
       {activeCategory === 'developer' ? (
         <DeveloperInfoSection />
+      ) : activeCategory === 'emails' ? (
+        <EmailsSettingsSection />
       ) : activeCategory && groupedSettings[activeCategory] && (
         <div className="space-y-6">
           {(() => {

@@ -6,7 +6,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createAPIClient, createAdminClient } from '@/lib/supabase/server';
-import { checkAdminRole } from '@/lib/utils/check-admin-role';
+import { checkAdminRole, checkCoachRole, getCoachClubId } from '@/lib/utils/check-admin-role';
 import { z } from 'zod';
 
 const updateRequestSchema = z.object({
@@ -30,9 +30,11 @@ export async function PATCH(
       );
     }
 
-    // Vérifier que l'utilisateur est admin
+    // Vérifier que l'utilisateur est admin ou coach
     const isAdmin = await checkAdminRole(user.id);
-    if (!isAdmin) {
+    const isCoach = await checkCoachRole(user.id);
+    
+    if (!isAdmin && !isCoach) {
       return NextResponse.json(
         { success: false, error: 'Accès non autorisé' },
         { status: 403 }
@@ -59,6 +61,17 @@ export async function PATCH(
 
     type MembershipRequest = { id: string; user_id: string; club_id: string; status: string };
     const typedRequest = membershipRequest as MembershipRequest;
+
+    // Si coach, vérifier que la demande appartient à son club
+    if (isCoach) {
+      const coachClubId = await getCoachClubId(user.id);
+      if (!coachClubId || coachClubId !== typedRequest.club_id) {
+        return NextResponse.json(
+          { success: false, error: 'Accès non autorisé à cette demande' },
+          { status: 403 }
+        );
+      }
+    }
 
     if (typedRequest.status !== 'pending') {
       return NextResponse.json(
@@ -89,8 +102,9 @@ export async function PATCH(
       );
     }
 
-    // Si la demande est approuvée, mettre à jour le favorite_club_id de l'utilisateur
+    // Si la demande est approuvée, mettre à jour le favorite_club_id et créer le rôle student
     if (action === 'approve') {
+      // 1. Mettre à jour le favorite_club_id dans user_profiles
       const { error: profileError } = await adminSupabase
         .from('user_profiles')
         .update({
@@ -99,8 +113,38 @@ export async function PATCH(
         .eq('id', typedRequest.user_id);
 
       if (profileError) {
-        // Log l'erreur mais ne bloque pas la réponse
         console.error('Error updating user profile:', profileError);
+      }
+
+      // 2. Récupérer l'ID du rôle "student"
+      const { data: studentRole, error: roleError } = await adminSupabase
+        .from('roles')
+        .select('id')
+        .eq('name', 'student')
+        .single();
+
+      if (roleError || !studentRole) {
+        console.error('Error fetching student role:', roleError);
+        // Ne pas bloquer si le rôle student n'existe pas encore
+      } else {
+        // 3. Créer ou mettre à jour le rôle student avec le club_id
+        const { error: userRoleError } = await adminSupabase
+          .from('user_roles')
+          .upsert({
+            user_id: typedRequest.user_id,
+            role_id: studentRole.id,
+            club_id: typedRequest.club_id,
+            granted_by: user.id,
+          } as any, {
+            onConflict: 'user_id,role_id,club_id',
+          });
+
+        if (userRoleError) {
+          console.error('Error creating student role:', userRoleError);
+          // Log l'erreur mais ne bloque pas la réponse
+        } else {
+          console.log('Student role created successfully for user:', typedRequest.user_id, 'club:', typedRequest.club_id);
+        }
       }
     }
 
