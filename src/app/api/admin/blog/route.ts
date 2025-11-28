@@ -57,6 +57,23 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Non autorisé' }, { status: 403 });
     }
 
+    // Vérifier la limite de 50 blogs
+    const { count, error: countError } = await supabase
+      .from('blog_posts')
+      .select('*', { count: 'exact', head: true });
+
+    if (countError) {
+      console.error('Error counting blog posts:', countError);
+      return NextResponse.json({ error: 'Erreur lors de la vérification' }, { status: 500 });
+    }
+
+    if (count !== null && count >= 50) {
+      return NextResponse.json(
+        { error: 'Limite de 50 articles de blog atteinte. Veuillez supprimer des articles avant d\'en créer de nouveaux.' },
+        { status: 403 }
+      );
+    }
+
     const body = await request.json();
 
     // Ajouter l'auteur

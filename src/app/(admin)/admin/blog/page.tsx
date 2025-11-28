@@ -36,6 +36,8 @@ const statusColors: Record<string, 'default' | 'success'> = {
   published: 'success',
 };
 
+const BLOG_LIMIT = 50;
+
 export default function AdminBlogPage() {
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -182,6 +184,10 @@ export default function AdminBlogPage() {
   };
 
   const handleCreateNew = () => {
+    if (posts.length >= BLOG_LIMIT) {
+      alert(`Limite de ${BLOG_LIMIT} articles atteinte. Veuillez supprimer des articles avant d'en créer de nouveaux.`);
+      return;
+    }
     setSelectedPost(null);
     setIsFormOpen(true);
   };
@@ -293,6 +299,8 @@ export default function AdminBlogPage() {
         emptyMessage="Aucun article trouvé"
         newItemLabel="Nouvel Article"
         onNewItemClick={handleCreateNew}
+        newItemDisabled={posts.length >= BLOG_LIMIT}
+        newItemTooltip={posts.length >= BLOG_LIMIT ? `Limite de ${BLOG_LIMIT} articles atteinte` : undefined}
         minItemsPerPage={8}
         itemsPerPage={8}
         selectable={true}

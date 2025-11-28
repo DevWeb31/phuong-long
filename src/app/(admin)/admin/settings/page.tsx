@@ -13,6 +13,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/common';
 import { X, MessageCircle, Mail, Phone, MapPin, ExternalLink } from 'lucide-react';
 import { EmailsSettingsSection } from './EmailsSettingsSection';
+import { SocialMediaSettingsSection } from './SocialMediaSettingsSection';
 
 interface SiteSetting {
   id: string;
@@ -183,7 +184,8 @@ export default function AdminSettingsPage() {
   const categories = [
     'general',
     'emails',
-    ...baseCategories.filter((category) => category !== 'general' && category !== 'developer' && category !== 'emails'),
+    'social',
+    ...baseCategories.filter((category) => category !== 'general' && category !== 'developer' && category !== 'emails' && category !== 'social'),
     'developer',
   ].filter((category, index, self) => self.indexOf(category) === index);
 
@@ -242,7 +244,7 @@ export default function AdminSettingsPage() {
                   : 'text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-primary-light'
               }`}
             >
-              {category === 'general' ? 'Général' : category === 'emails' ? 'Clubs' : category === 'developer' ? 'Développeur' : category}
+              {category === 'general' ? 'Général' : category === 'emails' ? 'Clubs' : category === 'social' ? 'Réseaux sociaux' : category === 'developer' ? 'Développeur' : category}
             </button>
           ))}
         </div>
@@ -253,6 +255,8 @@ export default function AdminSettingsPage() {
         <DeveloperInfoSection />
       ) : activeCategory === 'emails' ? (
         <EmailsSettingsSection />
+      ) : activeCategory === 'social' ? (
+        <SocialMediaSettingsSection />
       ) : activeCategory && groupedSettings[activeCategory] && (
         <div className="space-y-6">
           {(() => {

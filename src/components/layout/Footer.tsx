@@ -9,7 +9,7 @@
 
 import Link from 'next/link';
 import { Container } from '@/components/common';
-import { Facebook, Instagram, Youtube, Mail } from 'lucide-react';
+import { Facebook, Instagram, Youtube } from 'lucide-react';
 import { createServerClient } from '@/lib/supabase/server';
 import type { Club } from '@/lib/types';
 import { FooterShopSection } from './FooterShopSection';
@@ -35,11 +35,11 @@ const navigation = {
   ],
 };
 
-// Liens réseaux sociaux - À mettre à jour avec vraies URLs
-const socialLinks = [
-  { name: 'Facebook', icon: Facebook, href: '#' },
-  { name: 'Instagram', icon: Instagram, href: '#' },
-  { name: 'YouTube', icon: Youtube, href: '#' },
+// Configuration des réseaux sociaux
+const socialMediaConfig = [
+  { name: 'Facebook', icon: Facebook, key: 'social.facebook' },
+  { name: 'Instagram', icon: Instagram, key: 'social.instagram' },
+  { name: 'YouTube', icon: Youtube, key: 'social.youtube' },
 ];
 
 export async function Footer() {
@@ -54,6 +54,30 @@ export async function Footer() {
     .order('city');
   
   const typedClubs = (clubs || []) as unknown as Pick<Club, 'id' | 'name' | 'slug' | 'city'>[];
+
+  // Récupérer les réseaux sociaux depuis la base de données
+  let socialLinks: Array<{ name: string; icon: typeof Facebook; href: string }> = [];
+  try {
+    const { data: socialSettings } = await supabase
+      .from('site_settings')
+      .select('key, value')
+      .in('key', socialMediaConfig.map((c) => c.key))
+      .returns<Array<{ key: string; value: unknown }>>();
+
+    if (socialSettings) {
+      socialLinks = socialMediaConfig
+        .map((config) => {
+          const setting = socialSettings.find((s) => s.key === config.key);
+          const href = setting?.value ? String(setting.value) : null;
+          return href ? { name: config.name, icon: config.icon, href } : null;
+        })
+        .filter((link): link is { name: string; icon: typeof Facebook; href: string } => link !== null);
+    }
+  } catch (error) {
+    console.error('Error loading social media in footer:', error);
+    // En cas d'erreur, utiliser un tableau vide (pas de liens sociaux affichés)
+    socialLinks = [];
+  }
 
   // Vérifier si la boutique est masquée
   let isShopHidden = false;
@@ -164,41 +188,6 @@ export async function Footer() {
             </div>
           </div>
 
-          {/* Newsletter */}
-          <div className="mt-16 border-t dark:border-gray-800/60 pt-12">
-            <div className="max-w-md">
-              <h3 className="text-lg font-bold dark:text-gray-100 mb-2 flex items-center gap-2">
-                <Mail className="w-5 h-5" />
-                Newsletter
-              </h3>
-              <p className="mt-2 text-base dark:text-gray-500 mb-6">
-                Recevez nos actualités, événements et promotions.
-              </p>
-            </div>
-            <form className="mt-4 sm:flex sm:max-w-md">
-              <label htmlFor="email-address" className="sr-only">
-                Email
-              </label>
-              <input
-                type="email"
-                name="email-address"
-                id="email-address"
-                autoComplete="email"
-                required
-                className="w-full min-w-0 px-4 py-2 text-base dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-600 bg-white dark:bg-gray-900 border dark:border-gray-700 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                placeholder="Votre email"
-              />
-              <div className="mt-3 sm:mt-0 sm:ml-3 sm:flex-shrink-0">
-                <button
-                  type="submit"
-                  className="w-full px-4 py-2 text-base font-medium bg-primary border rounded-lg shadow-sm hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-gray-900 focus:ring-primary transition-colors"
-                >
-                  S'inscrire
-                </button>
-              </div>
-            </form>
-          </div>
-
           {/* Bottom */}
           <div className="mt-12 border-t dark:border-gray-800 pt-8 md:flex md:items-center md:justify-between">
             <div className="flex items-center gap-4 md:order-2">
@@ -219,9 +208,23 @@ export async function Footer() {
                 );
               })}
             </div>
-            <p className="mt-8 text-sm dark:text-gray-500 md:mt-0 md:order-1">
-              &copy; {currentYear} Phuong Long Vo Dao. Tous droits réservés.
-            </p>
+            <div className="mt-8 md:mt-0 md:order-1">
+              <p className="text-sm dark:text-gray-500">
+                &copy; {currentYear} Phuong Long Vo Dao. Tous droits réservés.
+              </p>
+              <p className="mt-1 text-xs text-gray-400 dark:text-gray-600 opacity-60">
+                Conçu par{' '}
+                <a
+                  href="https://www.devweb31.fr"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-primary dark:hover:text-primary-light transition-colors"
+                  title="DevWeb31 - Concepteur Développeur d'Applications"
+                >
+                  DevWeb31
+                </a>
+              </p>
+            </div>
           </div>
         </div>
       </Container>

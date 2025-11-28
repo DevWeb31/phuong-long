@@ -55,6 +55,8 @@ interface DataTableProps<T> {
   newItemLabel?: string;
   newItemHref?: string;
   onNewItemClick?: () => void;
+  newItemDisabled?: boolean;
+  newItemTooltip?: string;
   isLoading?: boolean;
   defaultSortColumn?: keyof T | string;
   defaultSortDirection?: 'asc' | 'desc';
@@ -78,6 +80,8 @@ export function DataTable<T extends { id: string | number }>({
   newItemLabel,
   newItemHref,
   onNewItemClick,
+  newItemDisabled = false,
+  newItemTooltip,
   isLoading = false,
   defaultSortColumn,
   defaultSortDirection = 'asc',
@@ -305,13 +309,24 @@ export function DataTable<T extends { id: string | number }>({
             <>
               {newItemHref ? (
                 <Link href={newItemHref}>
-                  <Button variant="primary" size="sm">
+                  <Button 
+                    variant="primary" 
+                    size="sm" 
+                    disabled={newItemDisabled}
+                    title={newItemTooltip}
+                  >
                     <PlusIcon className="w-4 h-4 mr-2" />
                     {newItemLabel}
                   </Button>
                 </Link>
               ) : (
-                <Button variant="primary" size="sm" onClick={onNewItemClick}>
+                <Button 
+                  variant="primary" 
+                  size="sm" 
+                  onClick={onNewItemClick}
+                  disabled={newItemDisabled}
+                  title={newItemTooltip}
+                >
                   <PlusIcon className="w-4 h-4 mr-2" />
                   {newItemLabel}
                 </Button>

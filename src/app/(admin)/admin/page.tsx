@@ -78,6 +78,10 @@ export default function AdminDashboardPage() {
   // États pour détecter si l'utilisateur est coach
   const [isCoach, setIsCoach] = useState(false);
   const [coachClubId, setCoachClubId] = useState<string | null>(null);
+  
+  // État pour la limite de blogs
+  const [blogCount, setBlogCount] = useState<number | null>(null);
+  const BLOG_LIMIT = 50;
 
   const fetchMembershipRequests = async (userIsCoach: boolean, userCoachClubId: string | null) => {
     try {
@@ -200,6 +204,17 @@ export default function AdminDashboardPage() {
         }
       } else {
         setLoading(false);
+      }
+
+      // Charger le nombre de blogs pour vérifier la limite
+      try {
+        const blogResponse = await fetch('/api/admin/blog');
+        if (blogResponse.ok) {
+          const blogData = await blogResponse.json();
+          setBlogCount(Array.isArray(blogData) ? blogData.length : 0);
+        }
+      } catch (error) {
+        console.error('Error fetching blog count:', error);
       }
 
       // Charger les clubs seulement si l'utilisateur n'est pas coach
@@ -355,16 +370,42 @@ export default function AdminDashboardPage() {
 
               <button
                 onClick={() => setIsBlogModalOpen(true)}
-                className="group p-3 border-2 border-accent/40 dark:border-accent/30 rounded-lg hover:border-accent hover:bg-gradient-to-r hover:from-accent/10 hover:to-accent/5 transition-all text-left cursor-pointer bg-white dark:bg-gray-800 shadow-sm hover:shadow-md shadow-accent/10"
+                disabled={blogCount !== null && blogCount >= BLOG_LIMIT}
+                className={`group p-3 border-2 rounded-lg transition-all text-left ${
+                  blogCount !== null && blogCount >= BLOG_LIMIT
+                    ? 'border-gray-300 dark:border-gray-700 bg-gray-100 dark:bg-gray-800/50 cursor-not-allowed opacity-60'
+                    : 'border-accent/40 dark:border-accent/30 hover:border-accent hover:bg-gradient-to-r hover:from-accent/10 hover:to-accent/5 cursor-pointer bg-white dark:bg-gray-800 shadow-sm hover:shadow-md shadow-accent/10'
+                }`}
+                title={blogCount !== null && blogCount >= BLOG_LIMIT ? `Limite de ${BLOG_LIMIT} articles atteinte` : undefined}
               >
                 <div className="flex items-center gap-2.5">
-                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-accent/20 to-accent/10 dark:from-accent/30 dark:to-accent/20 flex items-center justify-center flex-shrink-0 group-hover:from-accent/30 group-hover:to-accent/20 transition-all">
-                    <NewspaperIcon className="w-4 h-4 text-accent dark:text-accent" />
+                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 transition-all ${
+                    blogCount !== null && blogCount >= BLOG_LIMIT
+                      ? 'bg-gray-200 dark:bg-gray-700'
+                      : 'bg-gradient-to-br from-accent/20 to-accent/10 dark:from-accent/30 dark:to-accent/20 group-hover:from-accent/30 group-hover:to-accent/20'
+                  }`}>
+                    <NewspaperIcon className={`w-4 h-4 ${
+                      blogCount !== null && blogCount >= BLOG_LIMIT
+                        ? 'text-gray-400 dark:text-gray-500'
+                        : 'text-accent dark:text-accent'
+                    }`} />
                   </div>
                   <div className="flex-1">
-                    <div className="text-sm font-semibold text-gray-900 dark:text-gray-100">Nouvel Article</div>
-                    <div className="text-xs text-gray-600 dark:text-gray-400 mt-0.5">
-                      Publiez un nouvel article de blog
+                    <div className={`text-sm font-semibold ${
+                      blogCount !== null && blogCount >= BLOG_LIMIT
+                        ? 'text-gray-500 dark:text-gray-400'
+                        : 'text-gray-900 dark:text-gray-100'
+                    }`}>
+                      Nouvel Article
+                    </div>
+                    <div className={`text-xs mt-0.5 ${
+                      blogCount !== null && blogCount >= BLOG_LIMIT
+                        ? 'text-gray-400 dark:text-gray-500'
+                        : 'text-gray-600 dark:text-gray-400'
+                    }`}>
+                      {blogCount !== null && blogCount >= BLOG_LIMIT
+                        ? `Limite de ${BLOG_LIMIT} articles atteinte`
+                        : 'Publiez un nouvel article de blog'}
                     </div>
                   </div>
                 </div>
