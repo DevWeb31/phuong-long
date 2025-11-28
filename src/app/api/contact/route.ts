@@ -2,13 +2,17 @@
  * Contact API Route
  * 
  * Endpoint pour traiter les soumissions du formulaire de contact
+ * Envoie un email au club sélectionné via Resend
  * 
- * @version 1.0
- * @date 2025-11-04 23:15
+ * @version 2.0
+ * @date 2025-01-XX
+ * @updated Intégration Resend avec template
  */
 
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
+import { createAPIClient } from '@/lib/supabase/server';
+import { sendContactEmail } from '@/lib/services/email';
 
 // Schema de validation Zod
 const phoneRegex = /^0[1-9](?: [0-9]{2}){4}$/;
@@ -31,22 +35,62 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     // Validation des données (déclenche une erreur Zod si invalide)
-    contactSchema.parse(body);
+    const validatedData = contactSchema.parse(body);
 
-    // TODO: Implémenter l'envoi d'email
-    // Options possibles :
-    // - Resend (https://resend.com)
-    // - SendGrid
-    // - AWS SES
-    // - Nodemailer avec SMTP
+    // Récupérer l'email du club sélectionné
+    let clubEmail: string | null = null;
+    let clubName: string | null = null;
     
-    // TODO: Enregistrer le message dans Supabase (table contact_messages)
-    // const supabase = await createServerClient();
+    if (validatedData.club && validatedData.club !== 'autre') {
+      const supabase = await createAPIClient();
+      const { data: clubData, error: clubError } = await supabase
+        .from('clubs')
+        .select('email, name')
+        .eq('id', validatedData.club)
+        .eq('active', true)
+        .single<{ email: string | null; name: string }>();
+
+      if (!clubError && clubData) {
+        clubEmail = clubData.email;
+        clubName = clubData.name;
+      }
+    }
+
+    // Email de destination : club sélectionné ou email par défaut
+    const recipientEmail = clubEmail || process.env.RESEND_CONTACT_DEFAULT_EMAIL || process.env.RESEND_FROM_EMAIL;
+    
+    if (!recipientEmail) {
+      console.error('[CONTACT] Aucune adresse email de destination configurée');
+      return NextResponse.json(
+        { 
+          success: false, 
+          error: 'Configuration email manquante' 
+        },
+        { status: 500 }
+      );
+    }
+
+    // Envoyer l'email via Resend
+    const templateId = process.env.RESEND_CONTACT_TEMPLATE_ID;
+    
+    await sendContactEmail({
+      to: recipientEmail,
+      name: validatedData.name,
+      email: validatedData.email,
+      phone: validatedData.phone,
+      clubName: clubName || undefined,
+      subject: validatedData.subject,
+      message: validatedData.message,
+      templateId: templateId || undefined,
+    });
+
+    // TODO: Enregistrer le message dans Supabase (table contact_messages si elle existe)
+    // const supabase = await createAPIClient();
     // await supabase.from('contact_messages').insert({
     //   name: validatedData.name,
     //   email: validatedData.email,
     //   phone: validatedData.phone || null,
-    //   club: validatedData.club || null,
+    //   club_id: validatedData.club && validatedData.club !== 'autre' ? validatedData.club : null,
     //   subject: validatedData.subject,
     //   message: validatedData.message,
     //   status: 'new',

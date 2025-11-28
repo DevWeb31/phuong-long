@@ -13,4 +13,6 @@ export type { DataTableColumn, DataTableAction } from './DataTable';
 export { Modal, ConfirmModal } from './Modal';
 export { CoachFormModal } from './CoachFormModal';
 export { UserFormModal } from './UserFormModal';
+export { FAQFormModal } from './FAQFormModal';
+export type { FAQItem } from './FAQFormModal';
 

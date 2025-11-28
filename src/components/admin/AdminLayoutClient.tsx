@@ -30,6 +30,7 @@ import {
   Bars3Icon,
   XMarkIcon,
   DocumentTextIcon,
+  QuestionMarkCircleIcon,
 } from '@heroicons/react/24/outline';
 import { cn } from '@/lib/utils/cn';
 import { createClient } from '@/lib/supabase/client';
@@ -41,6 +42,7 @@ const navigation = [
   { name: 'Carousel Hero', href: '/admin/hero-slides', icon: VideoCameraIcon },
   { name: 'Événements', href: '/admin/events', icon: CalendarIcon },
   { name: 'Blog', href: '/admin/blog', icon: NewspaperIcon },
+  { name: 'FAQ', href: '/admin/faq', icon: QuestionMarkCircleIcon },
   { name: 'Contenu', href: '/admin/content', icon: DocumentTextIcon },
   { name: 'Paramètres', href: '/admin/settings', icon: Cog6ToothIcon },
 ];
@@ -54,6 +56,7 @@ const getPageTitle = (pathname: string): string => {
     '/admin/hero-slides': 'Carousel Hero',
     '/admin/events': 'Événements',
     '/admin/blog': 'Blog',
+    '/admin/faq': 'FAQ',
     '/admin/users': 'Utilisateurs',
     '/admin/content': 'Contenu',
     '/admin/content/home': 'Contenu - Accueil',
@@ -251,9 +254,9 @@ export function AdminLayoutClient({
           <nav className="p-6 space-y-2 h-full overflow-y-auto overflow-x-hidden">
             {navigation
               .filter((item) => {
-                // Si coach, ne montrer que le Dashboard
+                // Si coach, montrer Dashboard et FAQ uniquement
                 if (isCoach) {
-                  return item.href === '/admin';
+                  return item.href === '/admin' || item.href === '/admin/faq';
                 }
                 // Sinon, montrer tous les éléments
                 return true;

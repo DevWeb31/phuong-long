@@ -2,9 +2,10 @@
  * FAQ Page - Questions Fréquentes
  * 
  * Page avec toutes les questions fréquentes organisées par catégories
+ * Les FAQ sont chargées dynamiquement depuis la base de données
  * 
- * @version 1.0
- * @date 2025-11-04 23:05
+ * @version 2.0
+ * @date 2025-01-XX
  */
 
 import type { Metadata } from 'next';
@@ -12,7 +13,8 @@ import Link from 'next/link';
 import { Container, Accordion, Button, ParallaxBackground } from '@/components/common';
 import type { AccordionItem } from '@/components/common';
 import { FAQHeroContent } from '@/components/marketing/FAQHeroContent';
-import { Shield, Calendar, Shirt, Trophy, Mail, MapPin } from 'lucide-react';
+import { Shield, Calendar, Shirt, Mail, MapPin } from 'lucide-react';
+import { createServerClient } from '@/lib/supabase/server';
 
 export const metadata: Metadata = {
   title: 'FAQ - Questions Fréquentes | Phuong Long Vo Dao',
@@ -23,7 +25,15 @@ export const metadata: Metadata = {
   },
 };
 
-const generalQuestions: AccordionItem[] = [
+interface FAQItem {
+  id: string;
+  question: string;
+  answer: string;
+  display_order: number;
+}
+
+// Questions par défaut (fallback si aucune FAQ en base)
+const defaultGeneralQuestions: AccordionItem[] = [
   {
     id: 'general-1',
     question: 'Qu\'est-ce que le Phuong Long Vo Dao ?',
@@ -34,19 +44,9 @@ const generalQuestions: AccordionItem[] = [
     question: 'Quelle est la différence entre le Vo Dao et d\'autres arts martiaux ?',
     answer: 'Le Vo Dao vietnamien se distingue par sa fluidité, l\'utilisation de techniques circulaires, et l\'importance accordée à l\'équilibre entre force et souplesse. Contrairement au karaté plus linéaire ou au taekwondo axé sur les jambes, le Vo Dao offre un répertoire technique très varié incluant frappes, clés, projections et armes traditionnelles.',
   },
-  {
-    id: 'general-3',
-    question: 'À partir de quel âge peut-on commencer ?',
-    answer: 'Nous acceptons les enfants dès 6 ans dans nos cours débutants. Pour les adultes, il n\'y a pas de limite d\'âge supérieure ! Nous adaptons les exercices et l\'intensité en fonction du niveau et de la condition physique de chacun.',
-  },
-  {
-    id: 'general-4',
-    question: 'Faut-il être sportif pour débuter ?',
-    answer: 'Absolument pas ! Le Vo Dao s\'adapte à tous les niveaux de condition physique. Les débutants commencent en douceur et progressent à leur rythme. Nos professeurs qualifiés veillent à ce que chaque pratiquant évolue de manière sécurisée et adaptée.',
-  },
 ];
 
-const courseQuestions: AccordionItem[] = [
+const defaultCourseQuestions: AccordionItem[] = [
   {
     id: 'course-1',
     question: 'Quels sont les horaires des cours ?',
@@ -54,81 +54,48 @@ const courseQuestions: AccordionItem[] = [
   },
   {
     id: 'course-2',
-    question: 'Combien de fois par semaine faut-il s\'entraîner ?',
-    answer: 'Pour les débutants, nous recommandons 2 séances par semaine pour une progression optimale. Les pratiquants confirmés peuvent s\'entraîner 3 à 4 fois par semaine. La régularité est plus importante que la quantité !',
-  },
-  {
-    id: 'course-3',
-    question: 'Les cours sont-ils mixtes ?',
-    answer: 'Oui, tous nos cours sont mixtes et ouverts aux hommes comme aux femmes. Le Vo Dao est un art martial qui convient parfaitement aux deux genres, avec des techniques basées sur l\'efficacité plutôt que la force brute.',
-  },
-  {
-    id: 'course-4',
     question: 'Puis-je faire un cours d\'essai gratuit ?',
     answer: 'Absolument ! Nous offrons un cours d\'essai 100% gratuit sans engagement. C\'est l\'occasion idéale de découvrir notre discipline, rencontrer les professeurs et les élèves, et vous faire votre propre avis. Contactez le club de votre choix pour réserver votre essai.',
   },
 ];
 
-const equipmentQuestions: AccordionItem[] = [
+const defaultEquipmentQuestions: AccordionItem[] = [
   {
     id: 'equipment-1',
     question: 'Quel équipement faut-il pour débuter ?',
     answer: 'Pour votre premier cours, un jogging et un t-shirt suffisent. Une fois inscrit, vous aurez besoin d\'un "Vo Phuc" (tenue traditionnelle) que vous pourrez acheter via notre boutique ou directement au club. Les protections (gants, protège-tibias) seront nécessaires après quelques mois.',
   },
-  {
-    id: 'equipment-2',
-    question: 'Où puis-je acheter l\'équipement ?',
-    answer: 'Notre boutique en ligne propose tous les équipements nécessaires : tenues, ceintures, protections et accessoires. Vous pouvez également acheter directement auprès de votre professeur au club, qui peut vous conseiller sur les tailles et les modèles adaptés.',
-  },
-  {
-    id: 'equipment-3',
-    question: 'Combien coûte l\'équipement complet ?',
-    answer: 'Une tenue complète (Vo Phuc + ceinture) coûte entre 40€ et 60€. Les protections (gants, protège-tibias, coquille) représentent environ 50€ à 80€. L\'investissement initial pour débuter se situe donc autour de 100€ à 140€, en plus de l\'inscription.',
-  },
 ];
 
-const subscriptionQuestions: AccordionItem[] = [
+const defaultSubscriptionQuestions: AccordionItem[] = [
   {
     id: 'subscription-1',
     question: 'Quels sont les tarifs des cours ?',
     answer: 'Les tarifs varient selon les clubs et le nombre de séances par semaine. Comptez entre 200€ et 350€ par an. Des tarifs réduits sont souvent proposés pour les familles (2ème enfant, fratrie). Consultez la page de votre club pour les tarifs exacts.',
   },
-  {
-    id: 'subscription-2',
-    question: 'Y a-t-il un engagement minimum ?',
-    answer: 'L\'inscription se fait généralement à l\'année (septembre à juin), mais certains clubs proposent des inscriptions trimestrielles. Aucun engagement à long terme : si vous souhaitez arrêter, il suffit de nous prévenir.',
-  },
-  {
-    id: 'subscription-3',
-    question: 'La licence est-elle obligatoire ?',
-    answer: 'Oui, la licence fédérale est obligatoire pour pratiquer. Elle coûte environ 35€ par an et inclut une assurance responsabilité civile et accidents corporels. Elle est valable dans tous nos clubs et vous permet de participer aux stages et compétitions.',
-  },
-  {
-    id: 'subscription-4',
-    question: 'Proposez-vous des facilités de paiement ?',
-    answer: 'Oui, nous proposons des paiements échelonnés (3 ou 4 fois) par chèque. Certains clubs acceptent également les chèques vacances et les bons CAF. N\'hésitez pas à en discuter avec votre club.',
-  },
 ];
 
-const progressQuestions: AccordionItem[] = [
-  {
-    id: 'progress-1',
-    question: 'Comment fonctionne la progression par ceintures ?',
-    answer: 'Le système de ceintures va de blanche (débutant) à noire (expert), avec plusieurs niveaux intermédiaires (jaune, orange, verte, bleue, marron). Les passages de grades ont lieu 1 à 2 fois par an et sont évalués par un jury qualifié sur la technique, la forme physique et l\'attitude.',
-  },
-  {
-    id: 'progress-2',
-    question: 'Combien de temps pour avoir la ceinture noire ?',
-    answer: 'En moyenne, il faut 6 à 8 ans de pratique régulière pour atteindre la ceinture noire. Cela dépend de votre assiduité, de vos capacités et de votre investissement. La ceinture noire n\'est pas une fin en soi, mais le début d\'un apprentissage encore plus approfondi !',
-  },
-  {
-    id: 'progress-3',
-    question: 'Y a-t-il des compétitions ?',
-    answer: 'Oui ! Nous organisons et participons à des compétitions régionales et nationales (combats, techniques, armes). La participation n\'est pas obligatoire, mais c\'est une excellente occasion de se mesurer, progresser et représenter son club. Nous proposons aussi des stages avec d\'autres clubs.',
-  },
-];
+// Convertir les FAQ de la base en format AccordionItem
+function convertFAQToAccordion(faqItems: FAQItem[]): AccordionItem[] {
+  return faqItems.map((item) => ({
+    id: item.id,
+    question: item.question,
+    answer: item.answer,
+  }));
+}
 
-export default function FAQPage() {
+export default async function FAQPage() {
+  // Charger les FAQ générales depuis la base de données
+  const supabase = await createServerClient();
+  const { data: faqData } = await supabase
+    .from('faq')
+    .select('*')
+    .is('club_id', null)
+    .order('display_order', { ascending: true });
+
+  const generalQuestions = faqData && faqData.length > 0
+    ? convertFAQToAccordion(faqData as FAQItem[])
+    : defaultGeneralQuestions;
   return (
     <>
       {/* Hero Section */}
@@ -148,76 +115,79 @@ export default function FAQPage() {
         </Container>
       </section>
 
-      {/* Table of Contents */}
-      <section className="bg-white dark:bg-gray-900 border-b dark:border-gray-800 py-6">
-        <Container>
-          <div className="flex flex-wrap gap-3 justify-center">
-            <a href="#general" className="px-4 py-2 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-primary hover:text-white transition-colors font-medium">
-              Généralités
-            </a>
-            <a href="#courses" className="px-4 py-2 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-primary hover:text-white transition-colors font-medium">
-              Cours
-            </a>
-            <a href="#equipment" className="px-4 py-2 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-primary hover:text-white transition-colors font-medium">
-              Équipement
-            </a>
-            <a href="#subscription" className="px-4 py-2 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-primary hover:text-white transition-colors font-medium">
-              Inscription
-            </a>
-            <a href="#progress" className="px-4 py-2 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-primary hover:text-white transition-colors font-medium">
-              Progression
-            </a>
-          </div>
-        </Container>
-      </section>
+      {/* Table of Contents - Affichée uniquement si on utilise les sections par défaut */}
+      {(!faqData || faqData.length === 0) && (
+        <section className="bg-white dark:bg-gray-900 border-b dark:border-gray-800 py-6">
+          <Container>
+            <div className="flex flex-wrap gap-3 justify-center">
+              <a href="#general" className="px-4 py-2 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-primary hover:text-white transition-colors font-medium">
+                Généralités
+              </a>
+              <a href="#courses" className="px-4 py-2 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-primary hover:text-white transition-colors font-medium">
+                Cours
+              </a>
+              <a href="#equipment" className="px-4 py-2 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-primary hover:text-white transition-colors font-medium">
+                Équipement
+              </a>
+              <a href="#subscription" className="px-4 py-2 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-primary hover:text-white transition-colors font-medium">
+                Inscription
+              </a>
+            </div>
+          </Container>
+        </section>
+      )}
 
       {/* FAQ Sections */}
       <section className="py-16 lg:py-20 bg-gray-50 dark:bg-gray-900">
         <Container>
           <div className="max-w-4xl mx-auto space-y-12">
-            {/* Généralités */}
-            <div id="general">
-              <h2 className="text-3xl font-bold dark:text-gray-100 mb-6 flex items-center gap-3">
-                <Shield className="w-7 h-7 text-primary" />
-                Généralités sur le Vo Dao
-              </h2>
-              <Accordion items={generalQuestions} />
-            </div>
+            {/* Généralités - FAQ depuis la base de données */}
+            {generalQuestions.length > 0 && (
+              <div id="general">
+                <h2 className="text-3xl font-bold dark:text-gray-100 mb-6 flex items-center gap-3">
+                  <Shield className="w-7 h-7 text-primary" />
+                  Questions Fréquentes
+                </h2>
+                <Accordion items={generalQuestions} />
+              </div>
+            )}
 
-            {/* Cours */}
-            <div id="courses">
-              <h2 className="text-3xl font-bold dark:text-gray-100 mb-6 flex items-center gap-3">
-                <Calendar className="w-7 h-7 text-primary" />
-                Les Cours
-              </h2>
-              <Accordion items={courseQuestions} />
-            </div>
+            {/* Sections par défaut si aucune FAQ en base */}
+            {(!faqData || faqData.length === 0) && (
+              <>
+                {/* Cours */}
+                {defaultCourseQuestions.length > 0 && (
+                  <div id="courses">
+                    <h2 className="text-3xl font-bold dark:text-gray-100 mb-6 flex items-center gap-3">
+                      <Calendar className="w-7 h-7 text-primary" />
+                      Les Cours
+                    </h2>
+                    <Accordion items={defaultCourseQuestions} />
+                  </div>
+                )}
 
-            {/* Équipement */}
-            <div id="equipment">
-              <h2 className="text-3xl font-bold dark:text-gray-100 mb-6 flex items-center gap-3">
-                <Shirt className="w-7 h-7 text-primary" />
-                Équipement
-              </h2>
-              <Accordion items={equipmentQuestions} />
-            </div>
+                {/* Équipement */}
+                {defaultEquipmentQuestions.length > 0 && (
+                  <div id="equipment">
+                    <h2 className="text-3xl font-bold dark:text-gray-100 mb-6 flex items-center gap-3">
+                      <Shirt className="w-7 h-7 text-primary" />
+                      Équipement
+                    </h2>
+                    <Accordion items={defaultEquipmentQuestions} />
+                  </div>
+                )}
 
-            {/* Inscription */}
-            <div id="subscription">
-              <h2 className="text-3xl font-bold dark:text-gray-100 mb-6">
-                💳 Inscription & Tarifs
-              </h2>
-              <Accordion items={subscriptionQuestions} />
-            </div>
-
-            {/* Progression */}
-            <div id="progress">
-              <h2 className="text-3xl font-bold dark:text-gray-100 mb-6 flex items-center gap-3">
-                <Trophy className="w-7 h-7 text-primary" />
-                Progression & Compétitions
-              </h2>
-              <Accordion items={progressQuestions} />
-            </div>
+                {/* Inscription */}
+                {defaultSubscriptionQuestions.length > 0 && (
+                  <div id="subscription">
+                    <h2 className="text-3xl font-bold dark:text-gray-100 mb-6">
+                      💳 Inscription & Tarifs
+                    </h2>
+                    <Accordion items={defaultSubscriptionQuestions} />
+                  </div>
+                )}
+              </>
+            )}
           </div>
         </Container>
       </section>

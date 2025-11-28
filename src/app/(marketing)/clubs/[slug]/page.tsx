@@ -11,10 +11,10 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
-import { Container, Card, CardContent, CardHeader, CardTitle, CardDescription, Badge, Button, ScrollReveal } from '@/components/common';
+import { Container, Card, CardContent, CardHeader, CardTitle, CardDescription, Badge, Button, ScrollReveal, Accordion } from '@/components/common';
 import { createServerClient } from '@/lib/supabase/server';
 import type { Club, Coach, Event } from '@/lib/types';
-import { MapPinIcon, PhoneIcon, EnvelopeIcon, ClockIcon, CurrencyEuroIcon } from '@heroicons/react/24/outline';
+import { MapPinIcon, PhoneIcon, EnvelopeIcon, ClockIcon, CurrencyEuroIcon, QuestionMarkCircleIcon } from '@heroicons/react/24/outline';
 import { Lightbulb, Check, Facebook, Instagram, Youtube } from 'lucide-react';
 import { canViewClubContact } from '@/lib/utils/check-contact-visibility';
 
@@ -90,6 +90,22 @@ export default async function ClubDetailPage({ params }: Props) {
     .limit(3);
   
   const typedEvents = (events || []) as unknown as Pick<Event, 'id' | 'title' | 'slug' | 'start_date' | 'event_type' | 'location' | 'price_cents'>[];
+
+  // Récupérer les FAQ du club
+  const { data: clubFAQ } = await supabase
+    .from('faq')
+    .select('*')
+    .eq('club_id', typedClub.id)
+    .order('display_order', { ascending: true });
+
+  interface FAQItem {
+    id: string;
+    question: string;
+    answer: string;
+    display_order: number;
+  }
+
+  const typedClubFAQ = (clubFAQ || []) as unknown as FAQItem[];
 
   // Vérifier si l'utilisateur peut voir les informations de contact
   const canViewContact = await canViewClubContact();
@@ -671,6 +687,30 @@ export default async function ClubDetailPage({ params }: Props) {
                 </Link>
                 </ScrollReveal>
               ))}
+            </div>
+          </Container>
+        </section>
+      )}
+
+      {/* FAQ du Club */}
+      {typedClubFAQ && typedClubFAQ.length > 0 && (
+        <section className="py-16 lg:py-20 bg-gray-50 dark:bg-gray-900">
+          <Container>
+            <ScrollReveal direction="down" delay={0}>
+              <h2 className="text-3xl font-bold dark:text-gray-100 mb-8 flex items-center gap-3">
+                <QuestionMarkCircleIcon className="w-8 h-8 text-primary" />
+                Questions Fréquentes
+              </h2>
+            </ScrollReveal>
+            
+            <div className="max-w-4xl">
+              <Accordion
+                items={typedClubFAQ.map((faq) => ({
+                  id: faq.id,
+                  question: faq.question,
+                  answer: faq.answer,
+                }))}
+              />
             </div>
           </Container>
         </section>

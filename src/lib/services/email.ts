@@ -287,4 +287,88 @@ ${renderLinkFallback(resetUrl)}
   });
 }
 
+/**
+ * Envoyer un email de contact depuis le formulaire
+ * Supporte les templates Resend ou HTML inline
+ */
+export async function sendContactEmail(options: {
+  to: string;
+  name: string;
+  email: string;
+  phone?: string;
+  clubName?: string;
+  subject: string;
+  message: string;
+  templateId?: string;
+}) {
+  const { to, name, email, phone, clubName, subject, message, templateId } = options;
+
+  // Mode template Resend
+  if (templateId) {
+    return sendEmail({
+      to,
+      subject: `[Contact] ${subject}`,
+      templateId,
+      templateData: {
+        name,
+        email,
+        phone: phone || 'Non renseigné',
+        clubName: clubName || 'Question générale',
+        subject,
+        message,
+      },
+    });
+  }
+
+  // Mode HTML inline (fallback)
+  const content = `
+<h2 style="color:#1f2937;margin:0 0 24px 0;font-size:24px;font-weight:600;line-height:1.3;">Nouveau message de contact</h2>
+<p style="color:#1f2937;margin:0 0 16px 0;font-size:16px;line-height:1.6;">Vous avez reçu un nouveau message depuis le formulaire de contact du site Phuong Long Vo Dao.</p>
+
+<table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:20px;margin-bottom:24px;">
+  <tr>
+    <td>
+      <p style="color:#374151;margin:0 0 8px 0;font-size:14px;font-weight:500;line-height:1.5;">Nom :</p>
+      <p style="color:#1f2937;margin:0 0 16px 0;font-size:14px;line-height:1.5;font-weight:600;">${name}</p>
+      
+      <p style="color:#374151;margin:0 0 8px 0;font-size:14px;font-weight:500;line-height:1.5;">Email :</p>
+      <p style="color:#1f2937;margin:0 0 16px 0;font-size:14px;line-height:1.5;font-family:'Courier New',monospace;">${email}</p>
+      
+      ${phone ? `
+      <p style="color:#374151;margin:0 0 8px 0;font-size:14px;font-weight:500;line-height:1.5;">Téléphone :</p>
+      <p style="color:#1f2937;margin:0 0 16px 0;font-size:14px;line-height:1.5;">${phone}</p>
+      ` : ''}
+      
+      ${clubName ? `
+      <p style="color:#374151;margin:0 0 8px 0;font-size:14px;font-weight:500;line-height:1.5;">Club concerné :</p>
+      <p style="color:#dc2626;margin:0 0 16px 0;font-size:14px;line-height:1.5;font-weight:600;">${clubName}</p>
+      ` : ''}
+      
+      <p style="color:#374151;margin:0 0 8px 0;font-size:14px;font-weight:500;line-height:1.5;">Sujet :</p>
+      <p style="color:#1f2937;margin:0 0 16px 0;font-size:14px;line-height:1.5;font-weight:600;">${subject}</p>
+    </td>
+  </tr>
+</table>
+
+<p style="color:#374151;margin:0 0 8px 0;font-size:14px;font-weight:500;line-height:1.5;">Message :</p>
+<div style="background-color:#ffffff;border:1px solid #e5e7eb;border-radius:8px;padding:20px;margin-bottom:24px;">
+  <p style="color:#1f2937;margin:0;font-size:14px;line-height:1.6;white-space:pre-wrap;">${message.replace(/\n/g, '<br>')}</p>
+</div>
+
+<table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="border-top:2px solid #e5e7eb;padding-top:24px;margin-top:24px;">
+  <tr>
+    <td>
+      <p style="color:#6b7280;margin:0;font-size:12px;line-height:1.6;">Pour répondre à ce message, utilisez l'adresse email : <strong style="color:#dc2626;">${email}</strong></p>
+    </td>
+  </tr>
+</table>
+`;
+
+  return sendEmail({
+    to,
+    subject: `[Contact] ${subject}`,
+    html: renderEmailLayout(content),
+  });
+}
+
 
