@@ -9,7 +9,7 @@
 
 import { NextResponse } from 'next/server';
 import { createServerClient, createAdminClient } from '@/lib/supabase/server';
-import { checkAdminRole } from '@/lib/utils/check-admin-role';
+import { checkAdminRole, checkCoachRole, getCoachClubId } from '@/lib/utils/check-admin-role';
 
 export const runtime = 'nodejs';
 
@@ -24,8 +24,16 @@ export async function GET() {
     }
 
     const isAdmin = await checkAdminRole(user.id);
-    if (!isAdmin) {
+    const isCoach = await checkCoachRole(user.id);
+    
+    if (!isAdmin && !isCoach) {
       return NextResponse.json({ error: 'Non autorisé' }, { status: 403 });
+    }
+
+    // Si coach, récupérer son club_id pour filtrer les utilisateurs
+    const coachClubId = isCoach ? await getCoachClubId(user.id) : null;
+    if (isCoach && !coachClubId) {
+      return NextResponse.json({ error: 'Coach non associé à un club' }, { status: 403 });
     }
 
     // Utiliser le client admin pour accéder à auth.users
@@ -141,6 +149,19 @@ export async function GET() {
             clubCity = approvedRequest.city;
             // Utiliser le club_id de la demande approuvée comme favorite_club_id
             favoriteClubId = approvedRequest.club_id;
+          }
+        }
+
+        // Si coach, filtrer uniquement les utilisateurs du même club
+        if (isCoach && coachClubId) {
+          // Vérifier si l'utilisateur a le même club_id
+          const userHasClub = favoriteClubId === coachClubId || 
+                             roles.some((r: any) => r.club_id === coachClubId) ||
+                             approvedRequestsMap.get(authUser.id)?.club_id === coachClubId;
+          
+          // Si l'utilisateur n'a pas le même club, l'exclure
+          if (!userHasClub) {
+            return null;
           }
         }
 

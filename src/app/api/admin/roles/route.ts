@@ -9,7 +9,7 @@
 
 import { NextResponse } from 'next/server';
 import { createServerClient } from '@/lib/supabase/server';
-import { checkAdminRole } from '@/lib/utils/check-admin-role';
+import { checkAdminRole, checkCoachRole } from '@/lib/utils/check-admin-role';
 
 export const runtime = 'nodejs';
 
@@ -24,7 +24,9 @@ export async function GET() {
     }
 
     const isAdmin = await checkAdminRole(user.id);
-    if (!isAdmin) {
+    const isCoach = await checkCoachRole(user.id);
+    
+    if (!isAdmin && !isCoach) {
       return NextResponse.json({ error: 'Non autorisé' }, { status: 403 });
     }
 

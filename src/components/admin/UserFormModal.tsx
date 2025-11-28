@@ -103,9 +103,24 @@ export function UserFormModal({
     club_id: '',
   });
   const [loadingRoles, setLoadingRoles] = useState(false);
+  const [isCoach, setIsCoach] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
+      // Vérifier si l'utilisateur connecté est un coach
+      async function fetchUserRole() {
+        try {
+          const response = await fetch('/api/admin/user-role');
+          if (response.ok) {
+            const data = await response.json();
+            setIsCoach(data.isCoach || false);
+          }
+        } catch (err) {
+          console.error('Error fetching user role:', err);
+        }
+      }
+      
+      fetchUserRole();
       loadRoles();
       // Réinitialiser à la première étape quand on ouvre la modale
       setCurrentStep('info');
@@ -113,9 +128,94 @@ export function UserFormModal({
       setShowValidationErrors(false);
       setValidationErrors({});
     }
-  }, [isOpen]);
+  }, [isOpen, clubs]);
 
-  // Initialiser les données du formulaire quand l'utilisateur change ou quand les rôles sont chargés
+  // Réinitialiser les données du formulaire quand on change d'étape vers "role" ou "club"
+  useEffect(() => {
+    if (!isOpen || !user || roles.length === 0 || loadingRoles) {
+      return;
+    }
+    
+    // Si on arrive sur l'étape "club" et que les clubs sont maintenant chargés, réinitialiser le club
+    if (currentStep === 'club' && clubs.length > 0 && !formData.club_id) {
+      // Réinitialiser uniquement le club si les clubs sont maintenant disponibles
+      let clubId = user.favorite_club_id || '';
+      
+      // Si pas de favorite_club_id, chercher dans user_roles
+      if (!clubId && user.user_roles && user.user_roles.length > 0) {
+        const roleWithClub = user.user_roles.find(ur => ur.club_id);
+        if (roleWithClub?.club_id) {
+          clubId = roleWithClub.club_id;
+        }
+      }
+      
+      // Si on n'a toujours pas de club_id mais qu'on a un nom de club, chercher le club correspondant
+      if (!clubId && (user.club || user.club_city)) {
+        const clubCity = user.club_city || user.club;
+        const clubParts = (user.club || '').split(' - ');
+        const clubName = clubParts[0];
+        
+        // Chercher par ville d'abord (plus fiable)
+        let foundClub = clubs.find(c => c.city === clubCity);
+        
+        // Si pas trouvé par ville, chercher par nom
+        if (!foundClub && clubName) {
+          foundClub = clubs.find(c => c.name === clubName);
+        }
+        
+        // Si toujours pas trouvé, chercher par format complet "Nom - Ville"
+        if (!foundClub && user.club) {
+          foundClub = clubs.find(c => `${c.name} - ${c.city}` === user.club);
+        }
+        
+        if (foundClub) {
+          clubId = foundClub.id;
+        }
+      }
+      
+      if (clubId) {
+        setFormData(prev => ({
+          ...prev,
+          club_id: clubId,
+        }));
+      }
+    }
+    
+    // Si on arrive sur l'étape "role" et que le rôle n'est pas encore initialisé
+    if (currentStep === 'role' && !formData.role_id) {
+      let validRoleId = '';
+      if (user.user_roles && user.user_roles.length > 0) {
+        const primaryRole = user.user_roles[0];
+        if (primaryRole?.role_id) {
+          const roleExists = roles.some(r => r.id === primaryRole.role_id);
+          if (roleExists) {
+            validRoleId = primaryRole.role_id;
+          }
+        }
+        if (!validRoleId && primaryRole?.role_name) {
+          const roleByName = roles.find(r => r.name === primaryRole.role_name);
+          if (roleByName) {
+            validRoleId = roleByName.id;
+          }
+        }
+      }
+      if (!validRoleId && user.role) {
+        const roleByName = roles.find(r => r.name === user.role);
+        if (roleByName) {
+          validRoleId = roleByName.id;
+        }
+      }
+      if (validRoleId) {
+        setFormData(prev => ({
+          ...prev,
+          role_id: validRoleId,
+        }));
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentStep, isOpen, user, roles, loadingRoles, clubs]);
+
+  // Initialiser les données du formulaire quand l'utilisateur change ou quand les rôles/clubs sont chargés
   useEffect(() => {
     if (!isOpen) {
       return;
@@ -129,27 +229,139 @@ export function UserFormModal({
       return;
     }
     
-    // Si les rôles sont déjà chargés et les clubs sont disponibles, initialiser immédiatement
-    if (roles.length > 0 && !loadingRoles && clubs.length > 0) {
-      initializeFormData(user, roles);
+    // Si les rôles sont chargés, initialiser (même si les clubs ne sont pas encore chargés)
+    if (roles.length > 0 && !loadingRoles) {
+      // Si les clubs sont disponibles, initialiser complètement
+      if (clubs.length > 0) {
+        initializeFormData(user, roles);
+      } else {
+        // Initialiser au moins le rôle (le club sera initialisé quand les clubs seront chargés)
+        let validRoleId = '';
+        if (user.user_roles && user.user_roles.length > 0) {
+          const primaryRole = user.user_roles[0];
+          if (primaryRole?.role_id) {
+            const roleExists = roles.some(r => r.id === primaryRole.role_id);
+            if (roleExists) {
+              validRoleId = primaryRole.role_id;
+            }
+          }
+          if (!validRoleId && primaryRole?.role_name) {
+            const roleByName = roles.find(r => r.name === primaryRole.role_name);
+            if (roleByName) {
+              validRoleId = roleByName.id;
+            }
+          }
+        }
+        if (!validRoleId && user.role) {
+          const roleByName = roles.find(r => r.name === user.role);
+          if (roleByName) {
+            validRoleId = roleByName.id;
+          }
+        }
+        setFormData(prev => ({
+          ...prev,
+          role_id: validRoleId,
+        }));
+      }
     }
-    // Sinon, l'initialisation se fera dans loadRoles après le chargement
+    
+    // Si les clubs sont maintenant chargés et que le club n'est pas encore initialisé, l'initialiser
+    if (clubs.length > 0 && roles.length > 0 && !loadingRoles && user && !formData.club_id) {
+      let clubId = user.favorite_club_id || '';
+      
+      // Si pas de favorite_club_id, chercher dans user_roles
+      if (!clubId && user.user_roles && user.user_roles.length > 0) {
+        const roleWithClub = user.user_roles.find(ur => ur.club_id);
+        if (roleWithClub?.club_id) {
+          clubId = roleWithClub.club_id;
+        }
+      }
+      
+      // Si on n'a toujours pas de club_id mais qu'on a un nom de club, chercher le club correspondant
+      if (!clubId && (user.club || user.club_city)) {
+        const clubCity = user.club_city || user.club;
+        const clubParts = (user.club || '').split(' - ');
+        const clubName = clubParts[0];
+        
+        // Chercher par ville d'abord (plus fiable)
+        let foundClub = clubs.find(c => c.city === clubCity);
+        
+        // Si pas trouvé par ville, chercher par nom
+        if (!foundClub && clubName) {
+          foundClub = clubs.find(c => c.name === clubName);
+        }
+        
+        // Si toujours pas trouvé, chercher par format complet "Nom - Ville"
+        if (!foundClub && user.club) {
+          foundClub = clubs.find(c => `${c.name} - ${c.city}` === user.club);
+        }
+        
+        if (foundClub) {
+          clubId = foundClub.id;
+        }
+      }
+      
+      if (clubId) {
+        setFormData(prev => ({
+          ...prev,
+          club_id: clubId,
+        }));
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, roles, loadingRoles, isOpen, clubs]);
 
   const loadRoles = async () => {
     try {
       setLoadingRoles(true);
       const response = await fetch('/api/admin/roles');
-      if (response.ok) {
-        const data = await response.json();
-        // Exclure le rôle "developer"
-        const filteredRoles = data.filter((r: Role) => r.name !== 'developer');
-        setRoles(filteredRoles);
-        
-        // Initialiser les données du formulaire après le chargement des rôles
-        // (les clubs doivent déjà être chargés depuis la page parente)
-        if (user && clubs.length > 0) {
+      
+      if (!response.ok) {
+        return;
+      }
+      
+      const data = await response.json();
+      
+      // Exclure le rôle "developer"
+      const filteredRoles = data.filter((r: Role) => r.name !== 'developer');
+      setRoles(filteredRoles);
+      
+      // Initialiser les données du formulaire après le chargement des rôles
+      // Si les clubs sont disponibles, initialiser complètement
+      // Sinon, initialiser au moins le rôle
+      if (user) {
+        if (clubs.length > 0) {
           initializeFormData(user, filteredRoles);
+        } else {
+          // Initialiser au moins le rôle (le club sera initialisé quand les clubs seront chargés)
+          let validRoleId = '';
+          if (user.user_roles && user.user_roles.length > 0) {
+            const primaryRole = user.user_roles[0];
+            if (primaryRole?.role_id) {
+              const roleExists = filteredRoles.some((r: Role) => r.id === primaryRole.role_id);
+              if (roleExists) {
+                validRoleId = primaryRole.role_id;
+              }
+            }
+            if (!validRoleId && primaryRole?.role_name) {
+              const roleByName = filteredRoles.find((r: Role) => r.name === primaryRole.role_name);
+              if (roleByName) {
+                validRoleId = roleByName.id;
+              }
+            }
+          }
+          if (!validRoleId && user.role) {
+            const roleByName = filteredRoles.find((r: Role) => r.name === user.role);
+            if (roleByName) {
+              validRoleId = roleByName.id;
+            }
+          }
+          if (validRoleId) {
+            setFormData(prev => ({
+              ...prev,
+              role_id: validRoleId,
+            }));
+          }
         }
       }
     } catch (error) {
@@ -160,33 +372,26 @@ export function UserFormModal({
   };
 
   const initializeFormData = (currentUser: User, availableRoles: Role[]) => {
-    const primaryRole = currentUser.user_roles?.[0];
-    
     // Priorité 1: favorite_club_id (peut venir de user_profiles ou club_membership_requests)
     // Priorité 2: club_id du rôle (user_roles)
     // Priorité 3: chercher par nom de club
-    let clubId = currentUser.favorite_club_id || primaryRole?.club_id || '';
+    let clubId = currentUser.favorite_club_id ? String(currentUser.favorite_club_id) : '';
     
-    console.log('[UserFormModal] Initialisation formData:', {
-      favorite_club_id: currentUser.favorite_club_id,
-      role_club_id: primaryRole?.club_id,
-      club_name: currentUser.club,
-      club_city: currentUser.club_city,
-      initial_clubId: clubId,
-    });
+    // Si pas de favorite_club_id, chercher dans user_roles
+    if (!clubId && currentUser.user_roles && currentUser.user_roles.length > 0) {
+      // Chercher le premier rôle avec un club_id
+      const roleWithClub = currentUser.user_roles.find(ur => ur.club_id);
+      if (roleWithClub?.club_id) {
+        clubId = roleWithClub.club_id;
+      }
+    }
     
-    // Si on n'a pas de club_id mais qu'on a un nom de club, chercher le club correspondant
+    // Si on n'a toujours pas de club_id mais qu'on a un nom de club, chercher le club correspondant
     if (!clubId && (currentUser.club || currentUser.club_city) && clubs.length > 0) {
       // Le champ "club" peut contenir le nom de la ville ou "Nom - Ville"
       const clubCity = currentUser.club_city || currentUser.club;
       const clubParts = (currentUser.club || '').split(' - ');
       const clubName = clubParts[0];
-      
-      console.log('[UserFormModal] Recherche du club par nom/ville:', {
-        clubCity,
-        clubName,
-        club: currentUser.club,
-      });
       
       // Chercher par ville d'abord (plus fiable)
       let foundClub = clubs.find(c => c.city === clubCity);
@@ -203,30 +408,34 @@ export function UserFormModal({
       
       if (foundClub) {
         clubId = foundClub.id;
-        console.log('[UserFormModal] Club trouvé:', foundClub);
-      } else {
-        console.warn('[UserFormModal] Club not found:', {
-          clubName: currentUser.club,
-          clubCity: currentUser.club_city,
-          favorite_club_id: currentUser.favorite_club_id,
-          role_club_id: primaryRole?.club_id,
-          availableClubs: clubs.map(c => ({ id: c.id, name: c.name, city: c.city })),
-        });
       }
     }
     
     // Vérifier que le role_id existe dans la liste des rôles
     let validRoleId = '';
     
-    // Si on a un role_id depuis user_roles, l'utiliser
-    if (primaryRole?.role_id) {
-      const roleExists = availableRoles.some(r => r.id === primaryRole.role_id);
-      if (roleExists) {
-        validRoleId = primaryRole.role_id;
+    // Priorité 1: Chercher par role_id dans user_roles
+    if (currentUser.user_roles && currentUser.user_roles.length > 0) {
+      // Prendre le premier rôle (ou chercher un rôle spécifique si nécessaire)
+      const primaryRole = currentUser.user_roles[0];
+      if (primaryRole?.role_id) {
+        const roleExists = availableRoles.some(r => r.id === primaryRole.role_id);
+        if (roleExists) {
+          validRoleId = primaryRole.role_id;
+        }
       }
-    } 
-    // Sinon, si on a un primary_role (nom du rôle), chercher le role_id correspondant
-    else if (currentUser.role) {
+      
+      // Si pas trouvé par role_id, essayer par role_name
+      if (!validRoleId && primaryRole?.role_name) {
+        const roleByName = availableRoles.find(r => r.name === primaryRole.role_name);
+        if (roleByName) {
+          validRoleId = roleByName.id;
+        }
+      }
+    }
+    
+    // Priorité 2: Si toujours pas trouvé, utiliser primary_role (nom du rôle)
+    if (!validRoleId && currentUser.role) {
       const roleByName = availableRoles.find(r => r.name === currentUser.role);
       if (roleByName) {
         validRoleId = roleByName.id;
@@ -390,13 +599,6 @@ export function UserFormModal({
     const normalizedClubId = formData.club_id && formData.club_id.trim() !== '' ? formData.club_id : null;
     const normalizedRoleId = formData.role_id && formData.role_id.trim() !== '' ? formData.role_id : null;
     
-    console.log('[UserFormModal] Données avant soumission:', {
-      formData_club_id: formData.club_id,
-      formData_role_id: formData.role_id,
-      normalized_club_id: normalizedClubId,
-      normalized_role_id: normalizedRoleId,
-    });
-    
     await onSubmit({
       role_id: normalizedRoleId,
       club_id: normalizedClubId,
@@ -411,8 +613,6 @@ export function UserFormModal({
   const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const { name, value } = e.target;
     
-    console.log('[UserFormModal] handleChange:', { name, value, type: typeof value });
-    
     // Effacer l'erreur de validation pour ce champ
     if (validationErrors[name]) {
       setValidationErrors(prev => {
@@ -422,11 +622,7 @@ export function UserFormModal({
       });
     }
     
-    setFormData(prev => {
-      const newData = { ...prev, [name]: value };
-      console.log('[UserFormModal] Nouveau formData:', newData);
-      return newData;
-    });
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
   const currentStepIndex = STEPS.findIndex(s => s.id === currentStep);
@@ -711,7 +907,7 @@ export function UserFormModal({
                 <select
                   id="role_id"
                   name="role_id"
-                  value={formData.role_id}
+                  value={formData.role_id || ''}
                   onChange={handleChange}
                   required
                   className={`w-full px-4 py-2.5 border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 ${
@@ -721,11 +917,19 @@ export function UserFormModal({
                   }`}
                 >
                   <option value="">Sélectionner un rôle</option>
-                  {roles.map((role) => (
-                    <option key={role.id} value={role.id}>
-                      {role.name} {role.description && `- ${role.description}`}
-                    </option>
-                  ))}
+                  {roles
+                    .filter((role) => {
+                      // Si l'utilisateur est un coach, exclure les rôles "admin" et "moderator"
+                      if (isCoach) {
+                        return role.name !== 'admin' && role.name !== 'moderator';
+                      }
+                      return true;
+                    })
+                    .map((role) => (
+                      <option key={role.id} value={role.id}>
+                        {role.name} {role.description && `- ${role.description}`}
+                      </option>
+                    ))}
                 </select>
               )}
               {showValidationErrors && validationErrors.role_id && (
@@ -755,7 +959,7 @@ export function UserFormModal({
               <select
                 id="club_id"
                 name="club_id"
-                value={formData.club_id}
+                value={formData.club_id || ''}
                 onChange={handleChange}
                 className="w-full px-4 py-2.5 border dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
               >

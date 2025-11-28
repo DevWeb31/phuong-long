@@ -1,7 +1,7 @@
 /**
  * UsersNavLink - Lien Utilisateurs conditionnel dans le menu admin
  * 
- * Affiche le lien Utilisateurs uniquement pour les administrateurs et développeurs
+ * Affiche le lien Utilisateurs pour les administrateurs, développeurs et coaches
  * 
  * @version 1.0
  * @date 2025-01-XX
@@ -33,7 +33,7 @@ export function UsersNavLink() {
           return;
         }
 
-        // Vérifier si l'utilisateur est admin ou développeur
+        // Vérifier si l'utilisateur est admin, développeur ou coach
         const { data: userRoles, error: rolesError } = await supabase
           .from('user_roles')
           .select('role_id, roles!inner(name)')
@@ -48,7 +48,8 @@ export function UsersNavLink() {
 
         const roles = (userRoles as any[])?.map(ur => ur.roles?.name) || [];
         const isAdminOrDeveloper = roles.includes('admin') || roles.includes('developer');
-        setIsAuthorized(isAdminOrDeveloper);
+        const isCoach = roles.includes('coach');
+        setIsAuthorized(isAdminOrDeveloper || isCoach);
       } catch (error) {
         console.error('Error checking user authorization:', error);
         setIsAuthorized(false);

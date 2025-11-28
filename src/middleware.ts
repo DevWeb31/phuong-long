@@ -178,9 +178,9 @@ export async function middleware(request: NextRequest) {
       const isAdminOrDeveloper = roles.includes('admin') || roles.includes('developer');
       const isCoach = roles.includes('coach');
 
-      // Si l'utilisateur est coach, vérifier qu'il accède uniquement au dashboard
-      if (isCoach && !request.nextUrl.pathname.match(/^\/admin\/?$/)) {
-        // Les coaches ne peuvent accéder qu'à /admin (dashboard)
+      // Si l'utilisateur est coach, vérifier qu'il accède uniquement au dashboard ou à la page Utilisateurs
+      if (isCoach && !request.nextUrl.pathname.match(/^\/admin\/?$/) && !request.nextUrl.pathname.match(/^\/admin\/users\/?$/)) {
+        // Les coaches ne peuvent accéder qu'à /admin (dashboard) et /admin/users
         const url = request.nextUrl.clone();
         url.pathname = '/admin';
         return NextResponse.redirect(url);

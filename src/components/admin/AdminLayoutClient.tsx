@@ -285,18 +285,16 @@ export function AdminLayoutClient({
                 );
               })}
 
-            {/* Utilisateurs - Visible uniquement pour admin et développeur (pas pour coach) */}
-            {!isCoach && (
-              <div onClick={() => {
-                if (windowWidth < 1350) {
-                  setSidebarOpen(false);
-                } else {
-                  setMobileMenuOpen(false);
-                }
-              }}>
-                <UsersNavLink />
-              </div>
-            )}
+            {/* Utilisateurs - Visible pour admin, développeur et coach */}
+            <div onClick={() => {
+              if (windowWidth < 1350) {
+                setSidebarOpen(false);
+              } else {
+                setMobileMenuOpen(false);
+              }
+            }}>
+              <UsersNavLink />
+            </div>
 
             {/* Boutique - Conditionnel selon paramètre développeur (pas pour coach) */}
             {!isCoach && (

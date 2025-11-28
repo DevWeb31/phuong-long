@@ -73,8 +73,21 @@ export default function AdminUsersPage() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isCoach, setIsCoach] = useState(false);
 
   useEffect(() => {
+    async function fetchUserRole() {
+      try {
+        const response = await fetch('/api/admin/user-role');
+        if (response.ok) {
+          const data = await response.json();
+          setIsCoach(data.isCoach || false);
+        }
+      } catch (err) {
+        console.error('Error fetching user role:', err);
+      }
+    }
+
     async function fetchUsers() {
       try {
         setLoading(true);
@@ -128,6 +141,7 @@ export default function AdminUsersPage() {
       }
     }
 
+    fetchUserRole();
     fetchUsers();
     fetchClubs();
   }, []);
@@ -199,6 +213,19 @@ export default function AdminUsersPage() {
       alert('Vous ne pouvez pas modifier votre propre compte depuis cette interface.');
       return;
     }
+    
+    // Si l'utilisateur connecté est un coach, empêcher la modification des utilisateurs avec rôles coach, admin ou moderateur
+    if (isCoach) {
+      const userRoles = user.user_roles?.map(ur => ur.role_name) || [];
+      const restrictedRoles = ['coach', 'admin', 'moderator'];
+      const hasRestrictedRole = userRoles.some(role => restrictedRoles.includes(role));
+      
+      if (hasRestrictedRole) {
+        alert('Vous n\'avez pas les permissions nécessaires pour modifier cet utilisateur.');
+        return;
+      }
+    }
+    
     setSelectedUser(user);
     setIsFormOpen(true);
   };
@@ -284,6 +311,18 @@ export default function AdminUsersPage() {
       return;
     }
 
+    // Si l'utilisateur connecté est un coach, empêcher la suppression des utilisateurs avec rôles coach, admin ou moderateur
+    if (isCoach) {
+      const userRoles = user.user_roles?.map(ur => ur.role_name) || [];
+      const restrictedRoles = ['coach', 'admin', 'moderator'];
+      const hasRestrictedRole = userRoles.some(role => restrictedRoles.includes(role));
+      
+      if (hasRestrictedRole) {
+        alert('Vous n\'avez pas les permissions nécessaires pour supprimer cet utilisateur.');
+        return;
+      }
+    }
+
     // Double confirmation pour une action critique
     const confirmed = confirm(
       `⚠️ ATTENTION : Cette action est irréversible !\n\n` +
@@ -364,8 +403,44 @@ export default function AdminUsersPage() {
         onDelete={handleDelete}
         searchPlaceholder="Rechercher un utilisateur..."
         emptyMessage="Aucun utilisateur trouvé"
-        canEdit={(user) => currentUser ? user.id !== currentUser.id : true}
-        canDelete={(user) => currentUser ? user.id !== currentUser.id : true}
+        canEdit={(user) => {
+          // Empêcher la modification de l'utilisateur courant
+          if (currentUser && user.id === currentUser.id) {
+            return false;
+          }
+          
+          // Si l'utilisateur connecté est un coach, empêcher la modification des utilisateurs avec rôles coach, admin ou moderateur
+          if (isCoach) {
+            const userRoles = user.user_roles?.map(ur => ur.role_name) || [];
+            const restrictedRoles = ['coach', 'admin', 'moderator'];
+            const hasRestrictedRole = userRoles.some(role => restrictedRoles.includes(role));
+            
+            if (hasRestrictedRole) {
+              return false;
+            }
+          }
+          
+          return true;
+        }}
+        canDelete={(user) => {
+          // Empêcher la suppression de l'utilisateur courant
+          if (currentUser && user.id === currentUser.id) {
+            return false;
+          }
+          
+          // Si l'utilisateur connecté est un coach, empêcher la suppression des utilisateurs avec rôles coach, admin ou moderateur
+          if (isCoach) {
+            const userRoles = user.user_roles?.map(ur => ur.role_name) || [];
+            const restrictedRoles = ['coach', 'admin', 'moderator'];
+            const hasRestrictedRole = userRoles.some(role => restrictedRoles.includes(role));
+            
+            if (hasRestrictedRole) {
+              return false;
+            }
+          }
+          
+          return true;
+        }}
       />
 
       {/* User Form Modal */}

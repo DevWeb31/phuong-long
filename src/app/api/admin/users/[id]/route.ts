@@ -10,7 +10,7 @@
 
 import { NextResponse } from 'next/server';
 import { createServerClient, createAdminClient } from '@/lib/supabase/server';
-import { checkAdminRole } from '@/lib/utils/check-admin-role';
+import { checkAdminRole, checkCoachRole } from '@/lib/utils/check-admin-role';
 
 export const runtime = 'nodejs';
 
@@ -28,12 +28,30 @@ export async function PATCH(
     }
 
     const isAdmin = await checkAdminRole(user.id);
-    if (!isAdmin) {
+    const isCoach = await checkCoachRole(user.id);
+    
+    if (!isAdmin && !isCoach) {
       return NextResponse.json({ error: 'Non autorisé' }, { status: 403 });
     }
 
     const { id: userId } = await params;
     const body = await request.json();
+    
+    // Si l'utilisateur est un coach, vérifier qu'il ne modifie pas un utilisateur avec un rôle restreint
+    if (isCoach && !isAdmin) {
+      const { data: targetUserRoles } = await supabase
+        .from('user_roles')
+        .select('role_id, roles(name)')
+        .eq('user_id', userId);
+      
+      const targetRoles = (targetUserRoles || []).map((ur: any) => ur.roles?.name).filter(Boolean);
+      const restrictedRoles = ['coach', 'admin', 'moderator'];
+      const hasRestrictedRole = targetRoles.some((role: string) => restrictedRoles.includes(role));
+      
+      if (hasRestrictedRole) {
+        return NextResponse.json({ error: 'Vous n\'avez pas les permissions nécessaires pour modifier cet utilisateur.' }, { status: 403 });
+      }
+    }
 
     // Vérifier que l'utilisateur existe
     const adminSupabase = createAdminClient();
@@ -59,6 +77,14 @@ export async function PATCH(
           .eq('id', roleId)
           .single();
         roleName = (roleData as any)?.name || null;
+        
+        // Si l'utilisateur est un coach, empêcher l'attribution de rôles restreints
+        if (isCoach && !isAdmin) {
+          const restrictedRoles = ['coach', 'admin', 'moderator'];
+          if (roleName && restrictedRoles.includes(roleName)) {
+            return NextResponse.json({ error: 'Vous n\'avez pas les permissions nécessaires pour attribuer ce rôle.' }, { status: 403 });
+          }
+        }
       }
       
       // Supprimer tous les rôles existants de l'utilisateur (utiliser client admin pour contourner RLS)
@@ -429,7 +455,9 @@ export async function DELETE(
     }
 
     const isAdmin = await checkAdminRole(user.id);
-    if (!isAdmin) {
+    const isCoach = await checkCoachRole(user.id);
+    
+    if (!isAdmin && !isCoach) {
       return NextResponse.json({ error: 'Non autorisé' }, { status: 403 });
     }
 
@@ -441,6 +469,22 @@ export async function DELETE(
         { error: 'Vous ne pouvez pas supprimer votre propre compte' },
         { status: 400 }
       );
+    }
+    
+    // Si l'utilisateur est un coach, vérifier qu'il ne supprime pas un utilisateur avec un rôle restreint
+    if (isCoach && !isAdmin) {
+      const { data: targetUserRoles } = await supabase
+        .from('user_roles')
+        .select('role_id, roles(name)')
+        .eq('user_id', userId);
+      
+      const targetRoles = (targetUserRoles || []).map((ur: any) => ur.roles?.name).filter(Boolean);
+      const restrictedRoles = ['coach', 'admin', 'moderator'];
+      const hasRestrictedRole = targetRoles.some((role: string) => restrictedRoles.includes(role));
+      
+      if (hasRestrictedRole) {
+        return NextResponse.json({ error: 'Vous n\'avez pas les permissions nécessaires pour supprimer cet utilisateur.' }, { status: 403 });
+      }
     }
 
     const adminSupabase = createAdminClient();

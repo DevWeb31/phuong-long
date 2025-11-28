@@ -9,7 +9,7 @@
 
 import { NextResponse } from 'next/server';
 import { createServerClient } from '@/lib/supabase/server';
-import { checkAdminRole } from '@/lib/utils/check-admin-role';
+import { checkAdminRole, checkCoachRole, getCoachClubId } from '@/lib/utils/check-admin-role';
 
 export const runtime = 'nodejs';
 
@@ -18,21 +18,34 @@ export async function GET() {
   try {
     const supabase = await createServerClient();
     
-    // Vérifier l'authentification et le rôle admin
+    // Vérifier l'authentification et le rôle admin ou coach
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
       return NextResponse.json({ error: 'Non authentifié' }, { status: 401 });
     }
 
     const isAdmin = await checkAdminRole(user.id);
-    if (!isAdmin) {
+    const isCoach = await checkCoachRole(user.id);
+    
+    if (!isAdmin && !isCoach) {
       return NextResponse.json({ error: 'Non autorisé' }, { status: 403 });
     }
 
-    const { data: clubs, error } = await supabase
+    // Si coach, récupérer uniquement son club associé
+    let clubsQuery = supabase
       .from('clubs')
       .select('*')
       .order('created_at', { ascending: false });
+    
+    if (isCoach && !isAdmin) {
+      const coachClubId = await getCoachClubId(user.id);
+      if (!coachClubId) {
+        return NextResponse.json({ error: 'Coach non associé à un club' }, { status: 403 });
+      }
+      clubsQuery = clubsQuery.eq('id', coachClubId);
+    }
+
+    const { data: clubs, error } = await clubsQuery;
 
     if (error) throw error;
 
