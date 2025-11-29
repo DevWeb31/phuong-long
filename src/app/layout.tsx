@@ -3,6 +3,7 @@ import { Roboto } from 'next/font/google';
 import { ThemeProvider } from '@/lib/contexts/ThemeContext';
 import { CartProvider } from '@/lib/contexts/CartContext';
 import { AuthProvider } from '@/lib/hooks/useAuth';
+import { CookieConsent } from '@/components/common/CookieConsent';
 import './globals.css';
 
 const roboto = Roboto({
@@ -88,6 +89,7 @@ export default function RootLayout({
           <ThemeProvider>
             <CartProvider>
               {children}
+              <CookieConsent />
             </CartProvider>
           </ThemeProvider>
         </AuthProvider>

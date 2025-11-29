@@ -7,15 +7,10 @@
  * @date 2025-01-XX
  */
 
-import { NextRequest, NextResponse } from 'next/server';
-import { z } from 'zod';
+import { NextResponse } from 'next/server';
 import { createAPIClient, createAdminClient } from '@/lib/supabase/server';
 
-const deleteAccountSchema = z.object({
-  confirmEmail: z.string().email('Email invalide'),
-});
-
-export async function POST(request: NextRequest) {
+export async function DELETE() {
   try {
     // Vérifier que l'utilisateur est connecté
     const supabase = await createAPIClient();
@@ -38,17 +33,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Valider les données de la requête
-    const payload = await request.json();
-    const { confirmEmail } = deleteAccountSchema.parse(payload);
-
-    // Vérifier que l'email de confirmation correspond à l'email de l'utilisateur
-    if (confirmEmail.toLowerCase() !== userEmail.toLowerCase()) {
-      return NextResponse.json(
-        { success: false, error: 'L\'email de confirmation ne correspond pas à votre adresse email' },
-        { status: 400 }
-      );
-    }
+    // Pour la suppression, on ne demande plus de confirmation email dans l'API
+    // La confirmation se fait côté frontend (double confirmation dans l'UI)
 
     // Supprimer l'utilisateur via Admin API
     // Cela supprimera automatiquement toutes les données liées grâce aux CASCADE dans la base de données
@@ -72,12 +58,6 @@ export async function POST(request: NextRequest) {
     });
 
   } catch (error) {
-    if (error instanceof z.ZodError) {
-      return NextResponse.json(
-        { success: false, error: 'Données invalides', details: error.flatten() },
-        { status: 400 }
-      );
-    }
 
     console.error('[DELETE ACCOUNT] Erreur inattendue:', error);
     return NextResponse.json(

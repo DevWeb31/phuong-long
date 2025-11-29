@@ -10,10 +10,11 @@
  */
 
 import { createBrowserClient } from '@supabase/ssr';
+import type { SupabaseClient } from '@supabase/supabase-js';
 import type { Database } from './database.types';
 
 // Singleton pour le client Supabase côté client
-let browserClient: ReturnType<typeof createBrowserClient<Database>> | null = null;
+let browserClient: SupabaseClient<Database> | null = null;
 
 /**
  * Créer ou récupérer le client Supabase pour le navigateur

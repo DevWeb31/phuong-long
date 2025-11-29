@@ -19,6 +19,41 @@ export type Json =
 export interface Database {
   public: {
     Tables: {
+      user_profiles: {
+        Row: {
+          id: string;
+          username: string;
+          full_name: string | null;
+          avatar_url: string | null;
+          bio: string | null;
+          favorite_club_id: string | null;
+          preferences: Json;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id: string;
+          username: string;
+          full_name?: string | null;
+          avatar_url?: string | null;
+          bio?: string | null;
+          favorite_club_id?: string | null;
+          preferences?: Json;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          username?: string;
+          full_name?: string | null;
+          avatar_url?: string | null;
+          bio?: string | null;
+          favorite_club_id?: string | null;
+          preferences?: Json;
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
       clubs: {
         Row: {
           id: string;
@@ -327,6 +362,47 @@ export interface Database {
           overlay_opacity?: number;
           active?: boolean;
           display_order?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
+      user_consents: {
+        Row: {
+          id: string;
+          user_id: string;
+          consent_type: 'terms_of_service' | 'privacy_policy' | 'newsletter' | 'marketing' | 'analytics' | 'cookies_essential' | 'cookies_analytics' | 'cookies_marketing';
+          version: string;
+          granted: boolean;
+          ip_address: string | null;
+          user_agent: string | null;
+          granted_at: string;
+          revoked_at: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          consent_type: 'terms_of_service' | 'privacy_policy' | 'newsletter' | 'marketing' | 'analytics' | 'cookies_essential' | 'cookies_analytics' | 'cookies_marketing';
+          version: string;
+          granted?: boolean;
+          ip_address?: string | null;
+          user_agent?: string | null;
+          granted_at?: string;
+          revoked_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          consent_type?: 'terms_of_service' | 'privacy_policy' | 'newsletter' | 'marketing' | 'analytics' | 'cookies_essential' | 'cookies_analytics' | 'cookies_marketing';
+          version?: string;
+          granted?: boolean;
+          ip_address?: string | null;
+          user_agent?: string | null;
+          granted_at?: string;
+          revoked_at?: string | null;
           created_at?: string;
           updated_at?: string;
         };

@@ -20,10 +20,12 @@ import {
   ChevronDown,
   ShieldCheck,
   LayoutDashboard,
-  Shield
+  Shield,
+  Database
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { cn } from '@/lib/utils/cn';
+import type { User as SupabaseUser } from '@supabase/supabase-js';
 
 export function UserMenu() {
   const { user, signOut, loading } = useAuth();
@@ -74,7 +76,7 @@ export function UserMenu() {
 
   // Écouter directement les changements d'authentification Supabase comme fallback
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event: string, session: { user: SupabaseUser } | null) => {
       if (session?.user) {
         setLocalUser(session.user);
       } else if (event === 'SIGNED_OUT') {
@@ -258,6 +260,19 @@ export function UserMenu() {
               >
                 <Settings className="w-5 h-5 group-hover:scale-110 transition-transform" />
                 <span className="font-medium">Paramètres</span>
+              </Link>
+
+              <Link
+                href="/dashboard/data"
+                className={cn(
+                  'flex items-center gap-3 px-4 py-2.5 text-sm',
+                  'hover:bg-primary/5 hover:text-primary transition-all duration-200',
+                  'group'
+                )}
+                onClick={() => setIsOpen(false)}
+              >
+                <Database className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                <span className="font-medium">Gérer mes données</span>
               </Link>
 
               {/* Admin Panel - Conditionnel */}

@@ -13,8 +13,12 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { Button, Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/common';
 import { useAuth } from '@/lib/hooks/useAuth';
+import { createClient } from '@/lib/supabase/client';
+import type { Database } from '@/lib/supabase/database.types';
 import { EnvelopeIcon, LockClosedIcon, UserIcon } from '@heroicons/react/24/outline';
 import { CheckCircle2, XCircle, Loader2, Sparkles, Lock } from 'lucide-react';
+
+type UserConsentInsert = Database['public']['Tables']['user_consents']['Insert'];
 
 export default function SignUpPage() {
   const [formData, setFormData] = useState({
@@ -22,6 +26,12 @@ export default function SignUpPage() {
     email: '',
     password: '',
     confirmPassword: '',
+  });
+  const [consents, setConsents] = useState({
+    termsOfService: false,
+    privacyPolicy: false,
+    newsletter: false,
+    marketing: false,
   });
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
@@ -47,6 +57,13 @@ export default function SignUpPage() {
       return;
     }
 
+    // Validation des consentements obligatoires
+    if (!consents.termsOfService || !consents.privacyPolicy) {
+      setError('Vous devez accepter les Conditions d\'utilisation et la Politique de confidentialité pour créer un compte');
+      setLoading(false);
+      return;
+    }
+
     try {
       const { error: signUpError } = await signUp(
         formData.email,
@@ -64,6 +81,64 @@ export default function SignUpPage() {
         }
         setLoading(false);
         return;
+      }
+
+      // Enregistrer les consentements après création du compte
+      try {
+        const supabase = createClient();
+        const { data: { user } } = await supabase.auth.getUser();
+        
+        if (user) {
+          const consentVersion = '1.0';
+          const now = new Date().toISOString();
+          
+          // Enregistrer les consentements obligatoires
+          const termsConsent: UserConsentInsert = {
+            user_id: user.id,
+            consent_type: 'terms_of_service',
+            version: consentVersion,
+            granted: consents.termsOfService,
+            granted_at: now,
+          };
+          
+          await (supabase.from('user_consents') as any).upsert(termsConsent);
+
+          const privacyConsent: UserConsentInsert = {
+            user_id: user.id,
+            consent_type: 'privacy_policy',
+            version: consentVersion,
+            granted: consents.privacyPolicy,
+            granted_at: now,
+          };
+          
+          await (supabase.from('user_consents') as any).upsert(privacyConsent);
+
+          // Enregistrer les consentements optionnels
+          if (consents.newsletter) {
+            const newsletterConsent: UserConsentInsert = {
+              user_id: user.id,
+              consent_type: 'newsletter',
+              version: consentVersion,
+              granted: true,
+              granted_at: now,
+            };
+            await (supabase.from('user_consents') as any).upsert(newsletterConsent);
+          }
+
+          if (consents.marketing) {
+            const marketingConsent: UserConsentInsert = {
+              user_id: user.id,
+              consent_type: 'marketing',
+              version: consentVersion,
+              granted: true,
+              granted_at: now,
+            };
+            await (supabase.from('user_consents') as any).upsert(marketingConsent);
+          }
+        }
+      } catch (consentError) {
+        console.error('Error saving consents:', consentError);
+        // Ne pas bloquer l'inscription si l'enregistrement des consentements échoue
       }
 
       // Succès - afficher message de confirmation email
@@ -234,6 +309,77 @@ export default function SignUpPage() {
               </div>
             </div>
 
+            {/* Consents */}
+            <div className="space-y-4 border-t dark:border-gray-700 pt-4">
+              <h3 className="text-sm font-semibold dark:text-gray-300">Consentements</h3>
+              
+              {/* Terms of Service - Obligatoire */}
+              <div className="flex items-start gap-3">
+                <input
+                  type="checkbox"
+                  id="termsOfService"
+                  checked={consents.termsOfService}
+                  onChange={(e) => setConsents(prev => ({ ...prev, termsOfService: e.target.checked }))}
+                  required
+                  className="mt-1 w-4 h-4 text-primary rounded border-gray-300 focus:ring-primary"
+                />
+                <label htmlFor="termsOfService" className="text-sm dark:text-gray-300">
+                  J'accepte les{' '}
+                  <Link href="/legal/terms" className="text-primary hover:underline font-medium" target="_blank">
+                    Conditions Générales d'Utilisation
+                  </Link>
+                  {' '}<span className="text-red-500">*</span>
+                </label>
+              </div>
+
+              {/* Privacy Policy - Obligatoire */}
+              <div className="flex items-start gap-3">
+                <input
+                  type="checkbox"
+                  id="privacyPolicy"
+                  checked={consents.privacyPolicy}
+                  onChange={(e) => setConsents(prev => ({ ...prev, privacyPolicy: e.target.checked }))}
+                  required
+                  className="mt-1 w-4 h-4 text-primary rounded border-gray-300 focus:ring-primary"
+                />
+                <label htmlFor="privacyPolicy" className="text-sm dark:text-gray-300">
+                  J'ai lu et j'accepte la{' '}
+                  <Link href="/legal/privacy" className="text-primary hover:underline font-medium" target="_blank">
+                    Politique de Confidentialité
+                  </Link>
+                  {' '}<span className="text-red-500">*</span>
+                </label>
+              </div>
+
+              {/* Newsletter - Optionnel */}
+              <div className="flex items-start gap-3">
+                <input
+                  type="checkbox"
+                  id="newsletter"
+                  checked={consents.newsletter}
+                  onChange={(e) => setConsents(prev => ({ ...prev, newsletter: e.target.checked }))}
+                  className="mt-1 w-4 h-4 text-primary rounded border-gray-300 focus:ring-primary"
+                />
+                <label htmlFor="newsletter" className="text-sm dark:text-gray-300">
+                  J'accepte de recevoir la newsletter et les informations par email (optionnel)
+                </label>
+              </div>
+
+              {/* Marketing - Optionnel */}
+              <div className="flex items-start gap-3">
+                <input
+                  type="checkbox"
+                  id="marketing"
+                  checked={consents.marketing}
+                  onChange={(e) => setConsents(prev => ({ ...prev, marketing: e.target.checked }))}
+                  className="mt-1 w-4 h-4 text-primary rounded border-gray-300 focus:ring-primary"
+                />
+                <label htmlFor="marketing" className="text-sm dark:text-gray-300">
+                  J'accepte le traitement de mes données à des fins de personnalisation et de marketing (optionnel)
+                </label>
+              </div>
+            </div>
+
             {/* Error Message */}
             {error && (
               <div className="bg-red-50 border rounded-lg p-4 text-sm flex items-start gap-2">
@@ -257,17 +403,6 @@ export default function SignUpPage() {
               )}
             </Button>
 
-            {/* Terms */}
-            <p className="text-xs dark:text-gray-500">
-              En créant un compte, vous acceptez nos{' '}
-              <Link href="/legal/terms" className="text-primary hover:underline">
-                Conditions d'utilisation
-              </Link>{' '}
-              et notre{' '}
-              <Link href="/legal/privacy" className="text-primary hover:underline">
-                Politique de confidentialité
-              </Link>
-            </p>
           </form>
 
           {/* Divider */}

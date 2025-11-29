@@ -25,4 +25,6 @@ export { ClubImage } from './ClubImage';
 export { ImageCarousel } from './ImageCarousel';
 export { ImageLightbox } from './ImageLightbox';
 export { ScrollReveal } from './ScrollReveal';
+export { CookieConsent } from './CookieConsent';
+export { CookieConsentSettings } from './CookieConsentSettings';
 
