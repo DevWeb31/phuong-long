@@ -9,7 +9,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 // import crypto from 'crypto'; // TEMPORAIRE : Commenté pour les tests
-import { syncFacebookEvent, deactivateFacebookEvent } from '@/lib/services/facebook-event-sync';
+import { syncFacebookEvent } from '@/lib/services/facebook-event-sync';
 import { FacebookEventData } from '@/lib/utils/facebook-event-parser';
 
 export const runtime = 'nodejs';
@@ -85,6 +85,14 @@ export async function POST(request: NextRequest) {
         time?: number;
         changes?: Array<{
           value?: {
+            // Champs pour feed (publications)
+            item?: string; // "post" | "status" | "photo" etc.
+            post_id?: string;
+            message?: string;
+            created_time?: string;
+            photo?: string;
+            link?: string;
+            // Champs pour events (si disponible)
             id?: string;
             name?: string;
             description?: string;
@@ -134,35 +142,43 @@ export async function POST(request: NextRequest) {
       }
 
       for (const change of entry.changes) {
-        // Facebook envoie les événements avec field = "events"
-        // Le format peut varier selon le type d'événement (created, updated, deleted)
-        if (change.field !== 'events') {
+        // Facebook envoie les publications avec field = "feed"
+        // On traite les publications qui contiennent des balises [SITE]
+        if (change.field !== 'feed') {
+          console.log(`[Facebook Webhook] Champ ignoré: ${change.field}`);
           continue;
         }
 
-        const eventData = change.value;
+        const feedData = change.value;
         
-        // Gérer les événements supprimés
-        if (!eventData || !eventData.id) {
-          // Si pas de données mais un ID dans le change, c'est peut-être une suppression
-          // Facebook peut envoyer juste l'ID pour les suppressions
-          const eventId = change.value?.id || change.value;
-          if (eventId && typeof eventId === 'string') {
-            console.log(`[Facebook Webhook] Tentative de désactivation événement: ${eventId}`);
-            await deactivateFacebookEvent(eventId);
-          }
+        // Vérifier que c'est une publication (pas une suppression)
+        if (!feedData || feedData.item !== 'post' || !feedData.post_id) {
+          console.log(`[Facebook Webhook] Publication ignorée (pas un post ou supprimé)`);
           continue;
         }
 
-        // Construire l'objet FacebookEventData
+        // Extraire le message de la publication
+        const message = feedData.message || '';
+        
+        // Vérifier que le message contient la balise [SITE]
+        if (!message.includes('[SITE]')) {
+          console.log(`[Facebook Webhook] Publication ignorée (pas de balise [SITE])`);
+          continue;
+        }
+
+        console.log(`[Facebook Webhook] Publication avec [SITE] détectée: ${feedData.post_id}`);
+
+        // Construire un objet FacebookEventData depuis la publication
+        // On utilise le message comme titre + description
+        const firstLine = message.split('\n')[0] || message || 'Événement sans titre';
         const facebookEvent: FacebookEventData = {
-          id: eventData.id,
-          name: eventData.name || 'Événement sans titre',
-          description: eventData.description,
-          start_time: eventData.start_time || new Date().toISOString(),
-          end_time: eventData.end_time,
-          place: eventData.place,
-          cover: eventData.cover,
+          id: feedData.post_id,
+          name: firstLine.substring(0, 200), // Premier ligne comme titre
+          description: message,
+          start_time: feedData.created_time || new Date().toISOString(),
+          end_time: undefined,
+          place: undefined,
+          cover: feedData.photo ? { source: feedData.photo } : undefined,
         };
 
         // Synchroniser l'événement (création ou mise à jour)
@@ -170,12 +186,12 @@ export async function POST(request: NextRequest) {
 
         if (!result.success) {
           console.error(
-            `[Facebook Webhook] Erreur synchronisation événement ${eventData.id}:`,
+            `[Facebook Webhook] Erreur synchronisation:`,
             result.error
           );
         } else {
           console.log(
-            `[Facebook Webhook] Événement synchronisé avec succès: ${eventData.id}`
+            `[Facebook Webhook] Événement créé avec succès: ${result.eventId}`
           );
         }
       }
