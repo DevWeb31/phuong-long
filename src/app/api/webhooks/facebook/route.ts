@@ -8,7 +8,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import crypto from 'crypto';
+// import crypto from 'crypto'; // TEMPORAIRE : Commenté pour les tests
 import { syncFacebookEvent, deactivateFacebookEvent } from '@/lib/services/facebook-event-sync';
 import { FacebookEventData } from '@/lib/utils/facebook-event-parser';
 
@@ -22,6 +22,7 @@ export const runtime = 'nodejs';
  * @param secret - Le secret du webhook Facebook
  * @returns true si la signature est valide
  */
+/* TEMPORAIRE : Fonction commentée pour les tests
 function verifyFacebookSignature(
   payload: string,
   signature: string | null,
@@ -46,6 +47,7 @@ function verifyFacebookSignature(
     Buffer.from(receivedHash)
   );
 }
+*/
 
 /**
  * Gère les événements Facebook
@@ -64,12 +66,10 @@ export async function POST(request: NextRequest) {
     // Lire le corps de la requête comme texte (important pour la validation)
     const body = await request.text();
     
-    // Récupérer la signature
-    const signature = request.headers.get('X-Hub-Signature-256');
-
     // TEMPORAIRE : Désactiver la vérification de signature pour les tests
     // TODO: Réactiver après avoir configuré le bon FACEBOOK_WEBHOOK_SECRET
     /*
+    const signature = request.headers.get('X-Hub-Signature-256');
     if (!verifyFacebookSignature(body, signature, webhookSecret)) {
       console.error('[Facebook Webhook] Signature invalide');
       return NextResponse.json({ error: 'Signature invalide' }, { status: 401 });
