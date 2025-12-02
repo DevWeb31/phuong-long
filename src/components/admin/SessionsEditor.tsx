@@ -10,7 +10,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Calendar, Clock, Trash2, MapPin, Users, Plus, FileText } from 'lucide-react';
+import { Calendar, Clock, Trash2, Users, Plus, FileText } from 'lucide-react';
 import { Button } from '@/components/common';
 import type { EventSession } from '@/lib/types';
 
@@ -27,9 +27,9 @@ export function SessionsEditor({ sessions, onChange, disabled = false }: Session
     session_date: '',
     start_time: '',
     end_time: '',
-    location: '',
     max_attendees: null,
     notes: '',
+    status: 'scheduled',
   });
 
   const addSession = () => {
@@ -45,9 +45,9 @@ export function SessionsEditor({ sessions, onChange, disabled = false }: Session
       session_date: '',
       start_time: '',
       end_time: '',
-      location: '',
       max_attendees: null,
       notes: '',
+      status: 'scheduled',
     });
     setIsAddingSession(false);
   };
@@ -189,22 +189,6 @@ export function SessionsEditor({ sessions, onChange, disabled = false }: Session
                 </div>
               </div>
 
-              {/* Lieu spécifique */}
-              <div className="mt-3">
-                <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1 flex items-center gap-1">
-                  <MapPin className="w-3 h-3" />
-                  Lieu spécifique (optionnel)
-                </label>
-                <input
-                  type="text"
-                  value={session.location || ''}
-                  onChange={(e) => updateSession(index, 'location', e.target.value)}
-                  disabled={disabled}
-                  placeholder="Si différent du lieu principal de l'événement"
-                  className="w-full px-3 py-2 text-sm border dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                />
-              </div>
-
               {/* Notes */}
               <div className="mt-3">
                 <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1 flex items-center gap-1">
@@ -283,19 +267,6 @@ export function SessionsEditor({ sessions, onChange, disabled = false }: Session
                 className="w-full px-3 py-2 text-sm border dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
               />
             </div>
-          </div>
-
-          <div className="mb-3">
-            <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Lieu spécifique
-            </label>
-            <input
-              type="text"
-              value={newSession.location || ''}
-              onChange={(e) => setNewSession(prev => ({ ...prev, location: e.target.value }))}
-              placeholder="Si différent du lieu principal"
-              className="w-full px-3 py-2 text-sm border dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-            />
           </div>
 
           <div className="mb-4">

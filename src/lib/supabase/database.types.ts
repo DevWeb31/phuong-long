@@ -226,6 +226,12 @@ export interface Database {
           cover_image_url: string | null;
           price_cents: number;
           active: boolean;
+          is_all_clubs: boolean;
+          facebook_event_id: string | null;
+          facebook_url: string | null;
+          synced_from_facebook: boolean;
+          facebook_raw_data: Record<string, unknown> | null;
+          facebook_synced_at: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -240,6 +246,12 @@ export interface Database {
           end_date?: string | null;
           location?: string | null;
           max_attendees?: number | null;
+          is_all_clubs?: boolean;
+          facebook_event_id?: string | null;
+          facebook_url?: string | null;
+          synced_from_facebook?: boolean;
+          facebook_raw_data?: Record<string, unknown> | null;
+          facebook_synced_at?: string | null;
           registration_deadline?: string | null;
           cover_image_url?: string | null;
           price_cents?: number;
@@ -258,12 +270,220 @@ export interface Database {
           end_date?: string | null;
           location?: string | null;
           max_attendees?: number | null;
+          is_all_clubs?: boolean;
           registration_deadline?: string | null;
           cover_image_url?: string | null;
           price_cents?: number;
           active?: boolean;
+          facebook_event_id?: string | null;
+          facebook_url?: string | null;
+          synced_from_facebook?: boolean;
+          facebook_raw_data?: Record<string, unknown> | null;
+          facebook_synced_at?: string | null;
           created_at?: string;
           updated_at?: string;
+        };
+      };
+      event_sessions: {
+        Row: {
+          id: string;
+          event_id: string;
+          session_date: string;
+          start_time: string | null;
+          end_time: string | null;
+          start_datetime: string | null;
+          end_datetime: string | null;
+          notes: string | null;
+          max_attendees: number | null;
+          status: 'scheduled' | 'cancelled' | 'completed';
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          event_id: string;
+          session_date: string;
+          start_time?: string | null;
+          end_time?: string | null;
+          start_datetime?: string | null;
+          end_datetime?: string | null;
+          notes?: string | null;
+          max_attendees?: number | null;
+          status?: 'scheduled' | 'cancelled' | 'completed';
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          event_id?: string;
+          session_date?: string;
+          start_time?: string | null;
+          end_time?: string | null;
+          start_datetime?: string | null;
+          end_datetime?: string | null;
+          notes?: string | null;
+          max_attendees?: number | null;
+          status?: 'scheduled' | 'cancelled' | 'completed';
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
+      event_prices: {
+        Row: {
+          id: string;
+          event_id: string;
+          label: string;
+          price_cents: number;
+          currency: string;
+          description: string | null;
+          display_order: number;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          event_id: string;
+          label: string;
+          price_cents?: number;
+          currency?: string;
+          description?: string | null;
+          display_order?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          event_id?: string;
+          label?: string;
+          price_cents?: number;
+          currency?: string;
+          description?: string | null;
+          display_order?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
+      event_locations: {
+        Row: {
+          id: string;
+          event_id: string;
+          name: string;
+          address: string | null;
+          city: string | null;
+          postal_code: string | null;
+          country: string;
+          latitude: number | null;
+          longitude: number | null;
+          description: string | null;
+          is_primary: boolean;
+          display_order: number;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          event_id: string;
+          name: string;
+          address?: string | null;
+          city?: string | null;
+          postal_code?: string | null;
+          country?: string;
+          latitude?: number | null;
+          longitude?: number | null;
+          description?: string | null;
+          is_primary?: boolean;
+          display_order?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          event_id?: string;
+          name?: string;
+          address?: string | null;
+          city?: string | null;
+          postal_code?: string | null;
+          country?: string;
+          latitude?: number | null;
+          longitude?: number | null;
+          description?: string | null;
+          is_primary?: boolean;
+          display_order?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
+      event_images: {
+        Row: {
+          id: string;
+          event_id: string;
+          image_url: string;
+          title: string | null;
+          alt_text: string | null;
+          caption: string | null;
+          width: number | null;
+          height: number | null;
+          format: string | null;
+          size_bytes: number | null;
+          is_cover: boolean;
+          display_order: number;
+          uploaded_at: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          event_id: string;
+          image_url: string;
+          title?: string | null;
+          alt_text?: string | null;
+          caption?: string | null;
+          width?: number | null;
+          height?: number | null;
+          format?: string | null;
+          size_bytes?: number | null;
+          is_cover?: boolean;
+          display_order?: number;
+          uploaded_at?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          event_id?: string;
+          image_url?: string;
+          title?: string | null;
+          alt_text?: string | null;
+          caption?: string | null;
+          width?: number | null;
+          height?: number | null;
+          format?: string | null;
+          size_bytes?: number | null;
+          is_cover?: boolean;
+          display_order?: number;
+          uploaded_at?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
+      event_clubs: {
+        Row: {
+          id: string;
+          event_id: string;
+          club_id: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          event_id: string;
+          club_id: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          event_id?: string;
+          club_id?: string;
+          created_at?: string;
         };
       };
       products: {

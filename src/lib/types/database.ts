@@ -105,6 +105,12 @@ export interface Event {
   cover_image_url: string | null;
   price_cents: number;
   active: boolean;
+  is_all_clubs: boolean;
+  facebook_event_id: string | null;
+  facebook_url: string | null;
+  synced_from_facebook: boolean;
+  facebook_raw_data: Record<string, unknown> | null;
+  facebook_synced_at: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -130,11 +136,42 @@ export interface EventSession {
   id: string;
   event_id: string;
   session_date: string; // Date ISO (YYYY-MM-DD)
-  start_time: string; // Time (HH:MM:SS)
+  start_time: string | null; // Time (HH:MM:SS)
   end_time: string | null; // Time (HH:MM:SS)
-  location: string | null;
-  max_attendees: number | null;
+  start_datetime: string | null; // Timestamp complet
+  end_datetime: string | null; // Timestamp complet
   notes: string | null;
+  max_attendees: number | null;
+  status: 'scheduled' | 'cancelled' | 'completed';
+  created_at: string;
+  updated_at: string;
+}
+
+export interface EventPrice {
+  id: string;
+  event_id: string;
+  label: string; // Ex: "Adulte", "Enfant", "Adhérent"
+  price_cents: number; // 0 = gratuit
+  currency: string; // Par défaut "EUR"
+  description: string | null;
+  display_order: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface EventLocation {
+  id: string;
+  event_id: string;
+  name: string; // Nom du lieu (ex: "Dojo Municipal")
+  address: string | null;
+  city: string | null;
+  postal_code: string | null;
+  country: string; // Par défaut "France"
+  latitude: number | null; // Coordonnées GPS
+  longitude: number | null;
+  description: string | null;
+  is_primary: boolean; // Lieu principal
+  display_order: number;
   created_at: string;
   updated_at: string;
 }
@@ -143,12 +180,25 @@ export interface EventImage {
   id: string;
   event_id: string;
   image_url: string;
-  display_order: number;
-  caption: string | null;
+  title: string | null;
   alt_text: string | null;
+  caption: string | null;
+  width: number | null;
+  height: number | null;
+  format: string | null; // jpg, png, webp, etc.
+  size_bytes: number | null;
   is_cover: boolean;
+  display_order: number;
+  uploaded_at: string;
   created_at: string;
   updated_at: string;
+}
+
+export interface EventClub {
+  id: string;
+  event_id: string;
+  club_id: string;
+  created_at: string;
 }
 
 export interface Product {
@@ -247,6 +297,17 @@ export interface EventWithClub extends Event {
   is_full: boolean;
 }
 
+export interface EventWithRelations extends Event {
+  club: Pick<Club, 'id' | 'name' | 'city' | 'slug'> | null;
+  sessions: EventSession[];
+  prices: EventPrice[];
+  locations: EventLocation[];
+  images: EventImage[];
+  clubs: Pick<Club, 'id' | 'name' | 'city' | 'slug'>[]; // Pour événements multi-clubs
+  registrations_count?: number;
+  is_full?: boolean;
+}
+
 export interface ProductWithStock extends Product {
   in_stock: boolean;
   stock_status: 'in_stock' | 'low_stock' | 'out_of_stock';
@@ -315,6 +376,7 @@ export interface EventInput {
   description?: string;
   event_type: 'competition' | 'stage' | 'demonstration' | 'seminar' | 'other';
   club_id?: string;
+  is_all_clubs?: boolean;
   start_date: string;
   end_date?: string;
   location?: string;
@@ -322,6 +384,56 @@ export interface EventInput {
   registration_deadline?: string;
   cover_image_url?: string;
   price_cents?: number;
+}
+
+export interface EventSessionInput {
+  session_date: string; // YYYY-MM-DD
+  start_time?: string; // HH:MM
+  end_time?: string; // HH:MM
+  notes?: string;
+  max_attendees?: number;
+  status?: 'scheduled' | 'cancelled' | 'completed';
+}
+
+export interface EventPriceInput {
+  label: string;
+  price_cents: number;
+  description?: string;
+  display_order?: number;
+}
+
+export interface EventLocationInput {
+  name: string;
+  address?: string;
+  city?: string;
+  postal_code?: string;
+  country?: string;
+  latitude?: number;
+  longitude?: number;
+  description?: string;
+  is_primary?: boolean;
+  display_order?: number;
+}
+
+export interface EventImageInput {
+  image_url: string;
+  title?: string;
+  alt_text?: string;
+  caption?: string;
+  width?: number;
+  height?: number;
+  format?: string;
+  size_bytes?: number;
+  is_cover?: boolean;
+  display_order?: number;
+}
+
+export interface EventCompleteInput extends EventInput {
+  sessions?: EventSessionInput[];
+  prices?: EventPriceInput[];
+  locations?: EventLocationInput[];
+  images?: EventImageInput[];
+  club_ids?: string[]; // Pour événements multi-clubs
 }
 
 export interface ContactFormInput {

@@ -9,7 +9,7 @@
 
 'use client';
 
-import { Calendar, Clock, MapPin, Users, FileText } from 'lucide-react';
+import { Calendar, Clock, Users, FileText } from 'lucide-react';
 import { Card, CardContent, Badge } from '@/components/common';
 import type { EventSession } from '@/lib/types';
 
@@ -33,7 +33,8 @@ export function SessionsList({ sessions, className = '' }: SessionsListProps) {
     });
   };
 
-  const formatTime = (timeStr: string) => {
+  const formatTime = (timeStr: string | null | undefined) => {
+    if (!timeStr) return '--:--';
     return timeStr.substring(0, 5); // HH:MM
   };
 
@@ -88,14 +89,6 @@ export function SessionsList({ sessions, className = '' }: SessionsListProps) {
                           </>
                         )}
                       </div>
-
-                      {/* Lieu spécifique */}
-                      {session.location && (
-                        <div className="flex items-center gap-1.5 text-sm text-gray-600 dark:text-gray-400">
-                          <MapPin className="w-3.5 h-3.5 text-primary" />
-                          <span>{session.location}</span>
-                        </div>
-                      )}
 
                       {/* Capacité */}
                       {session.max_attendees && (
