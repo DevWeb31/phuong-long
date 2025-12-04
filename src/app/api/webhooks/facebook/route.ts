@@ -195,7 +195,12 @@ export async function POST(request: NextRequest) {
         // Extraire les images de la publication
         const images: string[] = [];
         
-        // Photo unique
+        // Photo dans le champ "link" (pour item: "photo")
+        if (feedData.link && feedData.item === 'photo' && feedData.link.includes('fbcdn.net')) {
+          images.push(feedData.link);
+        }
+        
+        // Photo unique dans le champ "photo"
         if (feedData.photo) {
           images.push(feedData.photo);
         }
