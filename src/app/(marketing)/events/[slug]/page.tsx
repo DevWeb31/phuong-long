@@ -324,17 +324,55 @@ export default async function EventDetailPage({ params }: Props) {
                 {/* Carte de prix - Tailles lisibles */}
                 <Card className="overflow-hidden border-2 border-primary/20 shadow-lg">
                   <div className="bg-gradient-to-br from-primary to-primary-dark p-4 md:p-6 text-white">
-                    <p className="text-xs md:text-sm font-medium text-white/80 mb-1">Tarif de participation</p>
-                    <p className="text-3xl md:text-4xl lg:text-5xl font-bold mb-1">
-                      {typedEvent.price_cents === 0 ? (
-                        'Gratuit'
-                      ) : (
-                        <>{(typedEvent.price_cents / 100).toFixed(0)}€</>
-                      )}
+                    <p className="text-xs md:text-sm font-medium text-white/80 mb-1">
+                      {(() => {
+                        const prices = typedEvent.prices || [];
+                        return prices.length > 1 ? 'Tarifs de participation' : 'Tarif de participation';
+                      })()}
                     </p>
-                    {typedEvent.price_cents > 0 && (
-                      <p className="text-xs md:text-sm text-white/70">par personne</p>
-                    )}
+                    {(() => {
+                      const prices = typedEvent.prices || [];
+                      if (prices.length === 0) {
+                        // Fallback sur l'ancien champ
+                        return (
+                          <>
+                            <p className="text-3xl md:text-4xl lg:text-5xl font-bold mb-1">
+                              {typedEvent.price_cents === 0 ? 'Gratuit' : `${(typedEvent.price_cents / 100).toFixed(0)}€`}
+                            </p>
+                            {typedEvent.price_cents > 0 && (
+                              <p className="text-xs md:text-sm text-white/70">par personne</p>
+                            )}
+                          </>
+                        );
+                      }
+                      
+                      if (prices.length === 1) {
+                        return (
+                          <>
+                            <p className="text-3xl md:text-4xl lg:text-5xl font-bold mb-1">
+                              {prices[0].price_cents === 0 ? 'Gratuit' : `${(prices[0].price_cents / 100).toFixed(0)}€`}
+                            </p>
+                            {prices[0].price_cents > 0 && (
+                              <p className="text-xs md:text-sm text-white/70">par personne</p>
+                            )}
+                          </>
+                        );
+                      }
+                      
+                      // Plusieurs tarifs
+                      return (
+                        <div className="space-y-2 mb-1">
+                          {prices.map((price, idx) => (
+                            <div key={idx} className="flex items-center justify-between gap-3">
+                              <span className="text-sm md:text-base text-white/90">{price.label}</span>
+                              <span className="text-xl md:text-2xl font-bold">
+                                {price.price_cents === 0 ? 'Gratuit' : `${(price.price_cents / 100).toFixed(0)}€`}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      );
+                    })()}
                   </div>
                   
                   <CardContent className="p-4 md:p-6 space-y-3 md:space-y-4">
@@ -476,17 +514,25 @@ export default async function EventDetailPage({ params }: Props) {
                             <p className="text-xs md:text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Horaire</p>
                             {typedEvent.sessions && typedEvent.sessions.length > 0 ? (
                               <div className="space-y-1">
-                                {typedEvent.sessions.map((session, idx) => (
-                                  <p key={idx} className="text-sm md:text-base lg:text-lg font-semibold text-gray-900 dark:text-gray-100">
-                                    {session.start_time}
-                                    {session.end_time && ` - ${session.end_time}`}
-                                    {typedEvent.sessions!.length > 1 && (
-                                      <span className="text-xs md:text-sm text-gray-500 dark:text-gray-400 ml-2">
-                                        ({new Date(session.session_date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })})
-                                      </span>
-                                    )}
-                                  </p>
-                                ))}
+                                {typedEvent.sessions.map((session, idx) => {
+                                  // Formater l'heure sans les secondes
+                                  const formatTime = (time: string | null) => {
+                                    if (!time) return '';
+                                    return time.substring(0, 5); // "09:00:00" → "09:00"
+                                  };
+                                  
+                                  return (
+                                    <p key={idx} className="text-sm md:text-base lg:text-lg font-semibold text-gray-900 dark:text-gray-100">
+                                      {formatTime(session.start_time)}
+                                      {session.end_time && ` - ${formatTime(session.end_time)}`}
+                                      {typedEvent.sessions!.length > 1 && (
+                                        <span className="text-xs md:text-sm text-gray-500 dark:text-gray-400 ml-2">
+                                          ({new Date(session.session_date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })})
+                                        </span>
+                                      )}
+                                    </p>
+                                  );
+                                })}
                               </div>
                             ) : (
                               <p className="text-sm md:text-base lg:text-lg font-semibold text-gray-900 dark:text-gray-100">
