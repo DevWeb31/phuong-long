@@ -1383,7 +1383,8 @@ export function ClubFormModal({ isOpen, onClose, onSubmit, club, isLoading = fal
               </div>
             </div>
 
-            {/* Actif */}
+            {/* Statut actif/inactif désactivé - Les clubs ne peuvent pas être désactivés */}
+            {/* 
             <div className="flex items-center gap-3 border-t dark:border-gray-700 pt-6">
               <input
                 type="checkbox"
@@ -1397,6 +1398,7 @@ export function ClubFormModal({ isOpen, onClose, onSubmit, club, isLoading = fal
                 Club actif (le club sera visible sur le site si cette case est cochée)
               </label>
             </div>
+            */}
           </div>
         )}
       </form>
