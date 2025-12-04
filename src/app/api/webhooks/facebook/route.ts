@@ -155,9 +155,9 @@ export async function POST(request: NextRequest) {
         const feedData = change.value;
         console.log('[Facebook Webhook] Feed data:', JSON.stringify(feedData, null, 2));
         
-        // Vérifier que c'est une publication (status, post, photo, video, etc.)
-        // Facebook envoie "status" pour les publications texte, "post" pour les liens, etc.
-        const validItems = ['status', 'post', 'photo', 'video', 'link'];
+        // Vérifier que c'est une publication (status, post, photo, video, share, etc.)
+        // Facebook envoie différents types selon le contenu de la publication
+        const validItems = ['status', 'post', 'photo', 'video', 'link', 'share'];
         if (!feedData || !feedData.item || !validItems.includes(feedData.item) || !feedData.post_id) {
           console.log(`[Facebook Webhook] Publication ignorée. Item: ${feedData?.item}, Post ID: ${feedData?.post_id}`);
           continue;
