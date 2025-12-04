@@ -295,8 +295,9 @@ export function extractMaxCapacity(content: string): number | null {
     return null;
   }
 
-  // Chercher une capacité spécifiée
-  const match = CAPACITY_PATTERN.exec(content);
+  // Chercher une capacité spécifiée (regex locale pour éviter problèmes de state)
+  const capacityRegex = /\[(?:CAPACITE|CAPACITÉ|PLACES):(\d+)\]/i;
+  const match = capacityRegex.exec(content);
   if (match && match[1]) {
     const capacity = parseInt(match[1], 10);
     return !isNaN(capacity) && capacity > 0 ? capacity : null;
