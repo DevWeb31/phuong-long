@@ -346,7 +346,7 @@ export default async function EventDetailPage({ params }: Props) {
                         );
                       }
                       
-                      if (prices.length === 1) {
+                      if (prices.length === 1 && prices[0]) {
                         return (
                           <>
                             <p className="text-3xl md:text-4xl lg:text-5xl font-bold mb-1">
