@@ -72,12 +72,15 @@ export default async function EventDetailPage({ params }: Props) {
       *,
       club:clubs(id, name, city, slug, phone, email),
       images:event_images(*),
-      sessions:event_sessions(*)
+      sessions:event_sessions(*),
+      prices:event_prices(*),
+      locations:event_locations(*)
     `)
     .eq('slug', slug)
     .order('display_order', { foreignTable: 'event_images', ascending: true })
     .order('session_date', { foreignTable: 'event_sessions', ascending: true })
     .order('start_time', { foreignTable: 'event_sessions', ascending: true })
+    .order('price_cents', { foreignTable: 'event_prices', ascending: true })
     .single();
   
   if (error || !event) {
@@ -88,6 +91,8 @@ export default async function EventDetailPage({ params }: Props) {
     club: { id: string; name: string; city: string; slug: string; phone: string | null; email: string | null } | null;
     images?: Array<{ image_url: string; alt_text: string | null; caption: string | null; is_cover: boolean; display_order: number }>;
     sessions?: Array<{ id: string; session_date: string; start_time: string; end_time: string | null; location: string | null; max_attendees: number | null; notes: string | null }>;
+    prices?: Array<{ id: string; label: string; price_cents: number; display_order: number }>;
+    locations?: Array<{ id: string; name: string; address: string | null; city: string | null; postal_code: string | null; latitude: number | null; longitude: number | null }>;
   };
   
   // Fusionner les images de la galerie avec l'image de couverture
@@ -268,7 +273,17 @@ export default async function EventDetailPage({ params }: Props) {
                 <p className="text-xs md:text-sm text-white/70 font-medium">Tarif</p>
               </div>
               <p className="font-bold text-sm md:text-base">
-                {typedEvent.price_cents === 0 ? 'Gratuit' : `${(typedEvent.price_cents / 100).toFixed(0)}€`}
+                {(() => {
+                  const prices = typedEvent.prices || [];
+                  if (prices.length === 0) {
+                    // Fallback sur l'ancien champ
+                    return typedEvent.price_cents === 0 ? 'Gratuit' : `${(typedEvent.price_cents / 100).toFixed(0)}€`;
+                  }
+                  const minPrice = Math.min(...prices.map(p => p.price_cents));
+                  if (minPrice === 0) return 'Gratuit';
+                  if (prices.length === 1) return `${(minPrice / 100).toFixed(0)}€`;
+                  return `À partir de ${(minPrice / 100).toFixed(0)}€`;
+                })()}
               </p>
             </div>
 
@@ -459,18 +474,34 @@ export default async function EventDetailPage({ params }: Props) {
                           </div>
                           <div className="flex-1 min-w-0">
                             <p className="text-xs md:text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Horaire</p>
-                            <p className="text-sm md:text-base lg:text-lg font-semibold text-gray-900 dark:text-gray-100">
-                              {new Date(typedEvent.start_date).toLocaleTimeString('fr-FR', {
-                                hour: '2-digit',
-                                minute: '2-digit'
-                              })}
-                              {typedEvent.end_date && (
-                                <> - {new Date(typedEvent.end_date).toLocaleTimeString('fr-FR', {
+                            {typedEvent.sessions && typedEvent.sessions.length > 0 ? (
+                              <div className="space-y-1">
+                                {typedEvent.sessions.map((session, idx) => (
+                                  <p key={idx} className="text-sm md:text-base lg:text-lg font-semibold text-gray-900 dark:text-gray-100">
+                                    {session.start_time}
+                                    {session.end_time && ` - ${session.end_time}`}
+                                    {typedEvent.sessions!.length > 1 && (
+                                      <span className="text-xs md:text-sm text-gray-500 dark:text-gray-400 ml-2">
+                                        ({new Date(session.session_date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })})
+                                      </span>
+                                    )}
+                                  </p>
+                                ))}
+                              </div>
+                            ) : (
+                              <p className="text-sm md:text-base lg:text-lg font-semibold text-gray-900 dark:text-gray-100">
+                                {new Date(typedEvent.start_date).toLocaleTimeString('fr-FR', {
                                   hour: '2-digit',
                                   minute: '2-digit'
-                                })}</>
-                              )}
-                            </p>
+                                })}
+                                {typedEvent.end_date && (
+                                  <> - {new Date(typedEvent.end_date).toLocaleTimeString('fr-FR', {
+                                    hour: '2-digit',
+                                    minute: '2-digit'
+                                  })}</>
+                                )}
+                              </p>
+                            )}
                           </div>
                         </div>
                       </div>
