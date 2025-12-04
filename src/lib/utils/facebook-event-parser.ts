@@ -394,13 +394,40 @@ export function extractEventData(facebookEvent: FacebookEventData): ExtractedEve
     title = 'Événement sans titre';
   }
 
-  // Nettoyer la description
-  const descriptionLines = parsedTags.cleanedContent.split('\n').slice(1);
-  const description = descriptionLines.join('\n').trim() || descriptionContent.trim() || null;
+  // Nettoyer la description (enlever le titre et les lignes vides)
+  const descriptionLines = parsedTags.cleanedContent.split('\n').slice(1).filter(line => line.trim());
+  const description = descriptionLines.join('\n').trim() || null;
 
   // Extraire les dates
-  const startDate = facebookEvent.start_time;
-  const endDate = facebookEvent.end_time || null;
+  // Si des sessions sont parsées, utiliser la date de la première session
+  // Sinon utiliser la date Facebook
+  let startDate = facebookEvent.start_time;
+  let endDate = facebookEvent.end_time || null;
+  
+  if (parsedTags.sessions.length > 0 && parsedTags.sessions[0]) {
+    // Utiliser la date de la première session
+    const firstSession = parsedTags.sessions[0];
+    const sessionDate = new Date(firstSession.date);
+    
+    if (firstSession.startTime) {
+      // Combiner date + heure de début
+      const [hours, minutes] = firstSession.startTime.split(':');
+      sessionDate.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+    }
+    
+    startDate = sessionDate.toISOString();
+    
+    // Si la dernière session est différente, utiliser comme end_date
+    const lastSession = parsedTags.sessions[parsedTags.sessions.length - 1];
+    if (lastSession && lastSession.date !== firstSession.date) {
+      const endSessionDate = new Date(lastSession.date);
+      if (lastSession.endTime) {
+        const [hours, minutes] = lastSession.endTime.split(':');
+        endSessionDate.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+      }
+      endDate = endSessionDate.toISOString();
+    }
+  }
 
   // Extraire le lieu depuis Facebook (fallback si pas de balise [LIEU:])
   let location: string | null = null;
