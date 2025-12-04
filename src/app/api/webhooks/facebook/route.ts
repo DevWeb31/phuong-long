@@ -155,8 +155,10 @@ export async function POST(request: NextRequest) {
         const feedData = change.value;
         console.log('[Facebook Webhook] Feed data:', JSON.stringify(feedData, null, 2));
         
-        // Vérifier que c'est une publication (pas une suppression)
-        if (!feedData || feedData.item !== 'post' || !feedData.post_id) {
+        // Vérifier que c'est une publication (status, post, photo, video, etc.)
+        // Facebook envoie "status" pour les publications texte, "post" pour les liens, etc.
+        const validItems = ['status', 'post', 'photo', 'video', 'link'];
+        if (!feedData || !feedData.item || !validItems.includes(feedData.item) || !feedData.post_id) {
           console.log(`[Facebook Webhook] Publication ignorée. Item: ${feedData?.item}, Post ID: ${feedData?.post_id}`);
           continue;
         }
