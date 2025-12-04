@@ -180,7 +180,7 @@ export async function POST(request: NextRequest) {
         
         // Convertir le timestamp Unix (secondes) en ISO string
         const createdDate = feedData.created_time 
-          ? new Date(feedData.created_time * 1000).toISOString() // *1000 car JS attend des millisecondes
+          ? new Date(Number(feedData.created_time) * 1000).toISOString() // *1000 car JS attend des millisecondes
           : new Date().toISOString();
         
         const facebookEvent: FacebookEventData = {
