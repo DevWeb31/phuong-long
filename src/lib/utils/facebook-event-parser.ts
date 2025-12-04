@@ -17,6 +17,7 @@ import {
   TARIFF_PATTERN,
   LOCATION_PATTERN,
   ADDRESS_PATTERN,
+  CAPACITY_PATTERN,
   getEventTypeFromTag,
   getClubSlugFromTag,
   isAllClubsTag,
