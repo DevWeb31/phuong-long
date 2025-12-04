@@ -203,7 +203,10 @@ export async function POST(request: NextRequest) {
         // Photos multiples (si disponible)
         if (feedData.photos && Array.isArray(feedData.photos)) {
           feedData.photos.forEach((photo: any) => {
-            if (photo.source || photo.url) {
+            // Facebook peut envoyer soit des strings directement, soit des objets
+            if (typeof photo === 'string') {
+              images.push(photo);
+            } else if (photo.source || photo.url) {
               images.push(photo.source || photo.url);
             }
           });
@@ -217,6 +220,8 @@ export async function POST(request: NextRequest) {
             }
           });
         }
+        
+        console.log(`[Facebook Webhook] ${images.length} images extraites:`, images);
         
         const facebookEvent: FacebookEventData = {
           id: feedData.post_id,
