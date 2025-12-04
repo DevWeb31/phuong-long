@@ -177,11 +177,17 @@ export async function POST(request: NextRequest) {
         // Construire un objet FacebookEventData depuis la publication
         // On utilise le message comme titre + description
         const firstLine = message.split('\n')[0] || message || 'Événement sans titre';
+        
+        // Convertir le timestamp Unix (secondes) en ISO string
+        const createdDate = feedData.created_time 
+          ? new Date(feedData.created_time * 1000).toISOString() // *1000 car JS attend des millisecondes
+          : new Date().toISOString();
+        
         const facebookEvent: FacebookEventData = {
           id: feedData.post_id,
           name: firstLine.substring(0, 200), // Premier ligne comme titre
           description: message,
-          start_time: feedData.created_time || new Date().toISOString(),
+          start_time: createdDate,
           end_time: undefined,
           place: undefined,
           cover: feedData.photo ? { source: feedData.photo } : undefined,
