@@ -211,14 +211,11 @@ export default function AdminClubsPage() {
         columns={columns}
         isLoading={isLoading}
         onEdit={handleEdit}
-        onDelete={handleDelete}
         onView={handleView}
         searchPlaceholder="Rechercher un club..."
         emptyMessage="Aucun club trouvé"
         defaultSortColumn="name"
         defaultSortDirection="asc"
-        newItemLabel="Nouveau Club"
-        onNewItemClick={handleCreateNew}
       />
 
       {/* Modals */}
