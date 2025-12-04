@@ -60,6 +60,7 @@ export interface FacebookEventData {
   cover?: {
     source?: string;
   };
+  images?: string[]; // URLs des images de la publication
   event_times?: Array<{
     start_time: string;
     end_time?: string;

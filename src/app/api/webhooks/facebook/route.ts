@@ -89,8 +89,17 @@ export async function POST(request: NextRequest) {
             item?: string; // "post" | "status" | "photo" etc.
             post_id?: string;
             message?: string;
-            created_time?: string;
+            created_time?: number;
             photo?: string;
+            photos?: Array<{ source?: string; url?: string }>;
+            attachments?: Array<{
+              type?: string;
+              media?: {
+                image?: {
+                  src?: string;
+                };
+              };
+            }>;
             link?: string;
             // Champs pour events (si disponible)
             id?: string;
@@ -183,6 +192,32 @@ export async function POST(request: NextRequest) {
           ? new Date(Number(feedData.created_time) * 1000).toISOString() // *1000 car JS attend des millisecondes
           : new Date().toISOString();
         
+        // Extraire les images de la publication
+        const images: string[] = [];
+        
+        // Photo unique
+        if (feedData.photo) {
+          images.push(feedData.photo);
+        }
+        
+        // Photos multiples (si disponible)
+        if (feedData.photos && Array.isArray(feedData.photos)) {
+          feedData.photos.forEach((photo: any) => {
+            if (photo.source || photo.url) {
+              images.push(photo.source || photo.url);
+            }
+          });
+        }
+        
+        // Attachments (média attachés)
+        if (feedData.attachments && Array.isArray(feedData.attachments)) {
+          feedData.attachments.forEach((attachment: any) => {
+            if (attachment.type === 'photo' && attachment.media?.image?.src) {
+              images.push(attachment.media.image.src);
+            }
+          });
+        }
+        
         const facebookEvent: FacebookEventData = {
           id: feedData.post_id,
           name: firstLine.substring(0, 200), // Premier ligne comme titre
@@ -190,7 +225,8 @@ export async function POST(request: NextRequest) {
           start_time: createdDate,
           end_time: undefined,
           place: undefined,
-          cover: feedData.photo ? { source: feedData.photo } : undefined,
+          cover: images.length > 0 ? { source: images[0] } : undefined,
+          images: images, // Toutes les images pour la galerie
         };
 
         // Synchroniser l'événement (création ou mise à jour)

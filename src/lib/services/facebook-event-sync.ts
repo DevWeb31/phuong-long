@@ -302,35 +302,37 @@ export async function syncFacebookEvent(
       }
     }
 
-    // 7.4 IMAGE DE COUVERTURE
-    // Si une image de couverture existe, l'ajouter dans event_images
-    if (extracted.coverImageUrl) {
-      // Vérifier si elle existe déjà
-      const { data: existingImage } = await supabase
+    // 7.4 IMAGES DE LA PUBLICATION
+    // Extraire toutes les images depuis facebookEventData
+    const imageUrls = facebookEventData.images || [];
+    
+    if (imageUrls.length > 0) {
+      // Supprimer les anciennes images
+      await supabase
         .from('event_images')
-        .select('id')
-        .eq('event_id', eventId)
-        .eq('is_cover', true)
-        .maybeSingle();
+        .delete()
+        .eq('event_id', eventId);
 
-      if (!existingImage) {
-        const { error: imageError } = await supabase
-          .from('event_images')
-          .insert([{
-            event_id: eventId,
-            image_url: extracted.coverImageUrl,
-            title: `Couverture - ${extracted.title}`,
-            alt_text: extracted.title,
-            is_cover: true,
-            display_order: 0,
-          }]);
+      // Créer les nouvelles images
+      const imagesToInsert = imageUrls.map((url, index) => ({
+        event_id: eventId,
+        image_url: url,
+        title: `Image ${index + 1} - ${extracted.title}`,
+        alt_text: extracted.title,
+        is_cover: index === 0, // Première image = couverture
+        display_order: index,
+      }));
 
-        if (imageError) {
-          console.error('[Facebook Sync] Erreur création image couverture:', imageError);
-        } else {
-          details.imagesCreated = 1;
-          console.log('[Facebook Sync] Image de couverture créée');
-        }
+      const { data: insertedImages, error: imagesError } = await supabase
+        .from('event_images')
+        .insert(imagesToInsert)
+        .select('id');
+
+      if (imagesError) {
+        console.error('[Facebook Sync] Erreur création images:', imagesError);
+      } else {
+        details.imagesCreated = insertedImages?.length || 0;
+        console.log(`[Facebook Sync] ${details.imagesCreated} images créées`);
       }
     }
 
