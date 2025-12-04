@@ -28,6 +28,12 @@ interface Club {
 
 interface EventWithClub extends Event {
   club: Club | null;
+  prices?: Array<{
+    id: string;
+    label: string;
+    price_cents: number;
+    display_order: number;
+  }>;
 }
 
 interface EventCarouselCardProps {
@@ -38,6 +44,30 @@ interface EventCarouselCardProps {
 export function EventCarouselCard({ event, timeStatus }: EventCarouselCardProps) {
   const isPast = timeStatus === 'past';
   const isCurrent = timeStatus === 'current';
+
+  // Calculer le prix à afficher
+  const getPriceDisplay = () => {
+    const prices = event.prices || [];
+    
+    if (prices.length === 0) {
+      // Fallback sur l'ancien champ
+      if (event.price_cents === 0) return { text: 'Gratuit', variant: 'success' as const };
+      return { text: `${(event.price_cents / 100).toFixed(0)}€`, variant: 'primary' as const };
+    }
+    
+    const minPrice = Math.min(...prices.map(p => p.price_cents));
+    
+    if (minPrice === 0) return { text: 'Gratuit', variant: 'success' as const };
+    
+    if (prices.length === 1) {
+      return { text: `${(minPrice / 100).toFixed(0)}€`, variant: 'primary' as const };
+    }
+    
+    // Plusieurs tarifs
+    return { text: `À partir de ${(minPrice / 100).toFixed(0)}€`, variant: 'primary' as const };
+  };
+
+  const priceDisplay = getPriceDisplay();
 
   return (
     <div
@@ -97,23 +127,13 @@ export function EventCarouselCard({ event, timeStatus }: EventCarouselCardProps)
                     </Badge>
                   )}
                 </div>
-                {event.price_cents === 0 ? (
-                  <Badge
-                    variant="success"
-                    size="sm"
-                    className="backdrop-blur-md bg-white/95 dark:bg-gray-900/95 text-xs font-semibold shadow-sm"
-                  >
-                    Gratuit
-                  </Badge>
-                ) : (
-                  <Badge
-                    variant="primary"
-                    size="sm"
-                    className="backdrop-blur-md bg-white/95 dark:bg-gray-900/95 text-xs font-semibold shadow-sm"
-                  >
-                    {(event.price_cents / 100).toFixed(0)}€
-                  </Badge>
-                )}
+                <Badge
+                  variant={priceDisplay.variant}
+                  size="sm"
+                  className="backdrop-blur-md bg-white/95 dark:bg-gray-900/95 text-xs font-semibold shadow-sm"
+                >
+                  {priceDisplay.text}
+                </Badge>
               </div>
             </div>
           ) : (
@@ -153,23 +173,13 @@ export function EventCarouselCard({ event, timeStatus }: EventCarouselCardProps)
                     </Badge>
                   )}
                 </div>
-                {event.price_cents === 0 ? (
-                  <Badge
-                    variant="success"
-                    size="sm"
-                    className="backdrop-blur-md bg-white/95 dark:bg-gray-900/95 text-xs font-semibold shadow-sm"
-                  >
-                    Gratuit
-                  </Badge>
-                ) : (
-                  <Badge
-                    variant="primary"
-                    size="sm"
-                    className="backdrop-blur-md bg-white/95 dark:bg-gray-900/95 text-xs font-semibold shadow-sm"
-                  >
-                    {(event.price_cents / 100).toFixed(0)}€
-                  </Badge>
-                )}
+                <Badge
+                  variant={priceDisplay.variant}
+                  size="sm"
+                  className="backdrop-blur-md bg-white/95 dark:bg-gray-900/95 text-xs font-semibold shadow-sm"
+                >
+                  {priceDisplay.text}
+                </Badge>
               </div>
             </div>
           )}

@@ -26,6 +26,12 @@ interface Club {
 
 interface EventWithClub extends Event {
   club: Club | null;
+  prices?: Array<{
+    id: string;
+    label: string;
+    price_cents: number;
+    display_order: number;
+  }>;
 }
 
 interface EventsListProps {

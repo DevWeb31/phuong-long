@@ -29,10 +29,12 @@ export default async function EventsPage() {
     .from('events')
     .select(`
       *,
-      club:clubs(id, name, city, slug)
+      club:clubs(id, name, city, slug),
+      prices:event_prices(*)
     `)
     .eq('active', true)
-    .order('start_date', { ascending: false }); // Les plus récents d'abord
+    .order('start_date', { ascending: false }) // Les plus récents d'abord
+    .order('price_cents', { foreignTable: 'event_prices', ascending: true }); // Trier les prix du moins cher au plus cher
 
   const typedEvents = (events || []) as unknown as Array<Event & { 
     club: { 
@@ -40,7 +42,13 @@ export default async function EventsPage() {
       name: string; 
       city: string; 
       slug: string;
-    } | null 
+    } | null;
+    prices?: Array<{
+      id: string;
+      label: string;
+      price_cents: number;
+      display_order: number;
+    }>;
   }>;
 
   // Catégoriser les événements pour les stats du hero
