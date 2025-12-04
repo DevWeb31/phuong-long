@@ -14,7 +14,7 @@
  */
 
 // @ts-nocheck - Temporary: Supabase type inference issues with new schema
-import { createServerClient } from '@/lib/supabase/server';
+import { createServerClient, createAdminClient } from '@/lib/supabase/server';
 import { extractEventData, type FacebookEventData } from '@/lib/utils/facebook-event-parser';
 import { generateUniqueEventSlug } from '@/lib/utils/slug-generator';
 import type { Database } from '@/lib/supabase/database.types';
@@ -39,7 +39,7 @@ interface SyncResult {
  * Trouve un club par son slug
  */
 async function findClubBySlug(clubSlug: string): Promise<string | null> {
-  const supabase = await createServerClient();
+  const supabase = createAdminClient();
   
   const { data: club } = await supabase
     .from('clubs')
@@ -65,7 +65,8 @@ export async function syncFacebookEvent(
   facebookEventData: FacebookEventData
 ): Promise<SyncResult> {
   try {
-    const supabase = await createServerClient();
+    // Utiliser le client admin pour bypasser les RLS (webhook sans auth utilisateur)
+    const supabase = createAdminClient();
 
     // 1. EXTRACTION ET PARSING
     const extracted = extractEventData(facebookEventData);
@@ -394,7 +395,7 @@ export async function deactivateFacebookEvent(
   facebookEventId: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    const supabase = await createServerClient();
+    const supabase = createAdminClient();
 
     const { error } = await supabase
       .from('events')
