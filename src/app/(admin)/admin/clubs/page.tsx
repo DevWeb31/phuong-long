@@ -10,7 +10,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { DataTable, DataTableColumn, ConfirmModal } from '@/components/admin';
+import { DataTable, DataTableColumn } from '@/components/admin';
 import { ClubFormModal } from '@/components/admin/ClubFormModal';
 import { Shield } from 'lucide-react';
 
@@ -31,7 +31,6 @@ export default function AdminClubsPage() {
   const [clubs, setClubs] = useState<Club[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isFormOpen, setIsFormOpen] = useState(false);
-  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [selectedClub, setSelectedClub] = useState<Club | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -116,45 +115,24 @@ export default function AdminClubsPage() {
     setIsFormOpen(true);
   };
 
-  const handleDelete = (club: Club) => {
-    setSelectedClub(club);
-    setIsDeleteOpen(true);
-  };
-
   const handleView = (club: Club) => {
     window.open(`/clubs/${club.slug || club.id}`, '_blank');
-  };
-
-  const handleCreateNew = () => {
-    setSelectedClub(null);
-    setIsFormOpen(true);
   };
 
   const handleSubmit = async (clubData: Partial<Club>) => {
     try {
       setIsSubmitting(true);
       
-      if (selectedClub) {
-        // Update
-        const response = await fetch(`/api/admin/clubs/${selectedClub.id}`, {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(clubData),
-        });
+      // Update only (création désactivée)
+      const response = await fetch(`/api/admin/clubs/${selectedClub!.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(clubData),
+      });
 
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => ({}));
-          throw new Error(errorData.details || errorData.error || 'Erreur lors de la mise à jour');
-        }
-      } else {
-        // Create
-        const response = await fetch('/api/admin/clubs', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(clubData),
-        });
-
-        if (!response.ok) throw new Error('Erreur lors de la création');
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.details || errorData.error || 'Erreur lors de la mise à jour');
       }
 
       await loadClubs();
@@ -164,29 +142,6 @@ export default function AdminClubsPage() {
       console.error('Error submitting club:', error);
       const errorMessage = error instanceof Error ? error.message : 'Une erreur est survenue';
       alert(`Erreur : ${errorMessage}`);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const handleConfirmDelete = async () => {
-    if (!selectedClub) return;
-
-    try {
-      setIsSubmitting(true);
-      
-      const response = await fetch(`/api/admin/clubs/${selectedClub.id}`, {
-        method: 'DELETE',
-      });
-
-      if (!response.ok) throw new Error('Erreur lors de la suppression');
-
-      await loadClubs();
-      setIsDeleteOpen(false);
-      setSelectedClub(null);
-    } catch (error) {
-      console.error('Error deleting club:', error);
-      alert('Une erreur est survenue');
     } finally {
       setIsSubmitting(false);
     }
@@ -218,7 +173,7 @@ export default function AdminClubsPage() {
         defaultSortDirection="asc"
       />
 
-      {/* Modals */}
+      {/* Modal d'édition seulement (suppression et création désactivées) */}
       <ClubFormModal
         isOpen={isFormOpen}
         onClose={() => {
@@ -227,21 +182,6 @@ export default function AdminClubsPage() {
         }}
         onSubmit={handleSubmit}
         club={selectedClub}
-        isLoading={isSubmitting}
-      />
-
-      <ConfirmModal
-        isOpen={isDeleteOpen}
-        onClose={() => {
-          setIsDeleteOpen(false);
-          setSelectedClub(null);
-        }}
-        onConfirm={handleConfirmDelete}
-        title="Supprimer le club"
-        message={`Êtes-vous sûr de vouloir supprimer le club "${selectedClub?.name}" ? Cette action est irréversible.`}
-        confirmLabel="Supprimer"
-        cancelLabel="Annuler"
-        variant="danger"
         isLoading={isSubmitting}
       />
     </div>
