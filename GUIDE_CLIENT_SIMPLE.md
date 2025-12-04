@@ -13,9 +13,9 @@
 Copiez-collez et remplissez avec vos informations :
 
 ```
-[TITRE DE VOTRE ÉVÉNEMENT] [SITE] [STAGE] [TREGUEUX]
-
-[Votre description de l'événement]
+[SITE] [STAGE] [TREGUEUX]
+[TITRE:Votre Titre d'Événement]
+[DESCRIPTION:Votre description complète de l'événement]
 
 📅 Date :
 [SESSION:15-06-2025|14:00-17:00]
@@ -31,12 +31,15 @@ Copiez-collez et remplissez avec vos informations :
 ```
 
 **Remplacez :**
-- `[TITRE DE VOTRE ÉVÉNEMENT]` par le titre
+- `Votre Titre d'Événement` par le titre exact (sera affiché sur le site)
+- `Votre description complète` par votre description (sera affichée sur le site)
 - `15-06-2025` par la date (format: JJ-MM-AAAA)
 - `14:00-17:00` par les horaires
 - `25€` par votre prix
 - Les informations de lieu
 - `20` par le nombre de places
+
+**💡 Nouveau : Les balises `[TITRE:...]` et `[DESCRIPTION:...]` permettent de contrôler exactement ce qui s'affiche sur le site !**
 
 ---
 

@@ -18,6 +18,8 @@ import {
   LOCATION_PATTERN,
   ADDRESS_PATTERN,
   CAPACITY_PATTERN,
+  TITLE_PATTERN,
+  DESCRIPTION_PATTERN,
   getEventTypeFromTag,
   getClubSlugFromTag,
   isAllClubsTag,
@@ -28,6 +30,8 @@ import {
   parsePriceToCents,
   parseLocation,
   extractMaxCapacity,
+  extractTitle,
+  extractDescription,
   type ParsedSession,
   type ParsedPrice,
   type ParsedLocation,
@@ -318,6 +322,8 @@ function cleanContent(content: string): string {
     .replace(/\[ILLIMITE\]/gi, '')
     .replace(/\[ILLIMITÉ\]/gi, '')
     .replace(/\[UNLIMITED\]/gi, '')
+    .replace(TITLE_PATTERN, '') // Nouveau
+    .replace(DESCRIPTION_PATTERN, '') // Nouveau
     .replace(SESSION_PATTERN, '')
     .replace(DATE_PATTERN, '')
     .replace(TIME_PATTERN, '')
@@ -326,7 +332,7 @@ function cleanContent(content: string): string {
     .replace(LOCATION_PATTERN, '')
     .replace(ADDRESS_PATTERN, '')
     .replace(CAPACITY_PATTERN, '')
-    .replace(/\[[A-Z\sÀ-ÿ]+\]/gi, '') // Autres balises
+    .replace(/\[[A-Z\sÀ-ÿ:]+\]/gi, '') // Autres balises (ajout : pour les nouvelles balises)
     .trim()
     .replace(/\s+/g, ' ') // Normaliser les espaces
     .replace(/\n{3,}/g, '\n\n'); // Max 2 sauts de ligne
@@ -382,21 +388,26 @@ export function extractEventData(facebookEvent: FacebookEventData): ExtractedEve
   // Parser toutes les balises
   const parsedTags = parseEventTags(fullContent);
 
-  // Nettoyer le titre (supprimer les balises)
-  let title = parsedTags.cleanedContent.split('\n')[0] || titleContent.trim();
-  
-  // Si le titre nettoyé est vide, utiliser le titre original
-  if (!title || title.length < 3) {
-    title = titleContent.replace(/\[[^\]]+\]/g, '').trim();
-  }
+  // Extraire le titre explicite ou nettoyer automatiquement
+  let title = extractTitle(fullContent);
   
   if (!title) {
+    // Pas de balise [TITRE:...], utiliser la première ligne nettoyée
+    title = parsedTags.cleanedContent.split('\n')[0]?.trim() || titleContent.replace(/\[[^\]]+\]/g, '').trim();
+  }
+  
+  if (!title || title.length < 3) {
     title = 'Événement sans titre';
   }
 
-  // Nettoyer la description (enlever le titre et les lignes vides)
-  const descriptionLines = parsedTags.cleanedContent.split('\n').slice(1).filter(line => line.trim());
-  const description = descriptionLines.join('\n').trim() || null;
+  // Extraire la description explicite ou nettoyer automatiquement
+  let description = extractDescription(fullContent);
+  
+  if (!description) {
+    // Pas de balise [DESCRIPTION:...], utiliser le contenu nettoyé sans le titre
+    const descriptionLines = parsedTags.cleanedContent.split('\n').slice(1).filter(line => line.trim());
+    description = descriptionLines.join('\n').trim() || null;
+  }
 
   // Extraire les dates
   // Si des sessions sont parsées, utiliser la date de la première session

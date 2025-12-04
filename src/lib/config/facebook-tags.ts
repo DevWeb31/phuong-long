@@ -120,6 +120,18 @@ export const LOCATION_PATTERN = /\[LIEU:([^\]]+)\]/gi;
 export const ADDRESS_PATTERN = /\[ADRESSE:([^\]]+)\]/gi;
 
 /**
+ * Pattern pour extraire le titre explicite
+ * Format: [TITRE:Mon titre d'événement]
+ */
+export const TITLE_PATTERN = /\[TITRE:([^\]]+)\]/i;
+
+/**
+ * Pattern pour extraire la description explicite
+ * Format: [DESCRIPTION:Ma description]
+ */
+export const DESCRIPTION_PATTERN = /\[DESCRIPTION:([^\]]+)\]/i;
+
+/**
  * Pattern pour extraire la capacité maximale
  * Formats acceptés:
  * - [CAPACITE:50]
@@ -283,6 +295,24 @@ export function parseLocation(locationStr: string): ParsedLocation {
 export function isUnlimitedCapacity(content: string): boolean {
   const upper = content.toUpperCase();
   return UNLIMITED_CAPACITY_TAGS.some(tag => upper.includes(tag));
+}
+
+/**
+ * Extrait le titre explicite depuis le contenu
+ * @returns Le titre extrait ou null
+ */
+export function extractTitle(content: string): string | null {
+  const match = TITLE_PATTERN.exec(content);
+  return match && match[1] ? match[1].trim() : null;
+}
+
+/**
+ * Extrait la description explicite depuis le contenu
+ * @returns La description extraite ou null
+ */
+export function extractDescription(content: string): string | null {
+  const match = DESCRIPTION_PATTERN.exec(content);
+  return match && match[1] ? match[1].trim() : null;
 }
 
 /**

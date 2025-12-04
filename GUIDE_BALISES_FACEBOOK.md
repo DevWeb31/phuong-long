@@ -22,6 +22,31 @@ Votre titre d'événement [SITE]
 
 ## 📌 BALISES DE BASE
 
+### Titre et Description (Recommandées !)
+
+Contrôlez exactement ce qui s'affiche sur le site :
+
+| Balise | Description | Exemple |
+|--------|-------------|---------|
+| `[TITRE:...]` | Titre exact de l'événement | `[TITRE:Stage d'été 2025]` |
+| `[DESCRIPTION:...]` | Description courte | `[DESCRIPTION:Stage intensif pour tous niveaux]` |
+
+**💡 Pourquoi les utiliser ?**
+- ✅ Contrôle total sur l'affichage
+- ✅ Pas de balises parasites dans le titre
+- ✅ Description claire et précise
+
+**Exemple :**
+```
+[SITE] [STAGE] [TREGUEUX]
+[TITRE:Stage de Perfectionnement Technique]
+[DESCRIPTION:Venez perfectionner vos techniques lors de ce stage intensif animé par nos meilleurs instructeurs.]
+
+[SESSION:15-06-2025|14:00-17:00]
+[PRIX:30€]
+[LIEU:Dojo de Trégueux]
+```
+
 ### Type d'Événement
 
 Indiquez de quel type d'événement il s'agit :
