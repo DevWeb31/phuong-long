@@ -142,6 +142,9 @@ export async function POST(request: NextRequest) {
       }
 
       for (const change of entry.changes) {
+        // Logger TOUTES les données pour debug
+        console.log('[Facebook Webhook] Change reçu:', JSON.stringify(change, null, 2));
+        
         // Facebook envoie les publications avec field = "feed"
         // On traite les publications qui contiennent des balises [SITE]
         if (change.field !== 'feed') {
@@ -150,10 +153,11 @@ export async function POST(request: NextRequest) {
         }
 
         const feedData = change.value;
+        console.log('[Facebook Webhook] Feed data:', JSON.stringify(feedData, null, 2));
         
         // Vérifier que c'est une publication (pas une suppression)
         if (!feedData || feedData.item !== 'post' || !feedData.post_id) {
-          console.log(`[Facebook Webhook] Publication ignorée (pas un post ou supprimé)`);
+          console.log(`[Facebook Webhook] Publication ignorée. Item: ${feedData?.item}, Post ID: ${feedData?.post_id}`);
           continue;
         }
 
