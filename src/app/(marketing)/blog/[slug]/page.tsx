@@ -227,8 +227,8 @@ export default async function BlogPostPage({ params }: Props) {
               </div>
             </div>
 
-            {/* Sidebar */}
-            <aside className="lg:col-span-4">
+            {/* Sidebar - Masquée sur mobile */}
+            <aside className="hidden lg:block lg:col-span-4">
               <BlogTableOfContents content={typedPost.content} />
             </aside>
           </div>
