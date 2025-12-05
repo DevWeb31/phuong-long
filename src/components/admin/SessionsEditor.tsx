@@ -139,7 +139,7 @@ export function SessionsEditor({ sessions, onChange, disabled = false }: Session
                     value={session.session_date || ''}
                     onChange={(e) => updateSession(index, 'session_date', e.target.value)}
                     disabled={disabled}
-                    className="w-full px-3 py-2 text-sm border dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                    className="w-full px-3 py-2 text-sm border dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 disabled:bg-gray-50 dark:disabled:bg-gray-900 disabled:text-gray-500 dark:disabled:text-gray-500"
                   />
                 </div>
 
@@ -153,7 +153,7 @@ export function SessionsEditor({ sessions, onChange, disabled = false }: Session
                     value={session.start_time || ''}
                     onChange={(e) => updateSession(index, 'start_time', e.target.value)}
                     disabled={disabled}
-                    className="w-full px-3 py-2 text-sm border dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                    className="w-full px-3 py-2 text-sm border dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 disabled:bg-gray-50 dark:disabled:bg-gray-900 disabled:text-gray-500 dark:disabled:text-gray-500"
                   />
                 </div>
 
@@ -167,7 +167,7 @@ export function SessionsEditor({ sessions, onChange, disabled = false }: Session
                     value={session.end_time || ''}
                     onChange={(e) => updateSession(index, 'end_time', e.target.value)}
                     disabled={disabled}
-                    className="w-full px-3 py-2 text-sm border dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                    className="w-full px-3 py-2 text-sm border dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 disabled:bg-gray-50 dark:disabled:bg-gray-900 disabled:text-gray-500 dark:disabled:text-gray-500"
                   />
                 </div>
 
@@ -184,7 +184,7 @@ export function SessionsEditor({ sessions, onChange, disabled = false }: Session
                     onChange={(e) => updateSession(index, 'max_attendees', e.target.value ? parseInt(e.target.value) : null)}
                     disabled={disabled}
                     placeholder="Illimité"
-                    className="w-full px-3 py-2 text-sm border dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                    className="w-full px-3 py-2 text-sm border dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 disabled:bg-gray-50 dark:disabled:bg-gray-900 disabled:text-gray-500 dark:disabled:text-gray-500 placeholder:text-gray-400 dark:placeholder:text-gray-500"
                   />
                 </div>
               </div>
@@ -201,7 +201,7 @@ export function SessionsEditor({ sessions, onChange, disabled = false }: Session
                   disabled={disabled}
                   rows={2}
                   placeholder="Ex: Catégorie enfants, Niveau avancé..."
-                  className="w-full px-3 py-2 text-sm border dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent resize-none"
+                  className="w-full px-3 py-2 text-sm border dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent resize-none bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 disabled:bg-gray-50 dark:disabled:bg-gray-900 disabled:text-gray-500 dark:disabled:text-gray-500 placeholder:text-gray-400 dark:placeholder:text-gray-500"
                 />
               </div>
             </div>
@@ -226,7 +226,7 @@ export function SessionsEditor({ sessions, onChange, disabled = false }: Session
                 type="date"
                 value={newSession.session_date || ''}
                 onChange={(e) => setNewSession(prev => ({ ...prev, session_date: e.target.value }))}
-                className="w-full px-3 py-2 text-sm border dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                className="w-full px-3 py-2 text-sm border dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
               />
             </div>
 
@@ -238,7 +238,7 @@ export function SessionsEditor({ sessions, onChange, disabled = false }: Session
                 type="time"
                 value={newSession.start_time || ''}
                 onChange={(e) => setNewSession(prev => ({ ...prev, start_time: e.target.value }))}
-                className="w-full px-3 py-2 text-sm border dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                className="w-full px-3 py-2 text-sm border dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
               />
             </div>
 
@@ -250,7 +250,7 @@ export function SessionsEditor({ sessions, onChange, disabled = false }: Session
                 type="time"
                 value={newSession.end_time || ''}
                 onChange={(e) => setNewSession(prev => ({ ...prev, end_time: e.target.value }))}
-                className="w-full px-3 py-2 text-sm border dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                className="w-full px-3 py-2 text-sm border dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
               />
             </div>
 
@@ -264,7 +264,7 @@ export function SessionsEditor({ sessions, onChange, disabled = false }: Session
                 value={newSession.max_attendees || ''}
                 onChange={(e) => setNewSession(prev => ({ ...prev, max_attendees: e.target.value ? parseInt(e.target.value) : null }))}
                 placeholder="Illimité"
-                className="w-full px-3 py-2 text-sm border dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                className="w-full px-3 py-2 text-sm border dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500"
               />
             </div>
           </div>
@@ -278,7 +278,7 @@ export function SessionsEditor({ sessions, onChange, disabled = false }: Session
               onChange={(e) => setNewSession(prev => ({ ...prev, notes: e.target.value }))}
               rows={2}
               placeholder="Ex: Catégorie enfants, Niveau avancé..."
-              className="w-full px-3 py-2 text-sm border dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent resize-none"
+              className="w-full px-3 py-2 text-sm border dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent resize-none bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500"
             />
           </div>
 
